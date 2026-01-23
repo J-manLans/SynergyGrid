@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synergygrid"
+version = "0.1.0"
+description = "Benchmark for synergy reasoning in agents"
+readme = "README.md"
+authors = [
+    {name = "Joel Lansgren", email = "jola2311@student.miun.se"},
+    {name = "Lauri Bernstéen", email = "labe2301@student.miun.se"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "gymnasium>=1.2",
+    "numpy>=2.2",
+    "pytest>=9.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
