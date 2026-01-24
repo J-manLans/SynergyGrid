@@ -1,5 +1,4 @@
 import gymnasium as gym
-import agent as agent
 
 class SynergyGridEnv(gym.Env):
     """

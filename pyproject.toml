@@ -15,7 +15,8 @@ requires-python = ">=3.10"
 dependencies = [
     "gymnasium>=1.2",
     "numpy>=2.2",
-    "pytest>=9.0"
+    "pytest>=9.0",
+    "pygame>=2.6"
 ]
 
 [tool.setuptools.packages.find]
