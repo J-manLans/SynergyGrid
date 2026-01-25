@@ -1,3 +1,27 @@
+###################################################################################
+# -e stands for editable mode
+# It installs the package so changes in source code are immediately reflected
+# Recommended for development
+#
+# pip install (-e) .
+# Install project + dependencies as defined in pyproject.toml
+#
+# pip install (-e) . --force-reinstall
+# Reinstall everything even if versions already match
+#
+# pip install (-e) . --force-reinstall --no-cache-dir
+# Full clean reinstall, ignores pip cache (good when pip is acting weird)
+#
+# pip install (-e) . --upgrade
+# Upgrade dependencies if newer versions are allowed by version constraints
+#
+# pip show synergygrid
+# Show where the package is installed and which version pip sees
+#
+# pip check
+# Verify dependency conflicts
+###################################################################################
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -16,7 +40,8 @@ dependencies = [
     "gymnasium>=1.2",
     "numpy>=2.2",
     "pytest>=9.0",
-    "pygame>=2.6"
+    "pygame>=2.6",
+    "matplotlib>=3.10"
 ]
 
 [tool.setuptools.packages.find]

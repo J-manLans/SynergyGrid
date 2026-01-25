@@ -9,10 +9,10 @@ class SynergyGridEnv(gym.Env):
         pass
 
     def step(self, action):
-        pass
+        return None, 0, False, False, {}
 
-    def reset(self):
-        pass
+    def reset(self,  *, seed: int | None = None, options: dict | None = None):
+        return None, {}
 
     def render(self, mode='human'):
         pass
