@@ -41,7 +41,13 @@ git commit -m "Implement basic reward calculation"
 * Even if the task is not done, update your branch if the other team member have issued a PR which has been merged, also pull `main` before each session starts:
 
 ```bash
+# More flexible
 git fetch
+git merge origin/main
+
+# More straight forward, but u need to have commited all
+# your ongoing changes for it to work and decide upon merg
+# strategy or set it with git config pull.rebase true (or what strategy you choose)
 git pull origin main
 ```
 
