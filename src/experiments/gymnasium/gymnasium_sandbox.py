@@ -1,20 +1,25 @@
 import gymnasium as gym
 import pygame
-from stable_baselines3 import PPO
-from stable_baselines3.common.monitor import Monitor
 import os
-
+import datetime
+from pathlib import Path
+from stable_baselines3.common.monitor import Monitor
+from experiments import environments, algorithms
 
 class GymAgentRunner:
     def __init__(self, environment: str, algorithm: str):
         self.environment = environment
         self.model = None
         self.algorithm = algorithm
+        self.AlgorithmClass = algorithms.get(self.algorithm, {})
+        if not self.AlgorithmClass:
+            raise ValueError(f"Unsupported algorithm: {self.algorithm}")
 
     def train(self, timesteps=20000, iterations=11):
         """Train a PPO agent on the environment."""
 
-        print("\nTraining agent...\n")
+        # Get current date and time for unique file naming
+        date = datetime.datetime.now().strftime("%y.%m.%d_%H:%M:%S")
 
         # Create directories for saving models and logs
         model_dir = os.path.join("results", "models", self.environment)
@@ -25,54 +30,73 @@ class GymAgentRunner:
         # Create and wrap the training environment
         env = gym.make(self.environment, render_mode=None)
         # Wrap the environment with a Monitor for logging.
-        # The csv is needed when plotting our own graphs with matplotlib later.
-        monitor_file = os.path.join(log_dir, f'{self.environment}.csv')
+        # The created csv is needed for plotting our own graphs with matplotlib later.
+        monitor_file = os.path.join(
+            log_dir, f"{self.environment}_{self.algorithm}_{date}.csv"
+        )
         env = Monitor(env, filename=monitor_file)
 
-        # Initialize the PPO model
-        self.model = PPO(
-            "MlpPolicy", env, verbose=1, tensorboard_log=log_dir, device="cpu"
+        # Initialize the model
+        self.model = self.AlgorithmClass(
+            env=env,
+            verbose=1,
+            tensorboard_log=log_dir,
+            **environments.get(self.environment, {}),
         )
 
         try:
             # This loop will keep training based on timesteps and iterations.
-            # After the timesteps are completed, the model is saved and training continues for the next iteration.
-            # Start another cmd prompt and launch Tensorboard: tensorboard --logdir results/logs/<env_name>
-            # Once Tensorboard is loaded, it will print a URL. Follow the URL to see the status of the training.
+            # After the timesteps are completed, the model is saved and training
+            # continues for the next iteration. When training is done, start another
+            # cmd prompt and launch Tensorboard:
+            # tensorboard --logdir results/logs/<env_name>
+            # Once Tensorboard is loaded, it will print a URL. Follow the URL to see
+            # the status of the training.
             for i in range(1, iterations + 1):
-                print("Training starting for iteration:", i)
+                print(
+                    f"\nTraining starting for iteration: {i}, environment: {self.environment}\n"
+                )
 
                 # Train the model
                 self.model.learn(total_timesteps=timesteps, reset_num_timesteps=False)
 
                 # Save the model
                 save_path = os.path.join(
-                    model_dir, f"{self.algorithm}_{self.environment}_{timesteps*i}"
+                    model_dir,
+                    f"{self.algorithm}_{self.environment}_{timesteps*i}_{date}",
                 )
                 self.model.save(save_path)
                 print(f"\nModel saved with {timesteps*i} time steps\n")
         finally:
             env.close()
 
-    def agentRun(self, agent_path: str):
+    def agentRun(self, agent_steps: str):
         """Run the trained agent with human-visible rendering."""
 
+        # Create a path to match the latest model of the specified timesteps
+        base_dir = Path(os.path.join("results", "models", self.environment))
+        file_name = f"{self.algorithm}_{self.environment}_{agent_steps}*"
+        model_dir = list(base_dir.glob(file_name))[-1]
+        # Create the environment with human rendering and load the model
         env = gym.make(self.environment, render_mode="human")
-        model = PPO.load(
-            os.path.join(
-                "results", "models", self.environment, f"{self.algorithm}_{agent_path}"
-            ),
-            env=env,
-        )
-        obs, info = env.reset()
-        done = False
+        model = self.AlgorithmClass.load(model_dir, env=env)
 
+        # Reset the environment, just in case
+        obs, info = env.reset()
+
+        done = False
         while not done:
             # Predict action from the trained model
             action, _ = model.predict(obs)
+            # Convert action to int if the action space is discrete (simple
+            # environments like FrozenLake or CartPole require this)
+            if isinstance(env.action_space, gym.spaces.Discrete):
+                action = int(action)
+
             obs, reward, terminated, truncated, info = env.step(action)
 
-            # Exit environment if terminated or truncated
+            # Exit environment if terminated or truncated. ESC exit doesn't work with
+            # models because of the rendering loop
             done = terminated or truncated
 
         env.close()
@@ -80,11 +104,13 @@ class GymAgentRunner:
     def randomRun(self):
         """Run a random actions with human-visible rendering."""
 
+        # Create the environment with human rendering
         env = gym.make(self.environment, render_mode="human")
 
+        # Reset the environment, just in case
         obs, info = env.reset()
-        done = False
 
+        done = False
         while not done:
             # Sample a random action and perform a step
             action = env.action_space.sample()
@@ -101,38 +127,3 @@ class GymAgentRunner:
                     done = True
 
         env.close()
-
-
-if __name__ == "__main__":
-    # Chose environment
-    environments = {
-        1: "LunarLander-v3",
-        2: "CartPole-v1",
-        3: "Acrobot-v1",
-        4: "MountainCar-v0",
-        5: "CarRacing-v3",
-        6: "BipedalWalker-v3",
-        7: "CliffWalking-v1",
-        8: "FrozenLake-v1",
-    }
-    environment = environments[1]
-
-    agent = True  # Choose to use an agent or not
-    training = True  # Choose to train or run the agent
-    algorithm = "PPO"  # Algorithm to use
-    timesteps = 100000  # Number of timesteps for training or model selection
-    iterations = 1  # Number of training iterations
-    model = f"{environment}_{timesteps}_best"  # Model to load for running the agent
-
-    runner = GymAgentRunner(environment=environment, algorithm=algorithm)
-
-    if agent:
-        if training:
-            # Train agent
-            runner.train(timesteps=timesteps, iterations=iterations)
-        else:
-            # Run environment with agent
-            runner.agentRun(model)
-    else:
-        # Run environment without agent
-        runner.randomRun()

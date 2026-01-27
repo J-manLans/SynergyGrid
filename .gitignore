@@ -210,3 +210,4 @@ __marimo__/
 # Our own ignores #
 ###################
 results/
+.vscode/

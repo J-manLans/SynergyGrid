@@ -3,6 +3,9 @@
 # in source code are immediately reflected. Recommended for development.
 # [dev] installs extra dependencies for development.
 #
+# Before running the install command make sure you have a virtual environment (venv)
+# so project-specific dependencies are isolated and don’t interfere with your system Python.
+#
 # pip install -e .[dev]
 # Install project + dependencies as defined in pyproject.toml
 # and updates the project with new additions if already installed

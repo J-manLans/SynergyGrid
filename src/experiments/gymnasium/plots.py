@@ -7,7 +7,7 @@ plots_dir = os.path.join("results", "plots")
 os.makedirs(plots_dir, exist_ok=True)
 
 # Set path to the monitor CSV files
-csv_files = glob.glob('results/logs/BipedalWalker-v3/*.csv')
+csv_files = glob.glob('results/logs/CarRacing-v3/*.csv')
 
 plt.figure(figsize=(10,6))
 
