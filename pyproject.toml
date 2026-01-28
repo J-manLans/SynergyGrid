@@ -40,13 +40,11 @@ authors = [
     {name = "Joel Lansgren", email = "jola2311@student.miun.se"},
     {name = "Lauri Bernstéen", email = "labe2301@student.miun.se"}
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "gymnasium>=1.2",
     "numpy>=2.2",
-    "pytest>=9.0",
-    "pygame>=2.6",
-    "matplotlib>=3.10"
+    "pygame>=2.6"
 ]
 
 # black is for automatical code formatting. Usage: `black path/to/file.py`
@@ -55,6 +53,8 @@ dependencies = [
 dev = [
     "stable-baselines3[extra]>=2.7.1",
     "swig>=4.4.1",
+    "matplotlib>=3.10",
+    "pytest>=9.0",
     "gymnasium[box2d]>=1.2",
     "black>=26.1"
 ]

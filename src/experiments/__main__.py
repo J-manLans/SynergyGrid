@@ -11,7 +11,7 @@ def main():
     # 6: CliffWalking-v1
     # 7: FrozenLake-v1
     env = list(environments.keys())
-    environment = env[2]
+    environment = env[1]
     # Choose algorithm to use for training (also needed when running agent)
     # 0: PPO
     # 1: DQN
@@ -19,8 +19,8 @@ def main():
     algorithm = alg[0]
     agent = True  # Choose to use an agent or not
     training = False  # Choose to train or run the agent
-    timesteps = 400000  # Num of timesteps for training or model selection when running
-    iterations = 10  # Number of training iterations
+    timesteps = 220000  # Num of timesteps for training or model selection when running
+    iterations = 6  # Number of training iterations
 
     runner = GymAgentRunner(environment=environment, algorithm=algorithm)
 
@@ -34,7 +34,6 @@ def main():
     else:
         # Run environment without agent
         runner.randomRun()
-
 
 if __name__ == "__main__":
     main()

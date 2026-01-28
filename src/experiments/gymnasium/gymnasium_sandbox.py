@@ -74,7 +74,7 @@ class GymAgentRunner:
         """Run the trained agent with human-visible rendering."""
 
         # Create a path to match the latest model of the specified timesteps
-        base_dir = Path(os.path.join("results", "models", self.environment))
+        base_dir = Path("results")/ "models"/self.environment
         file_name = f"{self.algorithm}_{self.environment}_{agent_steps}*"
         model_dir = list(base_dir.glob(file_name))[-1]
         # Create the environment with human rendering and load the model
