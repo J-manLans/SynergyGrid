@@ -27,6 +27,11 @@ class GymAgentRunner:
         os.makedirs(model_dir, exist_ok=True)
         os.makedirs(log_dir, exist_ok=True)
 
+        # Get the latest model
+        latest_model_path = os.path.join(
+            model_dir, f"{self.algorithm}_{self.environment}_latest"
+        )
+
         # Create and wrap the training environment
         env = gym.make(self.environment, render_mode=None)
         # Wrap the environment with a Monitor for logging.
@@ -36,15 +41,20 @@ class GymAgentRunner:
         )
         env = Monitor(env, filename=monitor_file)
 
-        # Initialize the model
-        self.model = self.AlgorithmClass(
-            env=env,
-            verbose=1,
-            tensorboard_log=log_dir,
-            **environments.get(self.environment, {}),
-        )
-
         try:
+            # Initialize the model
+            if os.path.exists(latest_model_path + ".zip"):
+                print("Loading existing training data", latest_model_path)
+                self.model = self.AlgorithmClass.load(latest_model_path, env=env)
+            else:
+                print("Creating new training data")
+                self.model = self.AlgorithmClass(
+                    env=env,
+                    verbose=1,
+                    tensorboard_log=log_dir,
+                    **environments.get(self.environment, {}),
+                )
+
             # This loop will keep training based on timesteps and iterations.
             # After the timesteps are completed, the model is saved and training
             # continues for the next iteration. When training is done, start another
@@ -55,18 +65,20 @@ class GymAgentRunner:
             for i in range(1, iterations + 1):
                 print(
                     f"\nTraining starting for iteration: {i}, environment: {self.environment}\n"
+                    f"Current timestep: ", self.model.num_timesteps
                 )
 
                 # Train the model
                 self.model.learn(total_timesteps=timesteps, reset_num_timesteps=False)
 
                 # Save the model
-                save_path = os.path.join(
-                    model_dir,
-                    f"{self.algorithm}_{self.environment}_{timesteps*i}_{date}",
-                )
-                self.model.save(save_path)
-                print(f"\nModel saved with {timesteps*i} time steps\n")
+                self.model.save(latest_model_path)
+                #versioned_path = os.path.join(
+                #    model_dir,
+                #    #f"{self.algorithm}_{self.environment}_{timesteps*i}_{date}",
+                #    f"{self.algorithm}_{self.environment}_{self.model.num_timesteps}"
+                #)
+                #self.model.save(versioned_path)
         finally:
             env.close()
 
@@ -75,7 +87,8 @@ class GymAgentRunner:
 
         # Create a path to match the latest model of the specified timesteps
         base_dir = Path("results")/ "models"/self.environment
-        file_name = f"{self.algorithm}_{self.environment}_{agent_steps}*"
+        #file_name = f"{self.algorithm}_{self.environment}_{agent_steps}*"
+        file_name = f"{self.algorithm}_{self.environment}_latest.zip"
         model_dir = list(base_dir.glob(file_name))[-1]
         # Create the environment with human rendering and load the model
         env = gym.make(self.environment, render_mode="human")
