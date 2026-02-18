@@ -1,6 +1,6 @@
-import random
 from enum import Enum
-
+import numpy as np
+from numpy.random import Generator, default_rng
 
 # Actions the Agent is capable of performing i.e. go in a certain direction
 class AgentAction(Enum):
@@ -27,15 +27,15 @@ class Agent:
         self.grid_cols = grid_cols
         self.reset()
 
-    def reset(self, seed=None):
+    def reset(self, rng:Generator|None=None):
+        if rng is None:
+            rng = default_rng()
         # Initialize Agents starting position
         self.agent_pos = [2, 2]
 
-        # Random resource position
-        random.seed(seed)
         self.resource_pos = [
-            random.randint(1, self.grid_rows - 1),
-            random.randint(1, self.grid_cols - 1),
+            rng.integers(1, self.grid_rows),
+            rng.integers(1, self.grid_cols),
         ]
 
     def perform_action(self, agent_action: AgentAction) -> bool:
@@ -72,3 +72,4 @@ class Agent:
 
             print()  # New line
         print()  # New line
+
