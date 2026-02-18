@@ -44,19 +44,22 @@ requires-python = ">=3.10,<3.13"
 dependencies = [
     "gymnasium>=1.2",
     "numpy>=2.2",
-    "pytest>=9.0",
+]
+
+[project.optional-dependencies]
+# Used for users who wants the extra functionalities but don't need the [dev] setup.
+extras = [
     "pygame>=2.6",
     "matplotlib>=3.10"
 ]
 
-# black is for automatical code formatting. Usage: `black path/to/file.py`
-
-[project.optional-dependencies]
 dev = [
+    "pygame>=2.6",
+    "matplotlib>=3.10",
     "stable-baselines3[extra]>=2.7.1",
-    "swig>=4.4.1",
-    "gymnasium[box2d]>=1.2",
-    "black>=26.1"
+    "swig>=4.4.1", # Generates Python bindings for C/C++ libs (needed for Box2D)
+    "gymnasium[box2d]>=1.2", # RL environments with Box2D physics (LunarLander and BipedalWalker)
+    "black>=26.1" # For automatic code formatting. Usage: black path/to/file.py
 ]
 
 [tool.setuptools.packages.find]

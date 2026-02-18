@@ -35,6 +35,5 @@ def main():
         # Run environment without agent
         runner.randomRun()
 
-
 if __name__ == "__main__":
     main()
