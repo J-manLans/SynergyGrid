@@ -1,4 +1,79 @@
+import argparse
+import sys
+import re
 from experiments import GymAgentRunner, environments, algorithms
+
+
+def __parse_args():
+    def positive_int_str(value: str):
+        if not re.fullmatch(r"\d+", value):
+            raise argparse.ArgumentTypeError(
+                f"{value} is not a positive integer string"
+            )
+        return value
+
+    parser = argparse.ArgumentParser(description="Run agent experiments.")
+
+    parser.add_argument(
+        "--env",
+        type=int,
+        default=0,
+        choices=range(len(environments)),
+        help="Environment index",
+    )
+
+    parser.add_argument(
+        "--alg",
+        type=int,
+        default=0,
+        choices=range(len(algorithms)),
+        help="Algorithm index",
+    )
+
+    parser.add_argument(
+        "--no-agent",
+        action="store_false",
+        dest="agent",
+        help="Use random sampling of action (default: use agent)",
+    )
+
+    parser.set_defaults(agent=True)
+
+    parser.add_argument(
+        "--run",
+        action="store_false",
+        dest="train",
+        help="Run a trained agent (default: train it instead)",
+    )
+
+    parser.set_defaults(train=True)
+
+    parser.add_argument(
+        "--cont", action="store_true", help="Continue training from a saved model"
+    )
+
+    parser.add_argument(
+        "--steps",
+        type=positive_int_str,
+        default="0",
+        help="Steps of the chosen agent, whole numbers 0 > infinity (--cont must be chosen)",
+    )
+
+    parser.add_argument(
+        "--timesteps", type=int, default=10000, help="Number of timesteps"
+    )
+
+    parser.add_argument(
+        "--iterations", type=int, default=10000, help="Number of iterations"
+    )
+
+    args = parser.parse_args()
+
+    if args.steps != "0" and not args.cont:
+        parser.error("--steps can only be used if --cont is set")
+
+    return args
+
 
 def main():
     # Chose environment
@@ -11,31 +86,52 @@ def main():
     # 6: CliffWalking-v1
     # 7: FrozenLake-v1
     env = list(environments.keys())
-    environment = env[1]
     # Choose algorithm to use for training (also needed when running agent)
     # 0: PPO
     # 1: DQN
     alg = list(algorithms.keys())
-    algorithm = alg[0]
-    agent = True  # Choose to use an trained agent or just random sampling
-    training = True  # Choose to train or run the agent
-    continue_training = True  # Choose to continue training from a saved model or not
-    agent_steps = "667648" # Model that we shall continue to train
-    timesteps = 333000  # Num of timesteps for training or model selection when running
-    iterations = 1  # Number of training iterations
+
+    if len(sys.argv) == 1:
+        environment = env[1]
+        algorithm = alg[0]
+        agent = True  # Choose to use an agent or just random sampling
+        training = True  # Choose to train or run the agent
+        continue_training = True  # Continue training from a saved model
+        agent_steps = "667648"  # Model that we shall continue to train
+        timesteps = (
+            333000  # Num of timesteps for training or model selection when running
+        )
+        iterations = 1  # Number of training iterations
+    else:
+        # pyhon -m experiments --env 0 --alg 0 --no-agent --run --timesteps 10000 --iterations 10000
+        args = __parse_args()
+        environment = env[args.env]
+        algorithm = alg[args.alg]
+        agent = args.agent
+        training = args.train
+        continue_training = args.cont
+        agent_steps = args.steps
+        timesteps = args.timesteps
+        iterations = args.iterations
 
     runner = GymAgentRunner(environment=environment, algorithm=algorithm)
 
     if agent:
         if training:
             # Train agent
-            runner.train(continue_training=continue_training, agent_steps=agent_steps, timesteps=timesteps, iterations=iterations)
+            runner.train(
+                continue_training=continue_training,
+                agent_steps=agent_steps,
+                timesteps=timesteps,
+                iterations=iterations,
+            )
         else:
             # Run environment with agent
             runner.agentRun(agent_steps)
     else:
         # Run environment without agent
         runner.randomRun()
+
 
 if __name__ == "__main__":
     main()
