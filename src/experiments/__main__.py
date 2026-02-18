@@ -103,8 +103,7 @@ def main():
         )
         iterations = 1  # Number of training iterations
     else:
-        # pyhon -m experiments --env 0 --alg 0 --no-agent --run --timesteps 10000 --iterations 10000
-        args = __parse_args()
+        args = __parse_args() # pyhon -m experiments -h for info
         environment = env[args.env]
         algorithm = alg[args.alg]
         agent = args.agent

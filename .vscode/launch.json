@@ -20,6 +20,17 @@
       "justMyCode": true
     },
     {
+      "name": "Debug tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+          "tests",
+          "-v"
+      ],
+      "justMyCode": true
+    },
+    {
       "name": "Attach VS Code debugger to running the python packages above",
       "type": "debugpy",
       "request": "attach",
