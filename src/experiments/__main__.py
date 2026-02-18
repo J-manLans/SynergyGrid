@@ -76,14 +76,13 @@ def main():
     if agent:
         if training:
             # Train agent
-            runner.train(timesteps=timesteps, iterations=iterations)
+            runner.train(continue_training=continue_training, agent_steps=agent_steps, timesteps=timesteps, iterations=iterations)
         else:
             # Run environment with agent
-            runner.agentRun(f"{timesteps}")
+            runner.agentRun(agent_steps)
     else:
         # Run environment without agent
         runner.randomRun()
-
 
 if __name__ == "__main__":
     main()
