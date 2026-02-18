@@ -2,9 +2,11 @@ import gymnasium as gym
 import pygame
 import os
 import datetime
+import sys
 from pathlib import Path
 from stable_baselines3.common.monitor import Monitor
 from experiments import environments, algorithms
+
 
 class GymAgentRunner:
     def __init__(self, environment: str, algorithm: str):
@@ -15,11 +17,13 @@ class GymAgentRunner:
         if not self.AlgorithmClass:
             raise ValueError(f"Unsupported algorithm: {self.algorithm}")
 
-    def train(self, timesteps=20000, iterations=11):
+    def train(
+        self, continue_training=False, agent_steps="", timesteps=20000, iterations=10
+    ):
         """Train a PPO agent on the environment."""
 
         # Get current date and time for unique file naming
-        date = datetime.datetime.now().strftime("%y.%m.%d_%H:%M:%S")
+        date = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
 
         # Create directories for saving models and logs
         model_dir = os.path.join("results", "models", self.environment)
@@ -36,13 +40,19 @@ class GymAgentRunner:
         )
         env = Monitor(env, filename=monitor_file)
 
-        # Initialize the model
-        self.model = self.AlgorithmClass(
-            env=env,
-            verbose=1,
-            tensorboard_log=log_dir,
-            **environments.get(self.environment, {}),
-        )
+        if continue_training:
+            # Get the model with the desired steps to continue its training
+            agent_path = self.__get_agent(agent_steps)
+            print("Loading existing training data", agent_path)
+            self.model = self.AlgorithmClass.load(agent_path, env=env)
+        else:
+            # Initialize a fresh model
+            self.model = self.AlgorithmClass(
+                env=env,
+                verbose=1,
+                tensorboard_log=log_dir,
+                **environments.get(self.environment, {}),
+            )
 
         try:
             # This loop will keep training based on timesteps and iterations.
@@ -63,20 +73,17 @@ class GymAgentRunner:
                 # Save the model
                 save_path = os.path.join(
                     model_dir,
-                    f"{self.algorithm}_{self.environment}_{timesteps*i}_{date}",
+                    f"{self.algorithm}_{self.environment}_{self.model.num_timesteps}_{date}",
                 )
                 self.model.save(save_path)
-                print(f"\nModel saved with {timesteps*i} time steps\n")
+                print(f"\nModel saved with {self.model.num_timesteps} time steps")
         finally:
             env.close()
 
     def agentRun(self, agent_steps: str):
         """Run the trained agent with human-visible rendering."""
 
-        # Create a path to match the latest model of the specified timesteps
-        base_dir = Path("results")/ "models"/self.environment
-        file_name = f"{self.algorithm}_{self.environment}_{agent_steps}*"
-        model_dir = list(base_dir.glob(file_name))[-1]
+        model_dir = self.__get_agent(agent_steps)
         # Create the environment with human rendering and load the model
         env = gym.make(self.environment, render_mode="human")
         model = self.AlgorithmClass.load(model_dir, env=env)
@@ -127,3 +134,12 @@ class GymAgentRunner:
                     done = True
 
         env.close()
+
+    def __get_agent(self, agent_steps: str) -> Path:
+        """Create a path to match the latest model of the specified timesteps"""
+        if agent_steps == "":
+            sys.exit("You forgot to specify the models steps")
+
+        base_dir = Path("results") / "models" / self.environment
+        file_name = f"{self.algorithm}_{self.environment}_{agent_steps}*"
+        return list(base_dir.glob(file_name))[-1]
