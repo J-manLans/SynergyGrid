@@ -6,13 +6,6 @@ from synergygrid import GridWorld as gw
 from synergygrid import AgentAction as act
 import numpy as np
 
-# TODO: own class in config I believe
-# Register this module as a gym environment. Once registered, the id is usable in gym.make().
-if "synergy_grid-v0" not in registry:
-    register(
-        id="synergy_grid-v0", entry_point="synergygrid.core.environment:SynergyGridEnv"
-    )
-
 
 # The custom environment must inherit from gym.Env
 class SynergyGridEnv(gym.Env):
@@ -119,7 +112,7 @@ class SynergyGridEnv(gym.Env):
         return obs, reward, terminated, truncated, {}
 
     def render(self, mode="human", action=None):
-        self.agent.render()
+        self.agent.renderer.render()
 
     def close(self):
         pass

@@ -1,8 +1,7 @@
 import argparse
 import sys
 import re
-from synergygrid import AgentRunner, environment, algorithms
-import synergygrid.core.environment
+from synergygrid import AgentRunner, environment, algorithms, register_env
 
 
 def __parse_args():
@@ -69,6 +68,7 @@ def __parse_args():
 
 
 def main():
+    register_env()
     env = list(environment.keys())[0]
     alg = list(algorithms.keys())
 
