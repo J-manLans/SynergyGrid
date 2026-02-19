@@ -2,15 +2,16 @@ import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import registry, register
 
-from synergygrid import Agent as ag
+from synergygrid import GridWorld as gw
 from synergygrid import AgentAction as act
 import numpy as np
 
+# TODO: own class in config I believe
 # Register this module as a gym environment. Once registered, the id is usable in gym.make().
 if "synergy_grid-v0" not in registry:
     register(
         id="synergy_grid-v0",
-        entry_point="synergygrid.core.environment:SynergyGridEnv",  # module_name:class_name
+        entry_point="synergygrid.core.environment:SynergyGridEnv"
     )
 
 
@@ -25,7 +26,14 @@ class SynergyGridEnv(gym.Env):
     # FPS set low since the agent moves discretely between grid cells.
     metadata = {"render_modes": ["human"], "render_fps": 1}
 
-    def __init__(self, grid_rows=5, grid_cols=5, max_steps=50, render_mode=None):
+    def __init__(
+        self,
+        grid_rows=5,
+        grid_cols=5,
+        max_steps=50,
+        starting_score=10,
+        render_mode=None,
+    ):
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self.render_mode = render_mode
@@ -33,7 +41,9 @@ class SynergyGridEnv(gym.Env):
         self.max_steps = max_steps
 
         # Initialize the bench world
-        self.agent = ag(grid_rows=grid_rows, grid_cols=grid_cols)
+        self.agent = gw(
+            grid_rows=grid_rows, grid_cols=grid_cols, starting_score=starting_score
+        )
 
         # Gymnasium also requires us to define the action space — which is the agent's possible
         # actions. Training code can call action_space.sample() to randomly select an action.
@@ -61,7 +71,9 @@ class SynergyGridEnv(gym.Env):
             seed=seed
         )  # gym requires this call to control randomness and reproduce scenarios.
 
-        self.step_count = 0 # Reset so we don't get truncated right away on our second run.
+        self.step_count = (
+            0  # Reset so we don't get truncated right away on our second run.
+        )
 
         # Reset the agent. Optionally, pass in seed to control randomness and reproduce scenarios.
         self.agent.reset(self.np_random)
