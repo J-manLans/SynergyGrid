@@ -59,7 +59,7 @@ dev = [
     "stable-baselines3[extra]>=2.7.1",
     "swig>=4.4.1", # Generates Python bindings for C/C++ libs (needed for Box2D)
     "gymnasium[box2d]>=1.2", # RL environments with Box2D physics (LunarLander and BipedalWalker)
-    "black>=26.1" # For automatic code formatting. Usage: black path/to/file.py
+    "black>=26.1" # For automatic code formatting. Usage: black path/to/file.py or black src/synergygrid
 ]
 
 [tool.setuptools.packages.find]

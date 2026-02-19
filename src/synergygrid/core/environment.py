@@ -1,30 +1,29 @@
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import registry, register
-from gymnasium.utils.env_checker import check_env
-from gymnasium.utils import seeding
 
 from synergygrid import Agent as ag
 from synergygrid import AgentAction as act
 import numpy as np
 
 # Register this module as a gym environment. Once registered, the id is usable in gym.make().
-if 'synergy_grid-v0' not in registry:
+if "synergy_grid-v0" not in registry:
     register(
         id="synergy_grid-v0",
         entry_point="synergygrid.core.environment:SynergyGridEnv",  # module_name:class_name
     )
 
+
 # The custom environment must inherit from gym.Env
 class SynergyGridEnv(gym.Env):
-    '''
+    """
     A custom environment for SynergyGrid.
-    '''
+    """
 
     # Metadata required by Gym.
     # "human" for Pygame visualization, "ansi" for console output.
     # FPS set low since the agent moves discretely between grid cells.
-    metadata = {"render_modes": ['human'], 'render_fps': 1}
+    metadata = {"render_modes": ["human"], "render_fps": 1}
 
     def __init__(self, grid_rows=5, grid_cols=5, max_steps=50, render_mode=None):
         self.grid_rows = grid_rows
@@ -45,30 +44,39 @@ class SynergyGridEnv(gym.Env):
         # The space is used by Gymnasium to validate observations returned by reset() and step().
         self.observation_space = spaces.Box(
             dtype=np.int32,
-            shape=(4,), # 4 integers: agent position (2) + resource position (2)
+            shape=(4,),  # 4 integers: agent position (2) + resource position (2)
             low=0,
-            high=np.array([
-                self.grid_rows-1, self.grid_cols-1, # Agent position bounds
-                self.grid_rows-1, self.grid_cols-1  # Resource position bounds
-            ])
+            high=np.array(
+                [
+                    self.grid_rows - 1,
+                    self.grid_cols - 1,  # Agent position bounds
+                    self.grid_rows - 1,
+                    self.grid_cols - 1,  # Resource position bounds
+                ]
+            ),
         )
 
-    def reset(self,  *, seed=None, options=None):
-        super().reset(seed=seed) # gym requires this call to control randomness and reproduce scenarios.
+    def reset(self, *, seed=None, options=None):
+        super().reset(
+            seed=seed
+        )  # gym requires this call to control randomness and reproduce scenarios.
+
+        self.step_count = 0 # Reset so we don't get truncated right away on our second run.
 
         # Reset the agent. Optionally, pass in seed to control randomness and reproduce scenarios.
         self.agent.reset(self.np_random)
 
         # Constructs the observation state: [agent_row, agent_col, resource_row, resource_col]
-        obs = obs = np.concatenate((self.agent.agent_pos, self.agent.resource_pos), dtype=np.int32)
+        obs = obs = np.concatenate(
+            (self.agent.agent_pos, self.agent.resource_pos), dtype=np.int32
+        )
 
         # Render environment if desired
-        if self.render_mode == 'human':
+        if self.render_mode == "human":
             self.render()
 
         # Return observation and info (not used)
         return obs, {}
-
 
     def step(self, action):
         # Perform action
@@ -82,11 +90,13 @@ class SynergyGridEnv(gym.Env):
             terminated = True
 
         # Constructs the observation state: [agent_row, agent_col, resource_row, resource_col]
-        obs = np.concatenate((self.agent.agent_pos, self.agent.resource_pos), dtype=np.int32)
+        obs = np.concatenate(
+            (self.agent.agent_pos, self.agent.resource_pos), dtype=np.int32
+        )
 
         # Render environment if desired
-        if self.render_mode == 'human':
-            print(act(action))
+        if self.render_mode == "human":
+            print(act(action), " ", self.step_count)
             self.render(action=action)
 
         truncated = self.step_count >= self.max_steps
@@ -95,8 +105,7 @@ class SynergyGridEnv(gym.Env):
         # Return observation, reward, terminated, truncated (not used) and info (not used)
         return obs, reward, terminated, truncated, {}
 
-
-    def render(self, mode='human', action=None):
+    def render(self, mode="human", action=None):
         self.agent.render()
 
     def close(self):

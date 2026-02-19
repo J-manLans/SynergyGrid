@@ -98,9 +98,7 @@ def main():
         training = True  # Choose to train or run the agent
         continue_training = True  # Continue training from a saved model
         agent_steps = "667648"  # Model that we shall continue to train
-        timesteps = (
-            333000  # Num of timesteps for training or model selection when running
-        )
+        timesteps = 333000  # Num of timesteps for training or model selection when running
         iterations = 1  # Number of training iterations
     else:
         args = __parse_args() # pyhon -m experiments -h for info

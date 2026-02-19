@@ -41,3 +41,8 @@ algorithms = {
     "PPO": PPO,
     "DQN": DQN
 }
+"""
+Choose algorithm to use for training (also needed when running agent)
+    0: PPO
+    1: DQN
+"""

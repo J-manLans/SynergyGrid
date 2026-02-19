@@ -8,7 +8,7 @@ class TestEnvironment:
     @pytest.fixture
     def env(self):
         """Fixture for a fresh SynergyGridEnv"""
-        return SynergyGridEnv(max_steps=10)
+        return SynergyGridEnv()
 
     def test_check_env(self):
         env = gym.make('synergy_grid-v0', render_mode='human')
