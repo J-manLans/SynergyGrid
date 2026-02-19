@@ -12,7 +12,7 @@ class PygameRenderer:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self.fps = fps
-        self.last_action = ''
+        self.last_action = ""
 
         self.__init_colors()  # Initialize colors
         pygame.init()  # Initialize pygame

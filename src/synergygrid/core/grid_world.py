@@ -29,7 +29,6 @@ class GridWorld:
 
         self.last_action = ""
 
-
     def reset(self, rng: Generator | None = None):
         if rng is None:
             rng = default_rng()
