@@ -7,7 +7,7 @@ from pathlib import Path
 from stable_baselines3.common.monitor import Monitor
 from synergygrid import environment, algorithms
 
-
+#TODO: split this up in run and train files and move from core into scripts or something
 class AgentRunner:
     def __init__(self, environment: str, algorithm: str):
         self.environment = environment
@@ -20,7 +20,7 @@ class AgentRunner:
     def train(
         self, continue_training=False, agent_steps="", timesteps=20000, iterations=10
     ):
-        '''
+        """
         Train an agent, either from scratch or by continuing from a saved checkpoint.
 
         :param continue_training: If True, the training continues from an existing model checkpoint.
@@ -31,7 +31,7 @@ class AgentRunner:
         :type timesteps: int
         :param iterations: Number of training loops, each consisting of `timesteps` steps.
         :type iterations: int
-        '''
+        """
 
         # Get current date and time for unique file naming
         date = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
@@ -92,12 +92,12 @@ class AgentRunner:
             env.close()
 
     def agentRun(self, agent_steps: str):
-        '''
+        """
         Run the benchmark with the specified model.
 
         :param agent_steps: The specific checkpoint steps of the model to run the benchmark with.
         :type agent_steps: str
-        '''
+        """
 
         model_dir = self.__get_agent(agent_steps)
         # Create the environment with human rendering and load the model

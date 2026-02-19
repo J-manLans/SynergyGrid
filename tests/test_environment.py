@@ -4,6 +4,7 @@ from gymnasium.utils.env_checker import check_env
 from synergygrid.core.environment import SynergyGridEnv
 
 
+# TODO: some more basic tests might be done here
 class TestEnvironment:
     @pytest.fixture
     def env(self):
@@ -11,5 +12,5 @@ class TestEnvironment:
         return SynergyGridEnv()
 
     def test_check_env(self):
-        env = gym.make('synergy_grid-v0', render_mode='human')
+        env = gym.make("synergy_grid-v0", render_mode="human")
         check_env(env.unwrapped)

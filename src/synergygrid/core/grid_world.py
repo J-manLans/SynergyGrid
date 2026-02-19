@@ -21,10 +21,11 @@ class GridTile(Enum):
         return self.name[:1]
 
 
-class Agent:
-    def __init__(self, grid_rows=5, grid_cols=5):
+class GridWorld:
+    def __init__(self, grid_rows=5, grid_cols=5, starting_score=10):
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
+        self.starting_score = starting_score
         self.reset()
 
     def reset(self, rng: Generator | None = None):
