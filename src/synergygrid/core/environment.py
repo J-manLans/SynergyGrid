@@ -10,8 +10,7 @@ import numpy as np
 # Register this module as a gym environment. Once registered, the id is usable in gym.make().
 if "synergy_grid-v0" not in registry:
     register(
-        id="synergy_grid-v0",
-        entry_point="synergygrid.core.environment:SynergyGridEnv"
+        id="synergy_grid-v0", entry_point="synergygrid.core.environment:SynergyGridEnv"
     )
 
 
@@ -24,7 +23,7 @@ class SynergyGridEnv(gym.Env):
     # Metadata required by Gym.
     # "human" for Pygame visualization, "ansi" for console output.
     # FPS set low since the agent moves discretely between grid cells.
-    metadata = {"render_modes": ["human"], "render_fps": 1}
+    metadata = {"render_modes": ["human"], "render_fps": 4}
 
     def __init__(
         self,
@@ -42,7 +41,10 @@ class SynergyGridEnv(gym.Env):
 
         # Initialize the bench world
         self.agent = gw(
-            grid_rows=grid_rows, grid_cols=grid_cols, starting_score=starting_score
+            grid_rows=grid_rows,
+            grid_cols=grid_cols,
+            starting_score=starting_score,
+            fps=self.metadata["render_fps"],
         )
 
         # Gymnasium also requires us to define the action space — which is the agent's possible
@@ -108,7 +110,6 @@ class SynergyGridEnv(gym.Env):
 
         # Render environment if desired
         if self.render_mode == "human":
-            print(act(action), " ", self.step_count)
             self.render(action=action)
 
         truncated = self.step_count >= self.max_steps

@@ -7,7 +7,8 @@ from pathlib import Path
 from stable_baselines3.common.monitor import Monitor
 from synergygrid import environment, algorithms
 
-#TODO: split this up in run and train files and move from core into scripts or something
+
+# TODO: split this up in run and train files and move from core into scripts or something
 class AgentRunner:
     def __init__(self, environment: str, algorithm: str):
         self.environment = environment
@@ -111,16 +112,12 @@ class AgentRunner:
         while not done:
             # Predict action from the trained model
             action, _ = model.predict(obs)
-            # Convert action to int if the action space is discrete (simple
-            # environments like FrozenLake or CartPole require this)
-            if isinstance(env.action_space, gym.spaces.Discrete):
-                action = int(action)
-
             obs, _, terminated, truncated, _ = env.step(action)
 
-            # Exit environment if terminated or truncated. ESC exit doesn't work with
-            # models because of the rendering loop
-            done = terminated or truncated
+            # Reset if resource is found and exit environment if truncated.
+            if terminated:
+                env.reset()
+            done = truncated
 
         env.close()
 

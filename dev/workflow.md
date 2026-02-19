@@ -45,7 +45,7 @@ git commit -m "Implement basic reward calculation"
 git fetch
 git merge origin/main
 
-# More straight forward, but u need to have commited all
+# More straight forward, but u need to have committed all
 # your ongoing changes for it to work and decide upon merg
 # strategy or set it with git config pull.rebase true (or what strategy you choose)
 git pull origin main
