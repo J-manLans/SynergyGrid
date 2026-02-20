@@ -97,7 +97,6 @@ class AgentRunner:
         Run the benchmark with the specified model.
 
         :param agent_steps: The specific checkpoint steps of the model to run the benchmark with.
-        :type agent_steps: str
         """
 
         model_dir = self.__get_agent(agent_steps)
@@ -106,7 +105,7 @@ class AgentRunner:
         model = self.AlgorithmClass.load(model_dir, env=env)
 
         # Reset the environment, just in case
-        obs, info = env.reset()
+        obs, _ = env.reset()
 
         done = False
         while not done:

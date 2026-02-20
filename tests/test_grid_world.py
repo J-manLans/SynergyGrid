@@ -12,7 +12,7 @@ class TestGridWorld:
         assert gw.agent_pos == [2, 2]
 
     def test_resetting_agent(self, gw: GridWorld):
-        gw.perform_action(AgentAction.DOWN)
+        gw.perform_agent_action(AgentAction.DOWN)
         gw.reset()
         assert gw.agent_pos == [2, 2]
 
@@ -26,7 +26,7 @@ class TestGridWorld:
         ],
     )
     def test_cardinal_directions(self, gw: GridWorld, action, expected_pos):
-        gw.perform_action(action)
+        gw.perform_agent_action(action)
         assert gw.agent_pos == expected_pos
 
     @pytest.mark.parametrize(
@@ -40,6 +40,6 @@ class TestGridWorld:
     )
     def test_grid_bounds(self, gw: GridWorld, action, row_col, value):
         for i in range(gw.grid_cols + 5):
-            gw.perform_action(action)
+            gw.perform_agent_action(action)
 
         assert gw.agent_pos[row_col] == value

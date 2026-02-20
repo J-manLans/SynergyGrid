@@ -1,83 +1,56 @@
-from enum import Enum
-from numpy.random import Generator, default_rng
-from synergygrid import PygameRenderer
-
-
-# Actions the Agent is capable of performing i.e. go in a certain direction
-class AgentAction(Enum):
-    LEFT = 0
-    DOWN = 1
-    RIGHT = 2
-    UP = 3
-
-
-# The SynergyGrid is divided into a grid. Use these 'tiles' to represent the objects on the grid.
-class GridTile(Enum):
-    _FLOOR = 0
-    AGENT = 1
-    RESOURCE = 2
+from numpy.random import Generator
+from synergygrid.core import AgentAction, SynergyAgent, BaseResource
+import numpy as np
 
 
 class GridWorld:
-    def __init__(self, grid_rows=5, grid_cols=5, starting_score=10, fps=1):
+    # ================= #
+    #       Init        #
+    # ================= #
+
+    def __init__(self, grid_rows=5, grid_cols=5, starting_score=10):
+        '''
+        Initializes the grid world. Defines the game world's size and initializes the agent and resource.
+        '''
+
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
-        self.starting_score = starting_score
-        self.renderer = PygameRenderer(grid_rows, grid_cols, fps)
+        self.agent = SynergyAgent(
+            grid_rows=5, grid_cols=5, starting_score=starting_score
+        )
+        self.resource = BaseResource(grid_rows=5, grid_cols=5)
 
-        self.reset()
+    def reset(self, rng: Generator|None=None) -> None:
+        '''
+        Reset the agent to its starting position and re-spawns the resource at a random location
+        '''
 
-        self.last_action = ""
+        self.agent.reset() # Initialize Agents starting position
+        self.resource.reset(rng) # Initialize the resource's position
 
-    def reset(self, rng: Generator | None = None):
-        if rng is None:
-            rng = default_rng()
+    # ================= #
+    #       API         #
+    # ================= #
 
-        # Initialize Agents starting position
-        self.agent_pos = [2, 2]
-        self.renderer.set_agent_pos(self.agent_pos)
+    # === Logic === #
 
-        # Initialize the resource's position
-        self.resource_pos = [
-            rng.integers(1, self.grid_rows),
-            rng.integers(1, self.grid_cols),
-        ]
-        self.renderer.set_resource_pos(self.resource_pos)
+    def perform_agent_action(self, agent_action: AgentAction) -> bool:
+        '''
+        Perform an action through the agent and compare if its position is the same as the resource, if it is it returns True, otherwise False
 
-    def perform_action(self, agent_action: AgentAction) -> bool:
-        self.last_action = agent_action
-        self.renderer.set_last_action(agent_action)
+        :param agent_action: the action the agent will perform
+        '''
 
-        # Move Robot to the next cell
-        if agent_action == AgentAction.LEFT:
-            if self.agent_pos[1] > 0:
-                self.agent_pos[1] -= 1
-        elif agent_action == AgentAction.RIGHT:
-            if self.agent_pos[1] < self.grid_cols - 1:
-                self.agent_pos[1] += 1
-        elif agent_action == AgentAction.UP:
-            if self.agent_pos[0] > 0:
-                self.agent_pos[0] -= 1
-        elif agent_action == AgentAction.DOWN:
-            if self.agent_pos[0] < self.grid_rows - 1:
-                self.agent_pos[0] += 1
+        self.agent.perform_action(agent_action)
+        return self.agent.agent_pos == self.resource.resource_pos
 
-        self.renderer.set_agent_pos(self.agent_pos)
+    # === Getters === #
 
-        # Return true if Agent reaches resource
-        return self.agent_pos == self.resource_pos
+    def get_agent_pos(self) -> list[int]:
+        return self.agent.agent_pos
 
+    def get_resource_pos(self) -> list[np.int64]:
+        return self.resource.resource_pos
 
-# For testing the graphics, remove when working
-if __name__ == "__main__":
-    grid_world = GridWorld()
-    grid_world.renderer.render()
-    rng = default_rng()
-
-    while True:
-        actions = list(AgentAction)
-        rand_index = rng.integers(0, len(actions))
-        rand_action = actions[rand_index]
-
-        grid_world.perform_action(rand_action)
-        grid_world.renderer.render()
+    def get_last_action(self) -> str | AgentAction:
+        return self.agent.last_action
