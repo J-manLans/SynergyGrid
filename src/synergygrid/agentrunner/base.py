@@ -5,7 +5,7 @@ import datetime
 import sys
 from pathlib import Path
 from stable_baselines3.common.monitor import Monitor
-from synergygrid import environment, algorithms
+from synergygrid.config import environment, algorithms
 
 
 class AgentRunner:

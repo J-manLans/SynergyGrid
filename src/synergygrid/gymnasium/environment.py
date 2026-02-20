@@ -1,9 +1,9 @@
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import registry, register
-
-from synergygrid import GridWorld, AgentAction as act, PygameRenderer
 import numpy as np
+from synergygrid.core import GridWorld, AgentAction as act
+from synergygrid.rendering import PygameRenderer
 
 
 # The custom environment must inherit from gym.Env

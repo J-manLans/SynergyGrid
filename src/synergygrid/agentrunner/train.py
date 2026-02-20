@@ -1,9 +1,9 @@
-from synergygrid.experiment import AgentRunner
 import gymnasium as gym
 import datetime
 from pathlib import Path
 from stable_baselines3.common.monitor import Monitor
-from synergygrid import environment
+from synergygrid.agentrunner import AgentRunner
+from synergygrid.config import environment
 
 
 def train_agent(

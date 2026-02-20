@@ -2,7 +2,7 @@ import pygame
 from os import path
 import sys
 import numpy as np
-from synergygrid import AgentAction
+from synergygrid.core import AgentAction
 
 
 class PygameRenderer:

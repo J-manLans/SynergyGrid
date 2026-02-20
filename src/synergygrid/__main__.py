@@ -1,7 +1,7 @@
 import argparse
 import sys
 import re
-from synergygrid import AgentRunner, environment, algorithms, register_env
+from synergygrid import *
 
 
 def __parse_args():
@@ -99,21 +99,18 @@ def main():
 
     runner = AgentRunner(environment=env, algorithm=algorithm)
 
-    if agent:
-        if training:
-            # Train agent
-            runner.train(
-                continue_training=continue_training,
-                agent_steps=agent_steps,
-                timesteps=timesteps,
-                iterations=iterations,
-            )
-        else:
-            # Run environment with agent
-            runner.evaluate(agent_steps)
+    if training:
+        # Train agent
+        train_agent(
+            runner,
+            continue_training=continue_training,
+            agent_steps=agent_steps,
+            timesteps=timesteps,
+            iterations=iterations,
+        )
     else:
-        # Run environment without agent
-        runner.randomRun()
+        # Run environment with agent
+        evaluate_agent(runner, agent_steps, agent)
 
 
 if __name__ == "__main__":
