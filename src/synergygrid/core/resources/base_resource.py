@@ -12,7 +12,7 @@ class BaseResource:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
 
-    def reset(self, rng: Generator|None=None) -> None:
+    def reset(self, rng: Generator | None = None) -> None:
         """Initializes the resource in the grid"""
 
         if rng == None:

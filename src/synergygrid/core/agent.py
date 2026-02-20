@@ -39,7 +39,7 @@ class SynergyAgent:
     # === Logic === #
 
     def perform_action(self, agent_action: AgentAction) -> None:
-        """ Records current action and moves the agent according to it """
+        """Records current action and moves the agent according to it"""
 
         self.last_action = agent_action
 

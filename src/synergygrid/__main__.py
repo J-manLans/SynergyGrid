@@ -73,11 +73,12 @@ def main():
     alg = list(algorithms.keys())
 
     if len(sys.argv) == 1:
+        # Pick algorithm to train or evaluate
         algorithm = alg[2]
         # Choose to use an agent or just random sampling
         agent = True
         # Choose to train or run the agent
-        training = True
+        training = False
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
@@ -109,7 +110,7 @@ def main():
             )
         else:
             # Run environment with agent
-            runner.agentRun(agent_steps)
+            runner.evaluate(agent_steps)
     else:
         # Run environment without agent
         runner.randomRun()

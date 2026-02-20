@@ -47,7 +47,7 @@ class SynergyGridEnv(gym.Env):
             self.renderer = PygameRenderer(
                 grid_rows=grid_rows,
                 grid_cols=grid_cols,
-                fps=self.metadata['render_fps'],
+                fps=self.metadata["render_fps"],
             )
 
         # Gymnasium also requires us to define the action space — which is the agent's possible
@@ -128,10 +128,12 @@ class SynergyGridEnv(gym.Env):
     def close(self):
         pass
 
+
 # =============================== #
 #  Quick test for the game world  #
 #  Click play button in your IDE  #
 # =============================== #
+
 
 def testEnvironment():
     import random
@@ -148,6 +150,7 @@ def testEnvironment():
 
         __render(renderer, world)
 
+
 def __render(renderer, world):
     renderer.render(
         world.get_agent_pos(),
@@ -155,5 +158,6 @@ def __render(renderer, world):
         world.get_last_action(),
     )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     testEnvironment()

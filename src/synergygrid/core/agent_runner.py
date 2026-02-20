@@ -1,6 +1,5 @@
 import gymnasium as gym
 import pygame
-import os
 import datetime
 import sys
 from pathlib import Path
@@ -12,7 +11,6 @@ from synergygrid import environment, algorithms
 class AgentRunner:
     def __init__(self, environment: str, algorithm: str):
         self.environment = environment
-        self.model = None
         self.algorithm = algorithm
         self.AlgorithmClass = algorithms.get(self.algorithm, {})
         if not self.AlgorithmClass:
@@ -38,28 +36,27 @@ class AgentRunner:
         date = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
 
         # Create directories for saving models and logs
-        model_dir = os.path.join("results", "models", self.environment)
-        log_dir = os.path.join("results", "logs", self.environment)
-        os.makedirs(model_dir, exist_ok=True)
-        os.makedirs(log_dir, exist_ok=True)
+        model_dir = Path("results/models") / self.environment
+        log_dir = Path("results/logs") / self.environment
+
+        Path(model_dir).mkdir(parents=True, exist_ok=True)
+        Path(log_dir).mkdir(parents=True, exist_ok=True)
 
         # Create and wrap the training environment
         env = gym.make(self.environment, render_mode=None)
         # Wrap the environment with a Monitor for logging.
         # The created csv is needed for plotting our own graphs with matplotlib later.
-        monitor_file = os.path.join(
-            log_dir, f"{self.environment}_{self.algorithm}_{date}.csv"
-        )
-        env = Monitor(env, filename=monitor_file)
+        monitor_file = Path(log_dir) / f"{self.environment}_{self.algorithm}_{date}.csv"
+        env = Monitor(env, filename=str(monitor_file))
 
+        model = None
         if continue_training:
+            print("Loading existing training data")
             # Get the model with the desired steps to continue its training
-            agent_path = self.__get_agent(agent_steps)
-            print("Loading existing training data", agent_path)
-            self.model = self.AlgorithmClass.load(agent_path, env=env)
+            model = self.__get_model(agent_steps, env)
         else:
             # Initialize a fresh model
-            self.model = self.AlgorithmClass(
+            model = self.AlgorithmClass(
                 env=env,
                 verbose=1,
                 tensorboard_log=log_dir,
@@ -80,31 +77,30 @@ class AgentRunner:
                 )
 
                 # Train the model
-                self.model.learn(total_timesteps=timesteps, reset_num_timesteps=False)
+                model.learn(total_timesteps=timesteps, reset_num_timesteps=False)
 
                 # Save the model
-                save_path = os.path.join(
-                    model_dir,
-                    f"{self.algorithm}_{self.environment}_{self.model.num_timesteps}_{date}",
+                save_path = (
+                    Path(model_dir)
+                    / f"{self.algorithm}_{self.environment}_{model.num_timesteps}_{date}"
                 )
-                self.model.save(save_path)
-                print(f"\nModel saved with {self.model.num_timesteps} time steps")
+                model.save(save_path)
+                print(f"\nModel saved with {model.num_timesteps} time steps")
         finally:
             env.close()
 
-    def agentRun(self, agent_steps: str):
+    def evaluate(self, agent_steps: str):
         """
         Run the benchmark with the specified model.
 
         :param agent_steps: The specific checkpoint steps of the model to run the benchmark with.
         """
 
-        model_dir = self.__get_agent(agent_steps)
         # Create the environment with human rendering and load the model
         env = gym.make(self.environment, render_mode="human")
-        model = self.AlgorithmClass.load(model_dir, env=env)
+        model = self.__get_model(agent_steps, env)
 
-        # Reset the environment, just in case
+        # Reset the environment
         obs, _ = env.reset()
 
         done = False
@@ -126,7 +122,7 @@ class AgentRunner:
         # Create the environment with human rendering
         env = gym.make(self.environment, render_mode="human")
 
-        # Reset the environment, just in case
+        # Reset the environment
         obs, info = env.reset()
 
         done = False
@@ -147,11 +143,12 @@ class AgentRunner:
 
         env.close()
 
-    def __get_agent(self, agent_steps: str) -> Path:
-        """Create a path to match the latest model of the specified timesteps"""
+    def __get_model(self, agent_steps: str, env):
+        """Create a path to match the latest model of the specified timesteps and load it"""
+
         if agent_steps == "":
             sys.exit("You forgot to specify the models steps")
 
-        base_dir = Path("results") / "models" / self.environment
+        base_dir = Path("results/models") / self.environment
         file_name = f"{self.algorithm}_{self.environment}_{agent_steps}*"
-        return list(base_dir.glob(file_name))[-1]
+        return self.AlgorithmClass.load(list(base_dir.glob(file_name))[-1], env=env)
