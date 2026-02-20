@@ -1,7 +1,7 @@
 import pytest
 import gymnasium as gym
 from gymnasium.utils.env_checker import check_env
-from synergygrid.core.environment import SynergyGridEnv
+from synergygrid.gymnasium.environment import SynergyGridEnv
 
 
 # TODO: some more basic tests might be done here

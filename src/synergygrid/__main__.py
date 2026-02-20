@@ -1,8 +1,7 @@
 import argparse
 import sys
 import re
-from synergygrid import AgentRunner, environment, algorithms
-import synergygrid.core.environment
+from synergygrid import *
 
 
 def __parse_args():
@@ -17,9 +16,9 @@ def __parse_args():
 
     parser.add_argument(
         "--alg",
-        type=int,
-        default=0,
-        choices=range(len(algorithms)),
+        type=str,
+        default="PPO",
+        choices=algorithms,
         help="Algorithm index",
     )
 
@@ -69,22 +68,28 @@ def __parse_args():
 
 
 def main():
+    register_env()
     env = list(environment.keys())[0]
     alg = list(algorithms.keys())
 
     if len(sys.argv) == 1:
+        # Pick algorithm to train or evaluate
         algorithm = alg[2]
-        agent = True  # Choose to use an agent or just random sampling
-        training = True  # Choose to train or run the agent
-        continue_training = False  # Continue training from a saved model
-        agent_steps = "15000"  # Model that we shall continue to train
-        timesteps = (
-            1000  # Num of timesteps for training or model selection when running
-        )
-        iterations = 15  # Number of training iterations
+        # Choose to use an agent or just random sampling
+        agent = True
+        # Choose to train or run the agent
+        training = False
+        # Continue training from a saved model
+        continue_training = False
+        # Model that we shall continue to train
+        agent_steps = "10500"
+        # Num of timesteps for training or model selection when running
+        timesteps = 10500
+        # Number of training iterations
+        iterations = 2
     else:
-        args = __parse_args()  # pyhon -m experiments -h for info
-        algorithm = alg[args.alg]
+        args = __parse_args()  # python -m experiments -h for info
+        algorithm = args.alg
         agent = args.agent
         training = args.train
         continue_training = args.cont
@@ -94,21 +99,18 @@ def main():
 
     runner = AgentRunner(environment=env, algorithm=algorithm)
 
-    if agent:
-        if training:
-            # Train agent
-            runner.train(
-                continue_training=continue_training,
-                agent_steps=agent_steps,
-                timesteps=timesteps,
-                iterations=iterations,
-            )
-        else:
-            # Run environment with agent
-            runner.agentRun(agent_steps)
+    if training:
+        # Train agent
+        train_agent(
+            runner,
+            continue_training=continue_training,
+            agent_steps=agent_steps,
+            timesteps=timesteps,
+            iterations=iterations,
+        )
     else:
-        # Run environment without agent
-        runner.randomRun()
+        # Run environment with agent
+        evaluate_agent(runner, agent_steps, agent)
 
 
 if __name__ == "__main__":

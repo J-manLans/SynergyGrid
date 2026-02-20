@@ -1,4 +1,12 @@
-from .config import algorithms, environment
-from .core import GridWorld, AgentAction, AgentRunner
+from .gymnasium import register_env
+from .config import environment, algorithms
+from .agentrunner import AgentRunner, train_agent, evaluate_agent
 
-__all__ = ["GridWorld", "AgentAction", "AgentRunner", "algorithms", "environment"]
+__all__ = [
+    "register_env",
+    "environment",
+    "algorithms",
+    "AgentRunner",
+    "train_agent",
+    "evaluate_agent",
+]

@@ -1,29 +1,27 @@
 import gymnasium as gym
 from gymnasium import spaces
 from gymnasium.envs.registration import registry, register
-
-from synergygrid import GridWorld as gw
-from synergygrid import AgentAction as act
 import numpy as np
-
-# TODO: own class in config I believe
-# Register this module as a gym environment. Once registered, the id is usable in gym.make().
-if "synergy_grid-v0" not in registry:
-    register(
-        id="synergy_grid-v0", entry_point="synergygrid.core.environment:SynergyGridEnv"
-    )
+from synergygrid.core import GridWorld, AgentAction as act
+from synergygrid.rendering import PygameRenderer
 
 
 # The custom environment must inherit from gym.Env
 class SynergyGridEnv(gym.Env):
     """
-    A custom environment for SynergyGrid.
+    SynergyGrid reinforcement learning environment.
+
+    A discrete grid-world environment for benchmarking single-agent RL.
     """
 
     # Metadata required by Gym.
     # "human" for Pygame visualization, "ansi" for console output.
     # FPS set low since the agent moves discretely between grid cells.
-    metadata = {"render_modes": ["human"], "render_fps": 4}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+
+    # ================= #
+    #       Init        #
+    # ================= #
 
     def __init__(
         self,
@@ -35,17 +33,22 @@ class SynergyGridEnv(gym.Env):
     ):
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
+        self.max_steps = max_steps
         self.render_mode = render_mode
         self.step_count = 0
-        self.max_steps = max_steps
 
         # Initialize the bench world
-        self.agent = gw(
-            grid_rows=grid_rows,
-            grid_cols=grid_cols,
-            starting_score=starting_score,
-            fps=self.metadata["render_fps"],
+        self.world = GridWorld(
+            grid_rows=grid_rows, grid_cols=grid_cols, starting_score=starting_score
         )
+
+        if render_mode == "human":
+            # Initialize the rendering
+            self.renderer = PygameRenderer(
+                grid_rows=grid_rows,
+                grid_cols=grid_cols,
+                fps=self.metadata["render_fps"],
+            )
 
         # Gymnasium also requires us to define the action space — which is the agent's possible
         # actions. Training code can call action_space.sample() to randomly select an action.
@@ -68,24 +71,23 @@ class SynergyGridEnv(gym.Env):
             ),
         )
 
+    # ================== #
+    #    Gym contract    #
+    # ================== #
+
     def reset(self, *, seed=None, options=None):
-        super().reset(
-            seed=seed
-        )  # gym requires this call to control randomness and reproduce scenarios.
-
-        self.step_count = (
-            0  # Reset so we don't get truncated right away on our second run.
-        )
-
-        # Reset the agent. Optionally, pass in seed to control randomness and reproduce scenarios.
-        self.agent.reset(self.np_random)
+        # Gymnasium requires this call to control randomness and reproduce scenarios.
+        super().reset(seed=seed)
+        # Reset so we don't get truncated right away on our second episode.
+        self.step_count = 0
+        # Reset the world.
+        self.world.reset(self.np_random)
 
         # Constructs the observation state: [agent_row, agent_col, resource_row, resource_col]
-        obs = obs = np.concatenate(
-            (self.agent.agent_pos, self.agent.resource_pos), dtype=np.int32
+        obs = np.concatenate(
+            (self.world.get_agent_pos(), self.world.get_resource_pos()), dtype=np.int32
         )
 
-        # Render environment if desired
         if self.render_mode == "human":
             self.render()
 
@@ -94,7 +96,7 @@ class SynergyGridEnv(gym.Env):
 
     def step(self, action):
         # Perform action
-        resource_consumed = self.agent.perform_action(act(action))
+        resource_consumed = self.world.perform_agent_action(act(action))
 
         # Determine reward and termination
         reward = 0
@@ -103,23 +105,59 @@ class SynergyGridEnv(gym.Env):
             reward = 1
             terminated = True
 
-        # Constructs the observation state: [agent_row, agent_col, resource_row, resource_col]
         obs = np.concatenate(
-            (self.agent.agent_pos, self.agent.resource_pos), dtype=np.int32
+            (self.world.get_agent_pos(), self.world.get_resource_pos()), dtype=np.int32
         )
 
-        # Render environment if desired
         if self.render_mode == "human":
-            self.render(action=action)
+            self.render()
 
         truncated = self.step_count >= self.max_steps
         self.step_count += 1
 
-        # Return observation, reward, terminated, truncated (not used) and info (not used)
+        # Return observation, reward, terminated, truncated and info (not used)
         return obs, reward, terminated, truncated, {}
 
-    def render(self, mode="human", action=None):
-        self.agent.render()
+    def render(self):
+        self.renderer.render(
+            self.world.get_agent_pos(),
+            self.world.get_resource_pos(),
+            self.world.get_last_action(),
+        )
 
     def close(self):
         pass
+
+
+# =============================== #
+#  Quick test for the game world  #
+#  Click play button in your IDE  #
+# =============================== #
+
+
+def testEnvironment():
+    import random
+
+    world = GridWorld()
+    renderer = PygameRenderer()
+
+    world.reset()
+    __render(renderer, world)
+
+    while True:
+        action = random.randint(0, len(act) - 1)
+        world.perform_agent_action(act(action))
+
+        __render(renderer, world)
+
+
+def __render(renderer, world):
+    renderer.render(
+        world.get_agent_pos(),
+        world.get_resource_pos(),
+        world.get_last_action(),
+    )
+
+
+if __name__ == "__main__":
+    testEnvironment()
