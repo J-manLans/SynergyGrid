@@ -70,6 +70,7 @@ class PygameRenderer:
     def render(
         self,
         agent_pos: list[int],
+        collected: bool,
         resource_pos: list[np.int64],
         last_action: str | AgentAction,
     ) -> None:
@@ -90,12 +91,14 @@ class PygameRenderer:
                 pos = (c * self.cell_width, r * self.cell_height)
                 self.window_surface.blit(self.floor_img, pos)
 
-                # Draw resource
-                if [r, c] == resource_pos:
-                    self.window_surface.blit(self.green_resource_img, pos)
+                if not collected:
+                    # TODO: collected only turns to true when the agent is standing on it.
+                    if [r, c] == resource_pos:
+                        # Draw resource
+                        self.window_surface.blit(self.green_resource_img, pos)
 
-                # Draw agent
                 if [r, c] == agent_pos:
+                    # Draw agent
                     self.window_surface.blit(self.agent_img, pos)
 
         # Draw a box on the bottom signifying the agents action

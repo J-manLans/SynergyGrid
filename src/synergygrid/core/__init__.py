@@ -1,5 +1,5 @@
 from .agent import AgentAction, SynergyAgent
-from .resources import BaseResource
+from .resources import BaseResource, BaseResourceTest, PositiveResource
 from .grid_world import GridWorld
 
 __all__ = [

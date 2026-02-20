@@ -30,7 +30,7 @@ class SynergyAgent:
     def reset(self) -> None:
         """Initialize Agents starting position at the center of the grid"""
 
-        self.agent_pos = [self.grid_rows // 2, self.grid_cols // 2]
+        self.pos = [self.grid_rows // 2, self.grid_cols // 2]
 
     # ================= #
     #        API        #
@@ -58,7 +58,7 @@ class SynergyAgent:
     # ================= #
 
     def __moveTowardsMinBound(self, axis: int) -> None:
-        self.agent_pos[axis] = max(self.agent_pos[axis] - 1, 0)
+        self.pos[axis] = max(self.pos[axis] - 1, 0)
 
     def __moveTowardsMaxBound(self, axis: int, bound: int) -> None:
-        self.agent_pos[axis] = min(self.agent_pos[axis] + 1, bound)
+        self.pos[axis] = min(self.pos[axis] + 1, bound)

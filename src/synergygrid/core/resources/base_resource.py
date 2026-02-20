@@ -18,7 +18,7 @@ class BaseResource:
         if rng == None:
             rng = default_rng()
 
-        self.resource_pos = [
+        self.pos = [
             rng.integers(1, self.grid_rows),
             rng.integers(1, self.grid_cols),
         ]

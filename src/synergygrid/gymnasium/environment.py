@@ -96,14 +96,9 @@ class SynergyGridEnv(gym.Env):
 
     def step(self, action):
         # Perform action
-        resource_consumed = self.world.perform_agent_action(act(action))
+        self.resource_consumed, reward = self.world.perform_agent_action(act(action))
 
-        # Determine reward and termination
-        reward = 0
-        terminated = False
-        if resource_consumed:
-            reward = 1
-            terminated = True
+        # TODO: need to fix termination - that is when the agents point reach zero
 
         obs = np.concatenate(
             (self.world.get_agent_pos(), self.world.get_resource_pos()), dtype=np.int32
@@ -116,11 +111,12 @@ class SynergyGridEnv(gym.Env):
         self.step_count += 1
 
         # Return observation, reward, terminated, truncated and info (not used)
-        return obs, reward, terminated, truncated, {}
+        return obs, reward, False, truncated, {}
 
     def render(self):
         self.renderer.render(
             self.world.get_agent_pos(),
+            self.resource_consumed,
             self.world.get_resource_pos(),
             self.world.get_last_action(),
         )
@@ -140,20 +136,22 @@ def testEnvironment():
 
     world = GridWorld()
     renderer = PygameRenderer()
+    resource_consumed = False
 
     world.reset()
-    __render(renderer, world)
+    __render(renderer, world, resource_consumed)
 
     while True:
         action = random.randint(0, len(act) - 1)
-        world.perform_agent_action(act(action))
+        resource_consumed, _ = world.perform_agent_action(act(action))
 
-        __render(renderer, world)
+        __render(renderer, world, resource_consumed)
 
 
-def __render(renderer, world):
+def __render(renderer, world, resource_consumed):
     renderer.render(
         world.get_agent_pos(),
+        resource_consumed,
         world.get_resource_pos(),
         world.get_last_action(),
     )
