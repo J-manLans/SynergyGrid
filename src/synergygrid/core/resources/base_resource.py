@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from numpy.random import Generator
+from synergygrid.core.resources import ResourceMeta
 
 
 class BaseResource(ABC):
-    present = True
+    consumed = False
     position = [np.int64(0), np.int64(0)]
 
     class Timer:
@@ -26,9 +27,10 @@ class BaseResource(ABC):
     #       Init        #
     # ================= #
 
-    def __init__(self, world_boundaries: tuple[int, int]):
+    def __init__(self, world_boundaries: tuple[int, int], type: ResourceMeta):
         """Defines the game world so resources know their bounds"""
         self.world_boundaries = world_boundaries  # (row, col) of the grid
+        self.type = type
         self.timer = self.Timer()
 
     # ================= #

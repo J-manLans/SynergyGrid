@@ -44,52 +44,46 @@ class GridWorld:
         self.rng = rng
 
         # Initialize the resource's position
-        self.resource = self.RESOURCES[rng.integers(0, len(self.RESOURCES))]
-        self.resource.spawn(rng)
+        self._spawn_random_resource()
 
     # ================= #
     #        API        #
     # ================= #
 
-    # === Logic === #
-
-    def perform_agent_action(self, agent_action: AgentAction) -> tuple[bool, int, int]:
+    def perform_agent_action(self, agent_action: AgentAction) -> int:
         """
         Perform an action through the agent and if the resource isn't consumed the agents position is compared to the resource's. If it is, consume the resource and store the reward, then return the resources consumed status, the agents score (since one move cost one score) and optional reward.
 
         :param agent_action: the action the agent will perform
         """
 
-        reward = 0
+        reward = self.agent.MOVE_COST
         self.agent.perform_action(agent_action)
 
-        if not self.resource.present:
+        if not self.resource.consumed:
             if self.resource.timer.tick():
                 self.resource.deplete_resource()
             if self.agent.position == self.resource.position:
                 reward = self.agent.consume_resource(self.resource)
         else:
             self._ensure_spawn_timer()
-            self._update_spawn_timer(self.rng)
+            self._update_spawn_timer()
 
-        return self.resource.present, self.agent.score, reward
-
-    # === Getters === #
-
-    def get_agent_pos(self) -> list[int]:
-        return self.agent.position
-
-    def get_resource_pos(self) -> list[np.int64]:
-        return self.resource.position
+        return reward
 
     # ================= #
     #      Helpers      #
     # ================= #
 
+    def _spawn_random_resource(self):
+        resource_index = self.rng.integers(0, len(self.RESOURCES))
+        self.resource = self.RESOURCES[resource_index]
+        self.resource.spawn(self.rng)
+
     def _ensure_spawn_timer(self) -> None:
         if not self.resource.timer.is_set():
             self.resource.timer.set(int(self.rng.integers(2, 7)))
 
-    def _update_spawn_timer(self, rng: Generator) -> None:
+    def _update_spawn_timer(self) -> None:
         if self.resource.timer.tick():
-            self.resource.spawn(rng)
+            self._spawn_random_resource()

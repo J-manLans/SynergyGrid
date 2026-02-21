@@ -1,4 +1,5 @@
-from synergygrid.core.resources import BaseResource
+from synergygrid.core.resources import BaseResource, ResourceMeta, ResourceCategory, DirectType
+
 from numpy.random import Generator
 from typing import Final
 
@@ -9,14 +10,17 @@ class PositiveResource(BaseResource):
     """
 
     REWARD: Final[int] = 5
-    COUNT_DOWN: Final[int] = 7
+    COUNT_DOWN: Final[int] = 8
 
     # ================= #
     #       Init        #
     # ================= #
 
     def __init__(self, world_boundaries: tuple[int, int]):
-        super().__init__(world_boundaries)
+        super().__init__(world_boundaries, ResourceMeta(
+            category = ResourceCategory.DIRECT,
+            subtype = DirectType.POSITIVE
+        ))
 
     # ================= #
     #        API        #

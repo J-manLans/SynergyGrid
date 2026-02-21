@@ -1,5 +1,6 @@
 from enum import Enum
 from synergygrid.core.resources import BaseResource
+from typing import Final
 
 
 class AgentAction(Enum):
@@ -12,6 +13,8 @@ class AgentAction(Enum):
 
 
 class SynergyAgent:
+    MOVE_COST: Final[int] = -1
+
     # ================= #
     #       Init        #
     # ================= #

@@ -2,7 +2,7 @@ import pygame
 from os import path
 import sys
 import numpy as np
-from synergygrid.core import AgentAction
+from synergygrid.core import AgentAction, ResourceMeta, ResourceCategory, DirectType
 
 
 class PygameRenderer:
@@ -48,20 +48,7 @@ class PygameRenderer:
         # Initialize game window
         self.window_surface = pygame.display.set_mode(self.window_size)
 
-        # Load graphics
-        ROOT_DIR = path.abspath(path.join(path.dirname(__file__), "..", "..", ".."))
-
-        file_name = path.join(ROOT_DIR, "assets/sprites/agent.png")
-        img = pygame.image.load(file_name)
-        self.agent_img = img
-
-        file_name = path.join(ROOT_DIR, "assets/sprites/green-resource.png")
-        img = pygame.image.load(file_name)
-        self.green_resource_img = img
-
-        file_name = path.join(ROOT_DIR, "assets/tiles/floor.png")
-        img = pygame.image.load(file_name)
-        self.floor_img = img
+        self._load_graphics()
 
     # ================= #
     #        API        #
@@ -72,6 +59,7 @@ class PygameRenderer:
         agent_pos: list[int],
         consumed: bool,
         resource_pos: list[np.int64],
+        resource_meta: ResourceMeta,
         agent_score: int,
     ) -> None:
         """
@@ -92,9 +80,7 @@ class PygameRenderer:
 
                 if not consumed:
                     if [r, c] == resource_pos:
-                        # Draw resource
-                        self.window_surface.blit(self.green_resource_img, pos)
-
+                        self._draw_resource(resource_meta, pos)
                 if [r, c] == agent_pos:
                     # Draw agent
                     self.window_surface.blit(self.agent_img, pos)
@@ -114,16 +100,47 @@ class PygameRenderer:
     #      Helpers      #
     # ================= #
 
+    # === Init ===#
+
     def _init_colors(self) -> None:
         """Sets all the colors the game uses"""
 
         self.background_clr = (45, 29, 29)
         self.text_clr = (255, 246, 213)
 
+    def _load_graphics(self):
+         # Load graphics
+        ROOT_DIR = path.abspath(path.join(path.dirname(__file__), "..", "..", ".."))
+
+        file_name = path.join(ROOT_DIR, "assets/sprites/agent.png")
+        img = pygame.image.load(file_name)
+        self.agent_img = img
+
+        file_name = path.join(ROOT_DIR, "assets/sprites/positive_resource.png")
+        img = pygame.image.load(file_name)
+        self.positive_resource = img
+
+        file_name = path.join(ROOT_DIR, "assets/sprites/negative_resource.png")
+        img = pygame.image.load(file_name)
+        self.negative_resource = img
+
+        file_name = path.join(ROOT_DIR, "assets/tiles/floor.png")
+        img = pygame.image.load(file_name)
+        self.floor_img = img
+
+    # === API ===#
+
+    def _draw_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
+        if resource_meta.category == ResourceCategory.DIRECT:
+            if resource_meta.subtype == DirectType.POSITIVE:
+                self.window_surface.blit(self.positive_resource, pos)
+            elif resource_meta.subtype == DirectType.NEGATIVE:
+                self.window_surface.blit(self.negative_resource, pos)
+
     def _process_events(self) -> None:
         """Process user events and key presses"""
 
-        waiting = True
+        waiting = False
         while waiting:
             for event in pygame.event.get():
                 # User clicked on X at the top right corner of window
@@ -136,7 +153,9 @@ class PygameRenderer:
                     if event.key == pygame.K_ESCAPE:
                         pygame.quit()
                         sys.exit()
-                    # Pause the game until the user hits space
+                    # TODO: Pause the game until the user hits space. Right now it's a step
+                    # function, so need to rework this a little bit, but good for debugging as of
+                    # now
                     elif event.key == pygame.K_SPACE:
                         waiting = False
 

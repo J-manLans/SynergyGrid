@@ -1,6 +1,5 @@
 import gymnasium as gym
 from gymnasium import spaces
-from gymnasium.envs.registration import registry, register
 import numpy as np
 from synergygrid.core import GridWorld, AgentAction as act
 from synergygrid.rendering import PygameRenderer
@@ -83,7 +82,7 @@ class SynergyGridEnv(gym.Env):
 
         # Constructs the observation state: [agent_row, agent_col, resource_row, resource_col]
         obs = np.concatenate(
-            (self.world.get_agent_pos(), self.world.get_resource_pos()), dtype=np.int32
+            (self.world.agent.position, self.world.resource.position), dtype=np.int32
         )
 
         # Return observation and info (not used)
@@ -91,7 +90,7 @@ class SynergyGridEnv(gym.Env):
 
     def step(self, action):
         # Perform action
-        self.resource_consumed, self.agent_score, reward = (
+        reward = (
             self.world.perform_agent_action(act(action))
         )
         self.step_count += 1
@@ -102,20 +101,21 @@ class SynergyGridEnv(gym.Env):
 
         # Prep Gymnasium variables
         obs = np.concatenate(
-            (self.world.get_agent_pos(), self.world.get_resource_pos()), dtype=np.int32
+            (self.world.agent.position, self.world.resource.position), dtype=np.int32
         )
         truncated = self.step_count >= self.max_steps
-        terminated = self.agent_score <= 0
+        terminated = self.world.agent.score <= 0
 
         # Return observation, reward, terminated, truncated and info (not used)
         return obs, reward, terminated, truncated, {}
 
     def render(self):
         self.renderer.render(
-            self.world.get_agent_pos(),
-            self.resource_consumed,
-            self.world.get_resource_pos(),
-            self.agent_score,
+            self.world.agent.position,
+            self.world.resource.consumed,
+            self.world.resource.position,
+            self.world.resource.type,
+            self.world.agent.score,
         )
 
     # ================== #
@@ -131,7 +131,6 @@ class SynergyGridEnv(gym.Env):
         self.grid_cols = grid_cols
         self.max_steps = max_steps
         self.render_mode = render_mode
-        self.agent_score = starting_score
 
     def _init_world(self, grid_rows, grid_cols, starting_score) -> None:
         self.world = GridWorld(
@@ -148,7 +147,6 @@ class SynergyGridEnv(gym.Env):
     # === General === #
 
     def _init_episode_vars(self) -> None:
-        self.resource_consumed = True
         self.step_count = 0
 
 
@@ -158,31 +156,31 @@ class SynergyGridEnv(gym.Env):
 # =============================== #
 
 
-def testEnvironment():
-    import random
+# def testEnvironment():
+#     import random
 
-    world = GridWorld()
-    renderer = PygameRenderer()
-    resource_consumed = False
+#     world = GridWorld()
+#     renderer = PygameRenderer()
+#     resource_consumed = False
 
-    world.reset()
-    _render(renderer, world, resource_consumed, 20)
+#     world.reset()
+#     _render(renderer, world, resource_consumed, 20)
 
-    while True:
-        action = random.randint(0, len(act) - 1)
-        resource_consumed, score, _ = world.perform_agent_action(act(action))
+#     while True:
+#         action = random.randint(0, len(act) - 1)
+#         resource_consumed, score, _ = world.perform_agent_action(act(action))
 
-        _render(renderer, world, resource_consumed, score)
-
-
-def _render(renderer, world, resource_consumed, score):
-    renderer.render(
-        world.get_agent_pos(),
-        resource_consumed,
-        world.get_resource_pos(),
-        score,
-    )
+#         _render(renderer, world, resource_consumed, score)
 
 
-if __name__ == "__main__":
-    testEnvironment()
+# def _render(renderer, world, resource_consumed, score):
+#     renderer.render(
+#         world.get_agent_pos(),
+#         resource_consumed,
+#         world.get_resource_pos(),
+#         score,
+#     )
+
+
+# if __name__ == "__main__":
+#     testEnvironment()
