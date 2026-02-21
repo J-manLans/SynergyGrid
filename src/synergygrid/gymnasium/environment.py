@@ -28,7 +28,7 @@ class SynergyGridEnv(gym.Env):
         grid_rows=5,
         grid_cols=5,
         max_steps=50,
-        starting_score=10,
+        starting_score=20,
         render_mode=None,
     ):
         # Set up bench environment;

@@ -24,7 +24,6 @@ class GridWorld:
         self.grid_cols = grid_cols
         self.agent = SynergyAgent(grid_rows, grid_cols, starting_score=starting_score)
 
-        # New shit
         self.RESOURCES = []
         self.RESOURCES.append(PositiveResource((grid_rows, grid_cols)))
 
@@ -38,12 +37,14 @@ class GridWorld:
         if rng == None:
             rng = default_rng()
 
+        self.rng = rng
+
         # Initialize the resource's position
         self.resource = self.RESOURCES[rng.integers(0, len(self.RESOURCES))]
         self.resource.spawn(rng)
 
     # ================= #
-    #       API         #
+    #        API        #
     # ================= #
 
     # === Logic === #
@@ -60,9 +61,12 @@ class GridWorld:
         reward = 0
         self.agent.perform_action(agent_action)
 
-        can_consume = (self.agent.pos == self.resource.pos) and (not self.resource.consumed)
-        if can_consume:
-            reward = self.agent.consume_resource(self.resource)
+        if not self.resource.consumed:
+            if self.agent.pos == self.resource.pos:
+                reward = self.agent.consume_resource(self.resource)
+        else:
+            self._ensure_spawn_timer()
+            self._update_spawn_timer(self.rng)
 
         return self.resource.consumed, self.agent.score == 0, reward
 
@@ -76,3 +80,15 @@ class GridWorld:
 
     def get_last_action(self) -> str | AgentAction:
         return self.agent.last_action
+
+    # ================= #
+    #      Helpers      #
+    # ================= #
+
+    def _ensure_spawn_timer(self) -> None:
+        if not self.resource.timer.is_set():
+            self.resource.timer.set(int(self.rng.integers(5, 10)))
+
+    def _update_spawn_timer(self, rng: Generator) -> None:
+        if self.resource.timer.tick():
+            self.resource.spawn(rng)

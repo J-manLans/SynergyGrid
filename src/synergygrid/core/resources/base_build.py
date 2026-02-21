@@ -5,16 +5,32 @@ from numpy.random import Generator
 
 class BaseResourceTest(ABC):
     consumed = True
+    pos = [np.int64(0), np.int64(0)]
+
+    class Timer:
+        def __init__(self):
+            self.remaining = 0
+
+        def is_set(self) -> bool:
+            return self.remaining > 0
+
+        def set(self, duration: int) -> None:
+            self.remaining = duration
+
+        def tick(self) -> bool:
+            if self.remaining > 0:
+                self.remaining -= 1
+            return self.remaining == 0
 
     # ================= #
     #       Init        #
     # ================= #
 
-
     def __init__(self, world_boundaries: tuple[int, int]):
         """Defines the game world so resources know their bounds"""
         self.world_boundaries = world_boundaries  # (row, col) of the grid
-        self.pos = [np.int64(0), np.int64(0)]
+        self.timer = self.Timer()
+
 
     # ================= #
     #        API        #

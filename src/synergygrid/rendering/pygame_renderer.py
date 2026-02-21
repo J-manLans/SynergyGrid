@@ -70,7 +70,7 @@ class PygameRenderer:
     def render(
         self,
         agent_pos: list[int],
-        collected: bool,
+        consumed: bool,
         resource_pos: list[np.int64],
         last_action: str | AgentAction,
     ) -> None:
@@ -91,7 +91,7 @@ class PygameRenderer:
                 pos = (c * self.cell_width, r * self.cell_height)
                 self.window_surface.blit(self.floor_img, pos)
 
-                if not collected:
+                if not consumed:
                     if [r, c] == resource_pos:
                         # Draw resource
                         self.window_surface.blit(self.green_resource_img, pos)
@@ -103,7 +103,7 @@ class PygameRenderer:
         # Draw a box on the bottom signifying the agents action
         # Just for demonstration of how to work with Pygame, will be removed later
         text = self.font.render(
-            f"Action: {last_action}", True, self.text_clr, self.background_clr
+            f"Score: {last_action}", True, self.text_clr, self.background_clr
         )
         text_pos = (0, self.window_size[1] - self.action_info_height)
         self.window_surface.blit(text, text_pos)
