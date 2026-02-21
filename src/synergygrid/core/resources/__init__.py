@@ -1,5 +1,5 @@
 from .base_resource import BaseResource
-from .base_build import BaseResourceTest
 from .direct.positive import PositiveResource
+from .direct.negative import NegativeResource
 
-__all__ = ["BaseResource", "BaseResourceTest", "PositiveResource"]
+__all__ = ["BaseResource", "PositiveResource", 'NegativeResource']

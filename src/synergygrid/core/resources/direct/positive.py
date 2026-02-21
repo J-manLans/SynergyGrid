@@ -1,14 +1,15 @@
-from synergygrid.core.resources import BaseResourceTest
+from synergygrid.core.resources import BaseResource
 from numpy.random import Generator
 from typing import Final
-import numpy as np
 
-class PositiveResource(BaseResourceTest):
+
+class PositiveResource(BaseResource):
     """
-    A resource that gives the agent a positive effect.
+    A resource that gives the agent a positive score.
     """
 
     REWARD: Final[int] = 5
+    COUNT_DOWN: Final[int] = 7
 
     # ================= #
     #       Init        #
@@ -25,24 +26,14 @@ class PositiveResource(BaseResourceTest):
         self.consumed = True
         return self.REWARD
 
-    def spawn(self, rng: Generator):
-        """Initializes the resource in the grid"""
+    def deplete_resource(self) -> None:
+        self.consumed = True
 
-        self.pos = [
+    def spawn(self, rng: Generator):
+        self.position = [
             rng.integers(1, self.world_boundaries[0]),
             rng.integers(1, self.world_boundaries[1]),
         ]
 
         self.consumed = False
-
-    def is_at_position(self, pos: list[np.int64]) -> bool:
-        """
-        Check if the resource is at a given position.
-        """
-        return self.pos == pos
-
-    def is_consumed(self) -> bool:
-        """
-        Check if the resource is consumed.
-        """
-        return self.consumed
+        self.timer.set(self.COUNT_DOWN)

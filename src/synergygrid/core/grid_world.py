@@ -1,15 +1,17 @@
 from synergygrid.core import (
     AgentAction,
     SynergyAgent,
-    BaseResourceTest,
+    BaseResource,
     PositiveResource,
+    NegativeResource
 )
 import numpy as np
 from numpy.random import Generator, default_rng
 
-#TODO: fix re-spawning mechanic
+
+# TODO: fix re-spawning mechanic
 class GridWorld:
-    RESOURCES: list[BaseResourceTest]
+    RESOURCES: list[BaseResource]
 
     # ================= #
     #       Init        #
@@ -24,8 +26,10 @@ class GridWorld:
         self.grid_cols = grid_cols
         self.agent = SynergyAgent(grid_rows, grid_cols, starting_score=starting_score)
 
-        self.RESOURCES = []
-        self.RESOURCES.append(PositiveResource((grid_rows, grid_cols)))
+        self.RESOURCES = [
+            PositiveResource((grid_rows, grid_cols)),
+            NegativeResource((grid_rows, grid_cols))
+        ]
 
     def reset(self, rng: Generator | None = None) -> None:
         """
@@ -49,9 +53,7 @@ class GridWorld:
 
     # === Logic === #
 
-    def perform_agent_action(
-        self, agent_action: AgentAction
-    ) -> tuple[bool, bool, int]:
+    def perform_agent_action(self, agent_action: AgentAction) -> tuple[bool, int, int]:
         """
         Perform an action through the agent and if the resource isn't consumed the agents position is compared to the resource's. If it is, consume the resource and store the reward, then return the resources consumed status, the agents score (since one move cost one score) and optional reward.
 
@@ -61,25 +63,24 @@ class GridWorld:
         reward = 0
         self.agent.perform_action(agent_action)
 
-        if not self.resource.consumed:
-            if self.agent.pos == self.resource.pos:
+        if not self.resource.present:
+            if self.resource.timer.tick():
+                self.resource.deplete_resource()
+            if self.agent.position == self.resource.position:
                 reward = self.agent.consume_resource(self.resource)
         else:
             self._ensure_spawn_timer()
             self._update_spawn_timer(self.rng)
 
-        return self.resource.consumed, self.agent.score == 0, reward
+        return self.resource.present, self.agent.score, reward
 
     # === Getters === #
 
     def get_agent_pos(self) -> list[int]:
-        return self.agent.pos
+        return self.agent.position
 
     def get_resource_pos(self) -> list[np.int64]:
-        return self.resource.pos
-
-    def get_last_action(self) -> str | AgentAction:
-        return self.agent.last_action
+        return self.resource.position
 
     # ================= #
     #      Helpers      #
@@ -87,7 +88,7 @@ class GridWorld:
 
     def _ensure_spawn_timer(self) -> None:
         if not self.resource.timer.is_set():
-            self.resource.timer.set(int(self.rng.integers(5, 10)))
+            self.resource.timer.set(int(self.rng.integers(2, 7)))
 
     def _update_spawn_timer(self, rng: Generator) -> None:
         if self.resource.timer.tick():

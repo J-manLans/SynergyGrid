@@ -1,5 +1,5 @@
 from enum import Enum
-from synergygrid.core.resources import BaseResourceTest
+from synergygrid.core.resources import BaseResource
 
 
 class AgentAction(Enum):
@@ -26,12 +26,11 @@ class SynergyAgent:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self.score = starting_score
-        self.last_action = ""
 
     def reset(self) -> None:
         """Initialize Agents starting position at the center of the grid"""
 
-        self.pos = [self.grid_rows // 2, self.grid_cols // 2]
+        self.position = [self.grid_rows // 2, self.grid_cols // 2]
 
     # ================= #
     #        API        #
@@ -52,11 +51,10 @@ class SynergyAgent:
         elif agent_action == AgentAction.DOWN:
             self._moveTowardsMaxBound(0, self.grid_rows - 1)
 
-        self.last_action = agent_action
         self.score -= 1
 
-    def consume_resource(self, resource:BaseResourceTest) -> int:
-        '''Consumes the resource, add its reward to its score and returns the reward'''
+    def consume_resource(self, resource: BaseResource) -> int:
+        """Consumes the resource, add its reward to its score and returns the reward"""
 
         reward = resource.consume()
         self.score += reward
@@ -67,7 +65,7 @@ class SynergyAgent:
     # ================= #
 
     def _moveTowardsMinBound(self, axis: int) -> None:
-        self.pos[axis] = max(self.pos[axis] - 1, 0)
+        self.position[axis] = max(self.position[axis] - 1, 0)
 
     def _moveTowardsMaxBound(self, axis: int, bound: int) -> None:
-        self.pos[axis] = min(self.pos[axis] + 1, bound)
+        self.position[axis] = min(self.position[axis] + 1, bound)

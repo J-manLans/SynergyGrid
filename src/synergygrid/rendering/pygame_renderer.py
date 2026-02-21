@@ -72,7 +72,7 @@ class PygameRenderer:
         agent_pos: list[int],
         consumed: bool,
         resource_pos: list[np.int64],
-        last_action: str | AgentAction,
+        agent_score: int,
     ) -> None:
         """
         Draws the game window and all its content, updates and limits the fps.
@@ -80,7 +80,6 @@ class PygameRenderer:
         Also catches user events (clicking the X top right or hitting ESC) for closing the game.
         """
 
-        self._process_events()
         self.window_surface.fill(self.background_clr)
 
         # Draw the graphics with pygame. blit() draws things in order, so we need to stack elements
@@ -103,12 +102,13 @@ class PygameRenderer:
         # Draw a box on the bottom signifying the agents action
         # Just for demonstration of how to work with Pygame, will be removed later
         text = self.font.render(
-            f"Score: {last_action}", True, self.text_clr, self.background_clr
+            f"Score: {agent_score}", True, self.text_clr, self.background_clr
         )
         text_pos = (0, self.window_size[1] - self.action_info_height)
         self.window_surface.blit(text, text_pos)
 
         self._update()
+        self._process_events()
 
     # ================= #
     #      Helpers      #
@@ -123,17 +123,25 @@ class PygameRenderer:
     def _process_events(self) -> None:
         """Process user events and key presses"""
 
-        for event in pygame.event.get():
-            # User clicked on X at the top right corner of window
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.KEYDOWN:
-                # User hit escape
-                if event.key == pygame.K_ESCAPE:
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                # User clicked on X at the top right corner of window
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
+                if event.type == pygame.KEYDOWN:
+                    # User hit escape
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                    # Pause the game until the user hits space
+                    elif event.key == pygame.K_SPACE:
+                        waiting = False
+
+            self.clock.tick(self.fps)
+
 
     def _update(self):
         """Refreshes the display and limits FPS"""

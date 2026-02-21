@@ -33,10 +33,13 @@ class SynergyGridEnv(gym.Env):
     ):
         # Set up bench environment;
 
-        self._init_configurable_vars(grid_rows, grid_cols, max_steps, render_mode)
+        self._init_configurable_vars(
+            grid_rows, grid_cols, max_steps, render_mode, starting_score
+        )
         self._init_episode_vars()
         self._init_world(grid_rows, grid_cols, starting_score)
-        if render_mode == "human": self._init_renderer(grid_rows, grid_cols)
+        if render_mode == "human":
+            self._init_renderer(grid_rows, grid_cols)
 
         # Set up Gymnasium environment:
 
@@ -88,17 +91,21 @@ class SynergyGridEnv(gym.Env):
 
     def step(self, action):
         # Perform action
-        self.resource_consumed, terminated, reward = self.world.perform_agent_action(act(action))
+        self.resource_consumed, self.agent_score, reward = (
+            self.world.perform_agent_action(act(action))
+        )
         self.step_count += 1
 
+        # Render
         if self.render_mode == "human":
             self.render()
 
+        # Prep Gymnasium variables
         obs = np.concatenate(
             (self.world.get_agent_pos(), self.world.get_resource_pos()), dtype=np.int32
         )
-
         truncated = self.step_count >= self.max_steps
+        terminated = self.agent_score <= 0
 
         # Return observation, reward, terminated, truncated and info (not used)
         return obs, reward, terminated, truncated, {}
@@ -108,11 +115,8 @@ class SynergyGridEnv(gym.Env):
             self.world.get_agent_pos(),
             self.resource_consumed,
             self.world.get_resource_pos(),
-            self.world.get_last_action(),
+            self.agent_score,
         )
-
-    def close(self):
-        pass
 
     # ================== #
     #       Helpers      #
@@ -120,11 +124,14 @@ class SynergyGridEnv(gym.Env):
 
     # === Init === #
 
-    def _init_configurable_vars(self, grid_rows, grid_cols, max_steps, render_mode) -> None:
+    def _init_configurable_vars(
+        self, grid_rows, grid_cols, max_steps, render_mode, starting_score
+    ) -> None:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self.max_steps = max_steps
         self.render_mode = render_mode
+        self.agent_score = starting_score
 
     def _init_world(self, grid_rows, grid_cols, starting_score) -> None:
         self.world = GridWorld(
@@ -144,6 +151,7 @@ class SynergyGridEnv(gym.Env):
         self.resource_consumed = True
         self.step_count = 0
 
+
 # =============================== #
 #  Quick test for the game world  #
 #  Click play button in your IDE  #
@@ -158,21 +166,21 @@ def testEnvironment():
     resource_consumed = False
 
     world.reset()
-    _render(renderer, world, resource_consumed)
+    _render(renderer, world, resource_consumed, 20)
 
     while True:
         action = random.randint(0, len(act) - 1)
-        resource_consumed, _, _ = world.perform_agent_action(act(action))
+        resource_consumed, score, _ = world.perform_agent_action(act(action))
 
-        _render(renderer, world, resource_consumed)
+        _render(renderer, world, resource_consumed, score)
 
 
-def _render(renderer, world, resource_consumed):
+def _render(renderer, world, resource_consumed, score):
     renderer.render(
         world.get_agent_pos(),
         resource_consumed,
         world.get_resource_pos(),
-        world.get_last_action(),
+        score,
     )
 
 

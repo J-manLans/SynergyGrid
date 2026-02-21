@@ -1,24 +1,57 @@
-from numpy.random import Generator, default_rng
+from abc import ABC, abstractmethod
+import numpy as np
+from numpy.random import Generator
 
 
-class BaseResource:
+class BaseResource(ABC):
+    present = True
+    position = [np.int64(0), np.int64(0)]
+
+    class Timer:
+        def __init__(self):
+            self.remaining = 0
+
+        def is_set(self) -> bool:
+            return self.remaining > 0
+
+        def set(self, duration: int) -> None:
+            self.remaining = duration
+
+        def tick(self) -> bool:
+            if self.remaining > 0:
+                self.remaining -= 1
+            return self.remaining == 0
+
     # ================= #
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows=5, grid_cols=5):
+    def __init__(self, world_boundaries: tuple[int, int]):
         """Defines the game world so resources know their bounds"""
+        self.world_boundaries = world_boundaries  # (row, col) of the grid
+        self.timer = self.Timer()
 
-        self.grid_rows = grid_rows
-        self.grid_cols = grid_cols
+    # ================= #
+    #        API        #
+    # ================= #
 
-    def reset(self, rng: Generator | None = None) -> None:
-        """Initializes the resource in the grid"""
+    @abstractmethod
+    def consume(self) -> int:
+        """
+        Defines how an agent interacts with the resource.
+        """
+        pass
 
-        if rng == None:
-            rng = default_rng()
+    @abstractmethod
+    def deplete_resource(self) -> None:
+        '''
+        Removes the resource without giving any reward.
+        '''
+        pass
 
-        self.pos = [
-            rng.integers(1, self.grid_rows),
-            rng.integers(1, self.grid_cols),
-        ]
+    @abstractmethod
+    def spawn(self, rng: Generator):
+        """
+        Spawns the resource.
+        """
+        pass

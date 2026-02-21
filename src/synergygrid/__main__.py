@@ -82,11 +82,11 @@ def main():
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
-        agent_steps = "10500"
+        agent_steps = "20000"
         # Num of timesteps for training or model selection when running
-        timesteps = 10500
+        timesteps = 5000
         # Number of training iterations
-        iterations = 2
+        iterations = 4
     else:
         args = __parse_args()  # python -m experiments -h for info
         algorithm = args.alg
