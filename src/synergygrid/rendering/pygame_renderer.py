@@ -29,7 +29,7 @@ class PygameRenderer:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self.fps = fps
-        self.__init_colors()
+        self._init_colors()
 
         # Default font
         self.font = pygame.font.SysFont("Calibre", 30)
@@ -80,7 +80,7 @@ class PygameRenderer:
         Also catches user events (clicking the X top right or hitting ESC) for closing the game.
         """
 
-        self.__process_events()
+        self._process_events()
         self.window_surface.fill(self.background_clr)
 
         # Draw the graphics with pygame. blit() draws things in order, so we need to stack elements
@@ -108,19 +108,19 @@ class PygameRenderer:
         text_pos = (0, self.window_size[1] - self.action_info_height)
         self.window_surface.blit(text, text_pos)
 
-        self.__update()
+        self._update()
 
     # ================= #
     #      Helpers      #
     # ================= #
 
-    def __init_colors(self) -> None:
+    def _init_colors(self) -> None:
         """Sets all the colors the game uses"""
 
         self.background_clr = (45, 29, 29)
         self.text_clr = (255, 246, 213)
 
-    def __process_events(self) -> None:
+    def _process_events(self) -> None:
         """Process user events and key presses"""
 
         for event in pygame.event.get():
@@ -135,7 +135,7 @@ class PygameRenderer:
                     pygame.quit()
                     sys.exit()
 
-    def __update(self):
+    def _update(self):
         """Refreshes the display and limits FPS"""
 
         pygame.display.update()

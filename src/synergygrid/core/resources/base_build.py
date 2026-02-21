@@ -4,7 +4,7 @@ from numpy.random import Generator
 
 
 class BaseResourceTest(ABC):
-    CONSUMED = True
+    consumed = True
 
     # ================= #
     #       Init        #

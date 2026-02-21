@@ -3,7 +3,6 @@ from numpy.random import Generator
 from typing import Final
 import numpy as np
 
-
 class PositiveResource(BaseResourceTest):
     """
     A resource that gives the agent a positive effect.
@@ -23,7 +22,7 @@ class PositiveResource(BaseResourceTest):
     # ================= #
 
     def consume(self) -> int:
-        self.CONSUMED = True
+        self.consumed = True
         return self.REWARD
 
     def spawn(self, rng: Generator):
@@ -34,7 +33,7 @@ class PositiveResource(BaseResourceTest):
             rng.integers(1, self.world_boundaries[1]),
         ]
 
-        self.CONSUMED = False
+        self.consumed = False
 
     def is_at_position(self, pos: list[np.int64]) -> bool:
         """
@@ -46,4 +45,4 @@ class PositiveResource(BaseResourceTest):
         """
         Check if the resource is consumed.
         """
-        return self.CONSUMED
+        return self.consumed

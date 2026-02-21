@@ -31,25 +31,14 @@ class SynergyGridEnv(gym.Env):
         starting_score=10,
         render_mode=None,
     ):
-        self.grid_rows = grid_rows
-        self.grid_cols = grid_cols
-        self.max_steps = max_steps
-        self.render_mode = render_mode
-        self.resource_consumed = True
-        self.step_count = 0
+        # Set up bench environment;
 
-        # Initialize the bench world
-        self.world = GridWorld(
-            grid_rows=grid_rows, grid_cols=grid_cols, starting_score=starting_score
-        )
+        self._init_configurable_vars(grid_rows, grid_cols, max_steps, render_mode)
+        self._init_episode_vars()
+        self._init_world(grid_rows, grid_cols, starting_score)
+        if render_mode == "human": self._init_renderer(grid_rows, grid_cols)
 
-        if render_mode == "human":
-            # Initialize the rendering
-            self.renderer = PygameRenderer(
-                grid_rows=grid_rows,
-                grid_cols=grid_cols,
-                fps=self.metadata["render_fps"],
-            )
+        # Set up Gymnasium environment:
 
         # Gymnasium also requires us to define the action space — which is the agent's possible
         # actions. Training code can call action_space.sample() to randomly select an action.
@@ -64,55 +53,55 @@ class SynergyGridEnv(gym.Env):
             low=0,
             high=np.array(
                 [
+                    # Agent position bounds
                     self.grid_rows - 1,
-                    self.grid_cols - 1,  # Agent position bounds
+                    self.grid_cols - 1,
+                    # Resource position bounds
                     self.grid_rows - 1,
-                    self.grid_cols - 1,  # Resource position bounds
+                    self.grid_cols - 1,
                 ]
             ),
         )
 
-    # ================== #
-    #    Gym contract    #
-    # ================== #
+    # ======================== #
+    #    Gymnasium contract    #
+    # ======================== #
 
     def reset(self, *, seed=None, options=None):
         # Gymnasium requires this call to control randomness and reproduce scenarios.
         super().reset(seed=seed)
-        # Reset so we don't get truncated right away on our second episode.
-        self.step_count = 0
+
         # Reset the world.
+        self._init_episode_vars()
         self.world.reset(self.np_random)
+
+        if self.render_mode == "human":
+            self.render()
 
         # Constructs the observation state: [agent_row, agent_col, resource_row, resource_col]
         obs = np.concatenate(
             (self.world.get_agent_pos(), self.world.get_resource_pos()), dtype=np.int32
         )
 
-        if self.render_mode == "human":
-            self.render()
-
         # Return observation and info (not used)
         return obs, {}
 
     def step(self, action):
         # Perform action
-        self.resource_consumed, reward = self.world.perform_agent_action(act(action))
+        self.resource_consumed, terminated, reward = self.world.perform_agent_action(act(action))
+        self.step_count += 1
 
-        # TODO: need to fix termination - that is when the agents point reach zero
+        if self.render_mode == "human":
+            self.render()
 
         obs = np.concatenate(
             (self.world.get_agent_pos(), self.world.get_resource_pos()), dtype=np.int32
         )
 
-        if self.render_mode == "human":
-            self.render()
-
         truncated = self.step_count >= self.max_steps
-        self.step_count += 1
 
         # Return observation, reward, terminated, truncated and info (not used)
-        return obs, reward, False, truncated, {}
+        return obs, reward, terminated, truncated, {}
 
     def render(self):
         self.renderer.render(
@@ -125,6 +114,35 @@ class SynergyGridEnv(gym.Env):
     def close(self):
         pass
 
+    # ================== #
+    #       Helpers      #
+    # ================== #
+
+    # === Init === #
+
+    def _init_configurable_vars(self, grid_rows, grid_cols, max_steps, render_mode) -> None:
+        self.grid_rows = grid_rows
+        self.grid_cols = grid_cols
+        self.max_steps = max_steps
+        self.render_mode = render_mode
+
+    def _init_world(self, grid_rows, grid_cols, starting_score) -> None:
+        self.world = GridWorld(
+            grid_rows=grid_rows, grid_cols=grid_cols, starting_score=starting_score
+        )
+
+    def _init_renderer(self, grid_rows, grid_cols) -> None:
+        self.renderer = PygameRenderer(
+            grid_rows=grid_rows,
+            grid_cols=grid_cols,
+            fps=self.metadata["render_fps"],
+        )
+
+    # === General === #
+
+    def _init_episode_vars(self) -> None:
+        self.resource_consumed = True
+        self.step_count = 0
 
 # =============================== #
 #  Quick test for the game world  #
@@ -140,16 +158,16 @@ def testEnvironment():
     resource_consumed = False
 
     world.reset()
-    __render(renderer, world, resource_consumed)
+    _render(renderer, world, resource_consumed)
 
     while True:
         action = random.randint(0, len(act) - 1)
-        resource_consumed, _ = world.perform_agent_action(act(action))
+        resource_consumed, _, _ = world.perform_agent_action(act(action))
 
-        __render(renderer, world, resource_consumed)
+        _render(renderer, world, resource_consumed)
 
 
-def __render(renderer, world, resource_consumed):
+def _render(renderer, world, resource_consumed):
     renderer.render(
         world.get_agent_pos(),
         resource_consumed,
