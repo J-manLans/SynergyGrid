@@ -1,4 +1,5 @@
 from enum import Enum
+from synergygrid.core.resources import BaseResourceTest
 
 
 class AgentAction(Enum):
@@ -52,6 +53,13 @@ class SynergyAgent:
             self.__moveTowardsMinBound(0)
         elif agent_action == AgentAction.DOWN:
             self.__moveTowardsMaxBound(0, self.grid_rows - 1)
+
+    def consume_resource(self, resource:BaseResourceTest) -> int:
+        '''Consumes the resource, add its reward to its score and returns the reward'''
+
+        reward = resource.consume()
+        self.score += reward
+        return reward
 
     # ================= #
     #      Helpers      #

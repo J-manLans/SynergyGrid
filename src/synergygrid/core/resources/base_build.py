@@ -4,10 +4,12 @@ from numpy.random import Generator
 
 
 class BaseResourceTest(ABC):
+    CONSUMED = True
 
     # ================= #
     #       Init        #
     # ================= #
+
 
     def __init__(self, world_boundaries: tuple[int, int]):
         """Defines the game world so resources know their bounds"""
@@ -38,6 +40,13 @@ class BaseResourceTest(ABC):
     def is_at_position(self, pos: list[np.int64]) -> bool:
         """
         Check if the resource is at a given position.
+        """
+        pass
+
+    @abstractmethod
+    def is_consumed(self) -> bool:
+        """
+        Check if the resource is consumed.
         """
         pass
 

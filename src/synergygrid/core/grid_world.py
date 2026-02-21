@@ -52,20 +52,18 @@ class GridWorld:
         self, agent_action: AgentAction
     ) -> tuple[bool, int]:
         """
-        Perform an action through the agent and compare if its position is the same as the resource, if it is it returns True, otherwise False
+        Perform an action through the agent and compare if its position is the same as the resource. If it is, consume the resource and store the reward, then return the resources consumed status and optional reward.
 
         :param agent_action: the action the agent will perform
         """
 
+        reward = 0
         self.agent.perform_action(agent_action)
 
-        # TODO: here somewhere lies the problem, it only flickers to true when agent is right on it,
-        # it doesn't consume it, only hides it at that certain state. So some despawn mechanic
-        # needs to be applied
         if self.agent.pos == self.resource.pos:
-            return True, self.resource.consume()
+            reward = self.agent.consume_resource(self.resource)
 
-        return False, 0
+        return self.resource.CONSUMED, reward
 
     # === Getters === #
 

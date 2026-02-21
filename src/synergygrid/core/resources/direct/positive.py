@@ -10,7 +10,6 @@ class PositiveResource(BaseResourceTest):
     """
 
     REWARD: Final[int] = 5
-    COLLECTED = True
 
     # ================= #
     #       Init        #
@@ -24,7 +23,7 @@ class PositiveResource(BaseResourceTest):
     # ================= #
 
     def consume(self) -> int:
-        self.COLLECTED = True
+        self.CONSUMED = True
         return self.REWARD
 
     def spawn(self, rng: Generator):
@@ -35,10 +34,16 @@ class PositiveResource(BaseResourceTest):
             rng.integers(1, self.world_boundaries[1]),
         ]
 
-        self.COLLECTED = False
+        self.CONSUMED = False
 
     def is_at_position(self, pos: list[np.int64]) -> bool:
         """
         Check if the resource is at a given position.
         """
         return self.pos == pos
+
+    def is_consumed(self) -> bool:
+        """
+        Check if the resource is consumed.
+        """
+        return self.CONSUMED

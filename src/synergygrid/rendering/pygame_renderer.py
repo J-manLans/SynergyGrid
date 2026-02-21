@@ -92,7 +92,6 @@ class PygameRenderer:
                 self.window_surface.blit(self.floor_img, pos)
 
                 if not collected:
-                    # TODO: collected only turns to true when the agent is standing on it.
                     if [r, c] == resource_pos:
                         # Draw resource
                         self.window_surface.blit(self.green_resource_img, pos)

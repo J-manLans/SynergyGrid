@@ -35,6 +35,7 @@ class SynergyGridEnv(gym.Env):
         self.grid_cols = grid_cols
         self.max_steps = max_steps
         self.render_mode = render_mode
+        self.resource_consumed = True
         self.step_count = 0
 
         # Initialize the bench world
