@@ -46,9 +46,9 @@ class BaseResource(ABC):
 
     @abstractmethod
     def deplete_resource(self) -> None:
-        '''
+        """
         Removes the resource without giving any reward.
-        '''
+        """
         pass
 
     @abstractmethod

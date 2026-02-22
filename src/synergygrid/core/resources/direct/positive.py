@@ -1,4 +1,10 @@
-from synergygrid.core.resources import BaseResource, ResourceMeta, ResourceCategory, DirectType
+from synergygrid.core.resources import (
+    BaseResource,
+    ResourceMeta,
+    ResourceCategory,
+    DirectType,
+    Tier,
+)
 
 from numpy.random import Generator
 from typing import Final
@@ -17,10 +23,14 @@ class PositiveResource(BaseResource):
     # ================= #
 
     def __init__(self, world_boundaries: tuple[int, int]):
-        super().__init__(world_boundaries, ResourceMeta(
-            category = ResourceCategory.DIRECT,
-            subtype = DirectType.POSITIVE
-        ))
+        super().__init__(
+            world_boundaries,
+            ResourceMeta(
+                category=ResourceCategory.DIRECT,
+                subtype=DirectType.POSITIVE,
+                tier=Tier.ZERO,
+            ),
+        )
 
     # ================= #
     #        API        #
@@ -28,6 +38,8 @@ class PositiveResource(BaseResource):
 
     def consume(self) -> int:
         self.consumed = True
+        # TODO: refactor this later so the resource actually removes from the observation when consumed - either here or in the obs space return, I'm not sure yet, but when that is done, depending on strategy, the two rows of code below will be redundant.
+        self.timer.set(0)
         return self.REWARD
 
     def deplete_resource(self) -> None:

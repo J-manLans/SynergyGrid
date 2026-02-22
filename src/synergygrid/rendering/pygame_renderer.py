@@ -109,7 +109,7 @@ class PygameRenderer:
         self.text_clr = (255, 246, 213)
 
     def _load_graphics(self):
-         # Load graphics
+        # Load graphics
         ROOT_DIR = path.abspath(path.join(path.dirname(__file__), "..", "..", ".."))
 
         file_name = path.join(ROOT_DIR, "assets/sprites/agent.png")
@@ -160,7 +160,6 @@ class PygameRenderer:
                         waiting = False
 
             self.clock.tick(self.fps)
-
 
     def _update(self):
         """Refreshes the display and limits FPS"""

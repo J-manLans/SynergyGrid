@@ -1,7 +1,7 @@
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-from synergygrid.core import GridWorld, AgentAction as act
+from synergygrid.core import GridWorld, AgentAction, SynergyType, DirectType
 from synergygrid.rendering import PygameRenderer
 
 
@@ -44,26 +44,9 @@ class SynergyGridEnv(gym.Env):
 
         # Gymnasium also requires us to define the action space — which is the agent's possible
         # actions. Training code can call action_space.sample() to randomly select an action.
-        self.action_space = spaces.Discrete(len(act))
+        self.action_space = spaces.Discrete(len(AgentAction))
 
-        # Gymnasium requires an observation space definition. Here we represent the state as a flat
-        # vector: [agent_row, agent_col, resource_row, resource_col].
-        # The space is used by Gymnasium to validate observations returned by reset() and step().
-        self.observation_space = spaces.Box(
-            dtype=np.int32,
-            shape=(4,),  # 4 integers: agent position (2) + resource position (2)
-            low=0,
-            high=np.array(
-                [
-                    # Agent position bounds
-                    self.grid_rows - 1,
-                    self.grid_cols - 1,
-                    # Resource position bounds
-                    self.grid_rows - 1,
-                    self.grid_cols - 1,
-                ]
-            ),
-        )
+        self._setup_obs_space()
 
     # ======================== #
     #    Gymnasium contract    #
@@ -81,18 +64,18 @@ class SynergyGridEnv(gym.Env):
             self.render()
 
         # Constructs the observation state: [agent_row, agent_col, resource_row, resource_col]
-        obs = np.concatenate(
-            (self.world.agent.position, self.world.resource.position), dtype=np.int32
-        )
+        # obs = np.concatenate(
+        #     (self.world.agent.position, self.world.resource.position), dtype=np.int32
+        # )
+
+        obs = self._get_observation()
 
         # Return observation and info (not used)
         return obs, {}
 
     def step(self, action):
         # Perform action
-        reward = (
-            self.world.perform_agent_action(act(action))
-        )
+        reward = self.world.perform_agent_action(AgentAction(action))
         self.step_count += 1
 
         # Render
@@ -100,9 +83,12 @@ class SynergyGridEnv(gym.Env):
             self.render()
 
         # Prep Gymnasium variables
-        obs = np.concatenate(
-            (self.world.agent.position, self.world.resource.position), dtype=np.int32
-        )
+        # obs = np.concatenate(
+        #     (self.world.agent.position, self.world.resource.position), dtype=np.int32
+        # )
+        obs = self._get_observation()
+        print(obs, ", ", reward)
+
         truncated = self.step_count >= self.max_steps
         terminated = self.world.agent.score <= 0
 
@@ -144,10 +130,45 @@ class SynergyGridEnv(gym.Env):
             fps=self.metadata["render_fps"],
         )
 
+    def _setup_obs_space(self):
+        # Gymnasium requires an observation space definition. Here we represent the state as a flat
+        # vector: [agent_row, agent_col, resource_row, resource_col].
+        # The space is used by Gymnasium to validate observations returned by reset() and step().
+
+        num_types = max(len(SynergyType), len(DirectType))
+
+        self.observation_space = spaces.Box(
+            low=0, # True for all values
+            high=np.array([
+                # Agent's position
+                self.grid_rows - 1, self.grid_cols - 1,
+                # Resource's position
+                self.grid_rows - 1, self.grid_cols - 1,
+                # Resource types
+                len(DirectType) - 1,
+                # Consumed status
+                True,
+                # Max timer before de-spawn (travel time for diagonal traverse)
+                (self.grid_rows - 1) + (self.grid_cols - 1)
+            ]),
+            dtype=np.int32
+        )
+
     # === General === #
 
     def _init_episode_vars(self) -> None:
         self.step_count = 0
+
+    def _get_observation(self):
+        return np.array([
+            self.world.agent.position[0],
+            self.world.agent.position[1],
+            self.world.resource.position[0],
+            self.world.resource.position[1],
+            self.world.resource.type.subtype.value,
+            self.world.resource.consumed,
+            self.world.resource.timer.remaining
+        ], dtype=np.int32)
 
 
 # =============================== #

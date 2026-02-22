@@ -3,7 +3,7 @@ from synergygrid.core import (
     SynergyAgent,
     BaseResource,
     PositiveResource,
-    NegativeResource
+    NegativeResource,
 )
 import numpy as np
 from numpy.random import Generator, default_rng
@@ -28,7 +28,7 @@ class GridWorld:
 
         self.RESOURCES = [
             PositiveResource((grid_rows, grid_cols)),
-            NegativeResource((grid_rows, grid_cols))
+            NegativeResource((grid_rows, grid_cols)),
         ]
 
     def reset(self, rng: Generator | None = None) -> None:

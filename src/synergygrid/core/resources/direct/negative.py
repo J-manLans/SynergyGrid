@@ -1,4 +1,10 @@
-from synergygrid.core.resources import BaseResource, ResourceMeta, ResourceCategory, DirectType
+from synergygrid.core.resources import (
+    BaseResource,
+    ResourceMeta,
+    ResourceCategory,
+    DirectType,
+    Tier,
+)
 from numpy.random import Generator
 from typing import Final
 
@@ -16,10 +22,14 @@ class NegativeResource(BaseResource):
     # ================= #
 
     def __init__(self, world_boundaries: tuple[int, int]):
-        super().__init__(world_boundaries, ResourceMeta(
-            category=ResourceCategory.DIRECT,
-            subtype=DirectType.NEGATIVE
-        ))
+        super().__init__(
+            world_boundaries,
+            ResourceMeta(
+                category=ResourceCategory.DIRECT,
+                subtype=DirectType.NEGATIVE,
+                tier=Tier.ZERO,
+            ),
+        )
 
     # ================= #
     #        API        #
