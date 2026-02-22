@@ -74,7 +74,9 @@ def train_agent(
 
             # Train the model
             model.learn(
-                total_timesteps=timesteps, tb_log_name=date, reset_num_timesteps=False
+                total_timesteps=timesteps,
+                tb_log_name=f"{date} {runner.algorithm}",
+                reset_num_timesteps=False,
             )
 
             # Save the model

@@ -26,7 +26,7 @@ class SynergyGridEnv(gym.Env):
         self,
         grid_rows=5,
         grid_cols=5,
-        max_steps=50,
+        max_steps=100,
         starting_score=20,
         render_mode=None,
     ):
@@ -58,7 +58,7 @@ class SynergyGridEnv(gym.Env):
 
         # Reset the world.
         self._init_episode_vars()
-        self.world.reset(self.np_random)
+        self.world.reset(self.starting_score, self.np_random)
 
         if self.render_mode == "human":
             self.render()
@@ -69,6 +69,8 @@ class SynergyGridEnv(gym.Env):
         # )
 
         obs = self._get_observation()
+
+        # print('-----------------NEW EPISODE-----------------', obs)
 
         # Return observation and info (not used)
         return obs, {}
@@ -87,7 +89,10 @@ class SynergyGridEnv(gym.Env):
         #     (self.world.agent.position, self.world.resource.position), dtype=np.int32
         # )
         obs = self._get_observation()
-        print(obs, ", ", reward)
+
+        # print(
+        #     f"{obs}\nreward: {reward}\nscore: {self.world.agent.score}\nresource type: {self.world.resource.type.subtype}\n{'remaining time tile re-spawn: ' if self.world.resource.consumed else 'remaining time tile de-spawn: '}{self.world.resource.timer.remaining}\n"
+        # )
 
         truncated = self.step_count >= self.max_steps
         terminated = self.world.agent.score <= 0
@@ -111,12 +116,18 @@ class SynergyGridEnv(gym.Env):
     # === Init === #
 
     def _init_configurable_vars(
-        self, grid_rows, grid_cols, max_steps, render_mode, starting_score
+        self,
+        grid_rows: int,
+        grid_cols: int,
+        max_steps: int,
+        render_mode: str | None,
+        starting_score: int,
     ) -> None:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self.max_steps = max_steps
         self.render_mode = render_mode
+        self.starting_score = starting_score
 
     def _init_world(self, grid_rows, grid_cols, starting_score) -> None:
         self.world = GridWorld(
@@ -135,23 +146,25 @@ class SynergyGridEnv(gym.Env):
         # vector: [agent_row, agent_col, resource_row, resource_col].
         # The space is used by Gymnasium to validate observations returned by reset() and step().
 
-        num_types = max(len(SynergyType), len(DirectType))
-
         self.observation_space = spaces.Box(
-            low=0, # True for all values
-            high=np.array([
-                # Agent's position
-                self.grid_rows - 1, self.grid_cols - 1,
-                # Resource's position
-                self.grid_rows - 1, self.grid_cols - 1,
-                # Resource types
-                len(DirectType) - 1,
-                # Consumed status
-                True,
-                # Max timer before de-spawn (travel time for diagonal traverse)
-                (self.grid_rows - 1) + (self.grid_cols - 1)
-            ]),
-            dtype=np.int32
+            low=0,  # True for all values
+            high=np.array(
+                [
+                    # Agent's max position
+                    self.grid_rows - 1,
+                    self.grid_cols - 1,
+                    # Resource's max position
+                    self.grid_rows - 1,
+                    self.grid_cols - 1,
+                    # Resource types
+                    len(DirectType) - 1,
+                    # Consumed status
+                    True,
+                    # Max timer before de-spawn (travel time for diagonal traverse)
+                    (self.grid_rows - 1) + (self.grid_cols - 1),
+                ]
+            ),
+            dtype=np.int32,
         )
 
     # === General === #
@@ -160,15 +173,21 @@ class SynergyGridEnv(gym.Env):
         self.step_count = 0
 
     def _get_observation(self):
-        return np.array([
-            self.world.agent.position[0],
-            self.world.agent.position[1],
-            self.world.resource.position[0],
-            self.world.resource.position[1],
-            self.world.resource.type.subtype.value,
-            self.world.resource.consumed,
-            self.world.resource.timer.remaining
-        ], dtype=np.int32)
+        return np.array(
+            [
+                self.world.agent.position[0],
+                self.world.agent.position[1],
+                self.world.resource.position[0],
+                self.world.resource.position[1],
+                self.world.resource.type.subtype.value,
+                # TODO: sentinel if recourse consumed instead [-1, -1, -1]. And maybe actually
+                # remove it from the game world instead of just marking it as consumed. But I'll
+                # start with just a sentinel - the idea is that agents will learn cleaner.
+                self.world.resource.consumed,  # <-- marks the resource as consumed, don't remove it
+                self.world.resource.timer.remaining,  # <-- this is both a de and re-spawn timer :/
+            ],
+            dtype=np.int32,
+        )
 
 
 # =============================== #

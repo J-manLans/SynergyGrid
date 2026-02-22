@@ -14,8 +14,8 @@ class NegativeResource(BaseResource):
     A resource that gives the agent a negative score.
     """
 
-    REWARD: Final[int] = -3
-    COUNT_DOWN: Final[int] = 5
+    REWARD: Final[int] = -5
+    COUNT_DOWN: Final[int] = 8
 
     # ================= #
     #       Init        #

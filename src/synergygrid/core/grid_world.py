@@ -9,7 +9,6 @@ import numpy as np
 from numpy.random import Generator, default_rng
 
 
-# TODO: fix re-spawning mechanic
 class GridWorld:
     RESOURCES: list[BaseResource]
 
@@ -17,7 +16,7 @@ class GridWorld:
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows=5, grid_cols=5, starting_score=10):
+    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resource.
         """
@@ -31,12 +30,12 @@ class GridWorld:
             NegativeResource((grid_rows, grid_cols)),
         ]
 
-    def reset(self, rng: Generator | None = None) -> None:
+    def reset(self, starting_score: int, rng: Generator | None = None) -> None:
         """
         Reset the agent to its starting position and re-spawns the resource at a random location
         """
 
-        self.agent.reset()  # Initialize Agents starting position
+        self.agent.reset(starting_score)  # Initialize Agents starting position
 
         if rng == None:
             rng = default_rng()
@@ -57,17 +56,17 @@ class GridWorld:
         :param agent_action: the action the agent will perform
         """
 
-        reward = self.agent.MOVE_COST
+        reward = 0
         self.agent.perform_action(agent_action)
 
         if not self.resource.consumed:
             if self.resource.timer.tick():
                 self.resource.deplete_resource()
-            if self.agent.position == self.resource.position:
+                self._set_respawn_timer()
+            elif self.agent.position == self.resource.position:
                 reward = self.agent.consume_resource(self.resource)
         else:
-            self._ensure_spawn_timer()
-            self._update_spawn_timer()
+            self._set_respawn_timer()
 
         return reward
 
@@ -79,6 +78,10 @@ class GridWorld:
         resource_index = self.rng.integers(0, len(self.RESOURCES))
         self.resource = self.RESOURCES[resource_index]
         self.resource.spawn(self.rng)
+
+    def _set_respawn_timer(self):
+        self._ensure_spawn_timer()
+        self._update_spawn_timer()
 
     def _ensure_spawn_timer(self) -> None:
         if not self.resource.timer.is_set():

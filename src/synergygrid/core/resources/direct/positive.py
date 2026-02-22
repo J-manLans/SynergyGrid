@@ -15,7 +15,7 @@ class PositiveResource(BaseResource):
     A resource that gives the agent a positive score.
     """
 
-    REWARD: Final[int] = 5
+    REWARD: Final[int] = 15
     COUNT_DOWN: Final[int] = 8
 
     # ================= #

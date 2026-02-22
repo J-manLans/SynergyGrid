@@ -140,7 +140,7 @@ class PygameRenderer:
     def _process_events(self) -> None:
         """Process user events and key presses"""
 
-        waiting = False
+        waiting = False # HACK: Flip to True to activate this part
         while waiting:
             for event in pygame.event.get():
                 # User clicked on X at the top right corner of window

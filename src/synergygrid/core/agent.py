@@ -13,13 +13,12 @@ class AgentAction(Enum):
 
 
 class SynergyAgent:
-    MOVE_COST: Final[int] = -1
 
     # ================= #
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows=5, grid_cols=5, starting_score=10):
+    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int):
         """
         Initializes the agent.
 
@@ -30,10 +29,11 @@ class SynergyAgent:
         self.grid_cols = grid_cols
         self.score = starting_score
 
-    def reset(self) -> None:
-        """Initialize Agents starting position at the center of the grid"""
+    def reset(self, starting_score: int) -> None:
+        """Initialize Agents starting position at the center of the grid and reset its score"""
 
         self.position = [self.grid_rows // 2, self.grid_cols // 2]
+        self.score = starting_score
 
     # ================= #
     #        API        #
@@ -53,8 +53,6 @@ class SynergyAgent:
             self._moveTowardsMinBound(0)
         elif agent_action == AgentAction.DOWN:
             self._moveTowardsMaxBound(0, self.grid_rows - 1)
-
-        self.score -= 1
 
     def consume_resource(self, resource: BaseResource) -> int:
         """Consumes the resource, add its reward to its score and returns the reward"""
