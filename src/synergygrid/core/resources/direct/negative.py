@@ -6,6 +6,7 @@ from synergygrid.core.resources import (
     Tier,
 )
 from typing import Final
+from numpy.random import Generator
 
 
 class NegativeResource(BaseResource):
@@ -19,7 +20,7 @@ class NegativeResource(BaseResource):
     #       Init        #
     # ================= #
 
-    def __init__(self, world_boundaries: tuple[int, int]):
+    def __init__(self, world_boundaries: tuple[int, int], rng: Generator):
         super().__init__(
             world_boundaries,
             (world_boundaries[0] - 1) + (world_boundaries[1] - 1),
@@ -29,4 +30,5 @@ class NegativeResource(BaseResource):
                 subtype=DirectType.NEGATIVE,
                 tier=Tier.ZERO,
             ),
+            rng
         )

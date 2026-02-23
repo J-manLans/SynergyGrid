@@ -57,9 +57,9 @@ class PygameRenderer:
     def render(
         self,
         agent_pos: list[int],
-        consumed: bool,
-        resource_pos: list[np.int64],
-        resource_meta: ResourceMeta,
+        is_active_statuses: list[bool],
+        resource_positions: list[list[np.int64]],
+        resource_types: list[ResourceMeta],
         agent_score: int,
     ) -> None:
         """
@@ -78,9 +78,11 @@ class PygameRenderer:
                 pos = (c * self.cell_width, r * self.cell_height)
                 self.window_surface.blit(self.floor_img, pos)
 
-                if not consumed:
-                    if [r, c] == resource_pos:
-                        self._draw_resource(resource_meta, pos)
+                for i in range(len(is_active_statuses)):
+                    if is_active_statuses[i]:
+                        if [r, c] == resource_positions[i]:
+                            self._draw_resource(resource_types[i], pos)
+
                 if [r, c] == agent_pos:
                     # Draw agent
                     self.window_surface.blit(self.agent_img, pos)

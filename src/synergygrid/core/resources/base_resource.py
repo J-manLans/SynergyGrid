@@ -6,7 +6,7 @@ from typing import Final
 
 
 class BaseResource(ABC):
-    consumed = False
+    is_active = False
     position = [np.int64(0), np.int64(0)]
 
     class Timer:
@@ -27,13 +27,21 @@ class BaseResource(ABC):
     #       Init        #
     # ================= #
 
-    def __init__(self, world_boundaries: tuple[int, int], count_down: int, reward: int, type: ResourceMeta):
+    def __init__(
+        self,
+        world_boundaries: tuple[int, int],
+        count_down: int,
+        reward: int,
+        type: ResourceMeta,
+        rng: Generator
+    ):
         """Defines the game world so resources know their bounds"""
 
-        self._LIFE_SPAN = count_down
+        self._life_span = count_down
         self._world_boundaries = world_boundaries  # (row, col) of the grid
         self._reward = reward
         self.type = type
+        self.rng = rng
         self.timer = self.Timer()
 
     # ================= #
@@ -45,9 +53,8 @@ class BaseResource(ABC):
         Defines how an agent interacts with the resource.
         """
 
-        self.consumed = True
-        # TODO: refactor this later so the resource actually removes from the observation when consumed - either here or in the obs space return, I'm not sure yet, but when that is done, depending on strategy, the two rows of code below will be redundant.
-        self.timer.set(0)
+        self.is_active = False
+        self.timer.set(int(self.rng.integers(2, 7)))
         return self._reward
 
     def deplete_resource(self, rng: Generator) -> None:
@@ -55,19 +62,19 @@ class BaseResource(ABC):
         Removes the resource without giving any reward.
         """
 
-        self.consumed = True
+        self.is_active = False
         # Set cool down timer
         self.timer.set(int(rng.integers(2, 7)))
 
-    def spawn(self, rng: Generator):
+    def spawn(self):
         """
         Spawns the resource.
         """
 
         self.position = [
-            rng.integers(1, self._world_boundaries[0]),
-            rng.integers(1, self._world_boundaries[1]),
+            self.rng.integers(1, self._world_boundaries[0]),
+            self.rng.integers(1, self._world_boundaries[1]),
         ]
 
-        self.consumed = False
-        self.timer.set(self._LIFE_SPAN)
+        self.is_active = True
+        self.timer.set(self._life_span)

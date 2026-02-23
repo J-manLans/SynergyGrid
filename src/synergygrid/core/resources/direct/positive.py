@@ -21,7 +21,7 @@ class PositiveResource(BaseResource):
     #       Init        #
     # ================= #
 
-    def __init__(self, world_boundaries: tuple[int, int]):
+    def __init__(self, world_boundaries: tuple[int, int], rng: Generator):
         super().__init__(
             world_boundaries,
             (world_boundaries[0] - 1) + (world_boundaries[1] - 1),
@@ -31,4 +31,5 @@ class PositiveResource(BaseResource):
                 subtype=DirectType.POSITIVE,
                 tier=Tier.ZERO,
             ),
+            rng
         )

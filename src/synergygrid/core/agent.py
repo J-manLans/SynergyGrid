@@ -42,7 +42,7 @@ class SynergyAgent:
     # === Logic === #
 
     def perform_action(self, agent_action: AgentAction) -> None:
-        """Records current action and moves the agent according to it"""
+        """Performs current action"""
 
         # Move Agent to the next cell
         if agent_action == AgentAction.LEFT:

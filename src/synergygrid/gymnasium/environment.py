@@ -24,6 +24,7 @@ class SynergyGridEnv(gym.Env):
 
     def __init__(
         self,
+        max_active_resources: int = 3,
         grid_rows: int = 5,
         grid_cols: int = 5,
         max_steps: int = 100,
@@ -36,7 +37,7 @@ class SynergyGridEnv(gym.Env):
             grid_rows, grid_cols, max_steps, starting_score, render_mode
         )
         self._init_episode_vars()
-        self._init_world(grid_rows, grid_cols, starting_score)
+        self._init_world(max_active_resources, grid_rows, grid_cols, starting_score)
         if render_mode == "human":
             self._init_renderer(grid_rows, grid_cols)
 
@@ -102,11 +103,13 @@ class SynergyGridEnv(gym.Env):
         return norm_obs, reward, terminated, truncated, {}
 
     def render(self):
+        self.world.get_resource_is_active_status()
+
         self.renderer.render(
             self.world.agent.position,
-            self.world.resource.consumed,
-            self.world.resource.position,
-            self.world.resource.type,
+            self.world.get_resource_is_active_status(),
+            self.world.get_resource_positions(),
+            self.world.get_resource_types(),
             self.world.agent.score,
         )
 
@@ -130,9 +133,14 @@ class SynergyGridEnv(gym.Env):
         self.render_mode = render_mode
         self.starting_score = starting_score
 
-    def _init_world(self, grid_rows, grid_cols, starting_score) -> None:
+    def _init_world(
+        self, max_active_resources: int, grid_rows, grid_cols, starting_score
+    ) -> None:
         self.world = GridWorld(
-            grid_rows=grid_rows, grid_cols=grid_cols, starting_score=starting_score
+            max_active_resources,
+            grid_rows=grid_rows,
+            grid_cols=grid_cols,
+            starting_score=starting_score,
         )
 
     def _init_renderer(self, grid_rows, grid_cols) -> None:
@@ -200,23 +208,25 @@ class SynergyGridEnv(gym.Env):
                 self.world.agent.position[0],
                 self.world.agent.position[1],
                 (
-                    self.world.resource.position[0]
-                    if not self.world.resource.consumed
+                    self.world.get_resource_positions()[0][0]
+                    if self.world.get_resource_is_active_status()[0]
                     else -1
                 ),
                 (
-                    self.world.resource.position[1]
-                    if not self.world.resource.consumed
+                    self.world.get_resource_positions()[0][1]
+                    if self.world.get_resource_is_active_status()[0]
                     else -1
                 ),
                 (
-                    self.world.resource.type.subtype.value
-                    if not self.world.resource.consumed
+                    self.world.get_resource_types()[0].subtype.value
+                    if self.world.get_resource_is_active_status()[0]
+
                     else -1
                 ),
                 (
-                    self.world.resource.timer.remaining
-                    if not self.world.resource.consumed
+                    self.world.get_resource_timers()[0].remaining
+                    if self.world.get_resource_is_active_status()[0]
+
                     else 0
                 ),
             ],
