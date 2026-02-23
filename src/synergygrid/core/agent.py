@@ -18,7 +18,7 @@ class SynergyAgent:
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int):
+    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int = 20):
         """
         Initializes the agent.
 
@@ -27,13 +27,14 @@ class SynergyAgent:
 
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
+        self.starting_score = starting_score
         self.score = starting_score
 
-    def reset(self, starting_score: int) -> None:
+    def reset(self) -> None:
         """Initialize Agents starting position at the center of the grid and reset its score"""
 
         self.position = [self.grid_rows // 2, self.grid_cols // 2]
-        self.score = starting_score
+        self.score = self.starting_score
 
     # ================= #
     #        API        #

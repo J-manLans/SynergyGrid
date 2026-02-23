@@ -14,21 +14,20 @@ class NegativeResource(BaseResource):
     A resource that gives the agent a negative score.
     """
 
-    _REWARD: Final[int] = -3
-
     # ================= #
     #       Init        #
     # ================= #
 
-    def __init__(self, world_boundaries: tuple[int, int], rng: Generator):
+    def __init__(
+        self, world_boundaries: tuple[int, int], reward: int = -3, cool_down: int = 7
+    ):
         super().__init__(
             world_boundaries,
-            (world_boundaries[0] - 1) + (world_boundaries[1] - 1),
-            self._REWARD,
+            reward,
+            cool_down,
             ResourceMeta(
                 category=ResourceCategory.DIRECT,
                 subtype=DirectType.NEGATIVE,
                 tier=Tier.ZERO,
             ),
-            rng
         )

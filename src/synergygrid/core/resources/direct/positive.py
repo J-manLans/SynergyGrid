@@ -15,21 +15,20 @@ class PositiveResource(BaseResource):
     A resource that gives the agent a positive score.
     """
 
-    _REWARD: Final[int] = 5
-
     # ================= #
     #       Init        #
     # ================= #
 
-    def __init__(self, world_boundaries: tuple[int, int], rng: Generator):
+    def __init__(
+        self, world_boundaries: tuple[int, int], reward: int = 5, cool_down: int = 5
+    ):
         super().__init__(
             world_boundaries,
-            (world_boundaries[0] - 1) + (world_boundaries[1] - 1),
-            self._REWARD,
+            reward,
+            cool_down,
             ResourceMeta(
                 category=ResourceCategory.DIRECT,
                 subtype=DirectType.POSITIVE,
                 tier=Tier.ZERO,
             ),
-            rng
         )

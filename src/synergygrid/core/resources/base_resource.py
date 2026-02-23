@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from numpy.random import Generator
 from synergygrid.core.resources import ResourceMeta
 from typing import Final
 
@@ -8,6 +7,8 @@ from typing import Final
 class BaseResource(ABC):
     is_active = False
     position = [np.int64(0), np.int64(0)]
+    _cool_down: int
+    _LIFE_SPAN: Final[int]
 
     class Timer:
         def __init__(self):
@@ -30,18 +31,16 @@ class BaseResource(ABC):
     def __init__(
         self,
         world_boundaries: tuple[int, int],
-        count_down: int,
         reward: int,
+        cool_down: int,
         type: ResourceMeta,
-        rng: Generator
     ):
         """Defines the game world so resources know their bounds"""
-
-        self._life_span = count_down
         self._world_boundaries = world_boundaries  # (row, col) of the grid
+        self._LIFE_SPAN = (world_boundaries[0] - 1) + (world_boundaries[1] - 1)
+        self._cool_down = cool_down
         self._reward = reward
         self.type = type
-        self.rng = rng
         self.timer = self.Timer()
 
     # ================= #
@@ -54,27 +53,22 @@ class BaseResource(ABC):
         """
 
         self.is_active = False
-        self.timer.set(int(self.rng.integers(2, 7)))
+        self.timer.set(self._cool_down)
         return self._reward
 
-    def deplete_resource(self, rng: Generator) -> None:
+    def deplete_resource(self) -> None:
         """
         Removes the resource without giving any reward.
         """
 
         self.is_active = False
-        # Set cool down timer
-        self.timer.set(int(rng.integers(2, 7)))
+        self.timer.set(self._cool_down)
 
-    def spawn(self):
+    def spawn(self, position: list[np.int64]):
         """
         Spawns the resource.
         """
 
-        self.position = [
-            self.rng.integers(1, self._world_boundaries[0]),
-            self.rng.integers(1, self._world_boundaries[1]),
-        ]
-
+        self.position = position
         self.is_active = True
-        self.timer.set(self._life_span)
+        self.timer.set(self._LIFE_SPAN)

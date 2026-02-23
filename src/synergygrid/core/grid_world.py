@@ -8,7 +8,6 @@ from synergygrid.core import (
 )
 import numpy as np
 from numpy.random import Generator, default_rng
-from typing import Final
 
 
 # TODO: make multiple active resources possible (max 3)
@@ -21,36 +20,28 @@ class GridWorld:
     #       Init        #
     # ================= #
 
-    def __init__(
-        self,
-        max_active_resources: int,
-        grid_rows: int,
-        grid_cols: int,
-        starting_score: int,
-    ):
+    def __init__(self, max_active_resources: int, grid_rows: int, grid_cols: int):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resource.
         """
         self.max_active_resources = max_active_resources
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
-        self.agent = SynergyAgent(grid_rows, grid_cols, starting_score=starting_score)
+        self.agent = SynergyAgent(grid_rows, grid_cols)
 
-    def reset(self, starting_score: int, rng: Generator | None = None) -> None:
+    def reset(self, rng: Generator | None = None) -> None:
         """
         Reset the agent to its starting position and re-spawns the resource at a random location
         """
 
-        self.agent.reset(starting_score)  # Initialize Agents starting position
+        self.agent.reset()  # Initialize Agents starting position
 
         if rng == None:
             rng = default_rng()
 
         self.rng = rng
 
-        self._ALL_RESOURCES = self._create_resources(
-            self.max_active_resources, (self.grid_rows, self.grid_cols)
-        )
+        self._ALL_RESOURCES = self._create_resources(self.max_active_resources)
         self._INACTIVE_RESOURCES = list(self._ALL_RESOURCES)
 
         # Initialize the resource's position
@@ -69,7 +60,7 @@ class GridWorld:
         for resource in self._ALL_RESOURCES:
             if resource.is_active:
                 if self._update_timer_and_check_if_completed(resource):
-                    resource.deplete_resource(self.rng)
+                    resource.deplete_resource()
                     self._remove_resource(resource)
                 elif self.agent.position == resource.position:
                     reward = self.agent.consume_resource(resource)
@@ -101,7 +92,7 @@ class GridWorld:
     # === Init === #
 
     def _create_resources(
-        self, max_active_resources, grid_shape: tuple[int, int], ratio=(0.75, 0.25)
+        self, max_active_resources: int, ratio=(0.75, 0.25)
     ) -> list[BaseResource]:
         # TODO: the ratio works for two resources, need to look over this when more is added
         n_pos = max(1, int(max_active_resources * ratio[0]))
@@ -109,9 +100,9 @@ class GridWorld:
 
         resources = []
         for _ in range(n_pos):
-            resources.append(PositiveResource(grid_shape, self.rng))
+            resources.append(PositiveResource((self.grid_rows, self.grid_cols)))
         for _ in range(n_neg):
-            resources.append(NegativeResource(grid_shape, self.rng))
+            resources.append(NegativeResource((self.grid_rows, self.grid_cols)))
 
         return resources
 
@@ -129,10 +120,38 @@ class GridWorld:
         self._INACTIVE_RESOURCES.append(depleted)
 
     def _spawn_random_resource(self):
-        available = len(self._INACTIVE_RESOURCES)
+        available_resources = len(self._INACTIVE_RESOURCES)
 
-        if available > 0 and len(self._ACTIVE_RESOURCES) < self.max_active_resources:
-            resource = self._INACTIVE_RESOURCES.pop(self.rng.integers(0, available))
-            self._ACTIVE_RESOURCES.append(resource)
+        if (
+            available_resources > 0
+            and len(self._ACTIVE_RESOURCES) < self.max_active_resources
+        ):
+            resource_idx = self.rng.integers(0, available_resources)
+            resource = self._INACTIVE_RESOURCES.pop(resource_idx)
 
-            resource.spawn()
+            while True:
+                position = [
+                    self.rng.integers(0, self.grid_rows),
+                    self.rng.integers(0, self.grid_cols),
+                ]
+
+                if self._empty_spawn_cell(position):
+                    resource.spawn(position)
+                    self._ACTIVE_RESOURCES.append(resource)
+                    break
+
+    def _empty_spawn_cell(self, position: list[np.int64]) -> bool:
+        # Check against agent
+        if position == self.agent.position:
+            return False
+
+        # If there are no active resources we can spawn right away
+        if len(self._ACTIVE_RESOURCES) == 0:
+            return True
+
+        # Check against all active resources
+        for r in self._ACTIVE_RESOURCES:
+            if position == r.position:
+                return False
+
+        return True

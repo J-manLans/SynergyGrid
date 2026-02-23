@@ -78,7 +78,7 @@ def main():
         # Choose to use an agent or just random sampling
         agent = True
         # Choose to train or run the agent
-        training = False
+        training = True
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
