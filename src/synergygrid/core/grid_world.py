@@ -60,13 +60,13 @@ class GridWorld:
         self.agent.perform_action(agent_action)
 
         if not self.resource.consumed:
-            if self.resource.timer.tick():
-                self.resource.deplete_resource()
-                self._set_respawn_timer()
+            if self._update_timer_and_check_if_completed():
+                self.resource.deplete_resource(self.rng)
             elif self.agent.position == self.resource.position:
                 reward = self.agent.consume_resource(self.resource)
         else:
-            self._set_respawn_timer()
+            if self._update_timer_and_check_if_completed():
+                self._spawn_random_resource()
 
         return reward
 
@@ -74,19 +74,15 @@ class GridWorld:
     #      Helpers      #
     # ================= #
 
+    # === API === #
+
+    def _update_timer_and_check_if_completed(self) -> bool:
+        self.resource.timer.tick()
+        return self.resource.timer.is_completed()
+
+     # === Global === #
+
     def _spawn_random_resource(self):
         resource_index = self.rng.integers(0, len(self.RESOURCES))
         self.resource = self.RESOURCES[resource_index]
         self.resource.spawn(self.rng)
-
-    def _set_respawn_timer(self):
-        self._ensure_spawn_timer()
-        self._update_spawn_timer()
-
-    def _ensure_spawn_timer(self) -> None:
-        if not self.resource.timer.is_set():
-            self.resource.timer.set(int(self.rng.integers(2, 7)))
-
-    def _update_spawn_timer(self) -> None:
-        if self.resource.timer.tick():
-            self._spawn_random_resource()
