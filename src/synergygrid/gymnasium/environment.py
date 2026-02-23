@@ -24,16 +24,16 @@ class SynergyGridEnv(gym.Env):
 
     def __init__(
         self,
-        grid_rows=5,
-        grid_cols=5,
-        max_steps=100,
-        starting_score=20,
-        render_mode=None,
+        grid_rows: int = 5,
+        grid_cols: int = 5,
+        max_steps: int = 100,
+        starting_score: int = 20,
+        render_mode: str | None = None,
     ):
         # Set up bench environment;
 
         self._init_configurable_vars(
-            grid_rows, grid_cols, max_steps, render_mode, starting_score
+            grid_rows, grid_cols, max_steps, starting_score, render_mode
         )
         self._init_episode_vars()
         self._init_world(grid_rows, grid_cols, starting_score)
@@ -73,12 +73,12 @@ class SynergyGridEnv(gym.Env):
         # print('-----------------NEW EPISODE-----------------', obs)
 
         # Return observation and info (not used)
-        return obs, {}
+        return self._normalize_obs(obs), {}
 
     def step(self, action):
         # Perform action
         reward = self.world.perform_agent_action(AgentAction(action))
-        self.step_count += 1
+        self.step_count_down -= 1
 
         # Render
         if self.render_mode == "human":
@@ -89,16 +89,17 @@ class SynergyGridEnv(gym.Env):
         #     (self.world.agent.position, self.world.resource.position), dtype=np.int32
         # )
         obs = self._get_observation()
+        norm_obs = self._normalize_obs(obs)
 
         # print(
         #     f"{obs}\nreward: {reward}\nscore: {self.world.agent.score}\nresource type: {self.world.resource.type.subtype}\n{'remaining time tile re-spawn: ' if self.world.resource.consumed else 'remaining time tile de-spawn: '}{self.world.resource.timer.remaining}\n"
         # )
 
-        truncated = self.step_count >= self.max_steps
+        truncated = self.step_count_down <= 0
         terminated = self.world.agent.score <= 0
 
         # Return observation, reward, terminated, truncated and info (not used)
-        return obs, reward, terminated, truncated, {}
+        return norm_obs, reward, terminated, truncated, {}
 
     def render(self):
         self.renderer.render(
@@ -120,8 +121,8 @@ class SynergyGridEnv(gym.Env):
         grid_rows: int,
         grid_cols: int,
         max_steps: int,
-        render_mode: str | None,
         starting_score: int,
+        render_mode: str | None,
     ) -> None:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
@@ -142,85 +143,119 @@ class SynergyGridEnv(gym.Env):
         )
 
     def _setup_obs_space(self):
-        # Gymnasium requires an observation space definition. Here we represent the state as a flat
-        # vector: [agent_row, agent_col, resource_row, resource_col].
-        # The space is used by Gymnasium to validate observations returned by reset() and step().
+        """
+        Gymnasium requires an observation space definition. Here we represent the state as a flat
+        vector. The space is used by Gymnasium to validate observations returned by reset() and step().
 
-        self.observation_space = spaces.Box(
-            low=0,  # True for all values
-            high=np.array(
-                [
-                    # Agent's max position
-                    self.grid_rows - 1,
-                    self.grid_cols - 1,
-                    # Resource's max position
-                    self.grid_rows - 1,
-                    self.grid_cols - 1,
-                    # Resource types
-                    len(DirectType) - 1,
-                    # Consumed status
-                    True,
-                    # Max timer before de-spawn (travel time for diagonal traverse)
-                    (self.grid_rows - 1) + (self.grid_cols - 1),
-                ]
-            ),
-            dtype=np.int32,
+        Set up:
+        - self._raw_low / self._raw_high: the original raw ranges (used for normalization)
+        - self._sentinel_mask: boolean mask of indices that use -1 as "absent"
+        - self.observation_space: the normalized observation space that agents will see
+        (0..1 for active features, -1 for absent resource fields)
+        """
+        # original raw bounds (match your _get_observation() ordering)
+        raw_low = np.array([0, 0, 0, -1, -1, -1, 0], dtype=np.float32)
+        raw_high = np.array(
+            [
+                self.max_steps,  # episode length
+                self.grid_rows - 1,  # agent_row max
+                self.grid_cols - 1,  # agent_col max
+                self.grid_rows - 1,  # resource_row max
+                self.grid_cols - 1,  # resource_col max
+                len(DirectType) - 1,  # resource_type max
+                (self.grid_rows - 1) + (self.grid_cols - 1),  # timer max
+            ],
+            dtype=np.float32,
         )
 
-    # === General === #
+        # store raw bounds for use in normalize_obs()
+        self._raw_high = raw_high
+
+        if np.any(raw_high - raw_low == 0):
+            raise ValueError(
+                "raw_high must be strictly greater than raw_low for all features"
+            )
+
+        # Absent resource mask: True where low == -1.0 (these fields mean "absent" when -1)
+        # This mask will be used to keep -1 as a special value instead of normalizing it.
+        self.resource_mask = raw_low == -1.0
+
+        # normalized observation space the agent will receive:
+        # inactive resources keep -1 as a valid "low" value; active features map to 0..1
+        low_norm = np.array([0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0], dtype=np.float32)
+        high_norm = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32)
+        self.observation_space = spaces.Box(
+            low=low_norm, high=high_norm, dtype=np.float32
+        )
+
+    # === Global === #
 
     def _init_episode_vars(self) -> None:
-        self.step_count = 0
+        self.step_count_down = self.max_steps
 
     def _get_observation(self):
         return np.array(
             [
+                self.step_count_down,
                 self.world.agent.position[0],
                 self.world.agent.position[1],
-                self.world.resource.position[0],
-                self.world.resource.position[1],
-                self.world.resource.type.subtype.value,
-                # TODO: sentinel if recourse consumed instead [-1, -1, -1]. And maybe actually
-                # remove it from the game world instead of just marking it as consumed. But I'll
-                # start with just a sentinel - the idea is that agents will learn cleaner.
-                self.world.resource.consumed,  # <-- marks the resource as consumed, don't remove it
-                self.world.resource.timer.remaining,  # <-- this is both a de and re-spawn timer :/
+                (
+                    self.world.resource.position[0]
+                    if not self.world.resource.consumed
+                    else -1
+                ),
+                (
+                    self.world.resource.position[1]
+                    if not self.world.resource.consumed
+                    else -1
+                ),
+                (
+                    self.world.resource.type.subtype.value
+                    if not self.world.resource.consumed
+                    else -1
+                ),
+                (
+                    self.world.resource.timer.remaining
+                    if not self.world.resource.consumed
+                    else 0
+                ),
             ],
-            dtype=np.int32,
+            dtype=np.float32,
         )
 
+    def _normalize_obs(self, obs):
+        """
+        Normalize observation to 0..1 while preserving sentinel values (-1) for absent resources.
 
-# =============================== #
-#  Quick test for the game world  #
-#  Click play button in your IDE  #
-# =============================== #
+        :param obs: raw observation array (shape: 7,) from _get_observation()
+        Returns:
+            normalized_obs: float32 np.array (7,) where:
+            - regular features scaled 0..1
+            - sentinel fields are -1.0 when absent, otherwise scaled 0..1
+        """
 
+        # Prepare output array
+        normalized_obs = np.empty_like(obs, dtype=np.float32)
+        # Create resource and non-resource indices
+        resource_idx = np.where(self.resource_mask)[0]
+        non_resource_idx = np.where(~self.resource_mask)[0]
+        # Prep the non-resource indices
+        normalized_obs[non_resource_idx] = (
+            obs[non_resource_idx] / self._raw_high[non_resource_idx]
+        )
 
-# def testEnvironment():
-#     import random
+        # If resource absent, keep -1, otherwise — normalize
+        resource_values = obs[resource_idx]
 
-#     world = GridWorld()
-#     renderer = PygameRenderer()
-#     resource_consumed = False
+        absent_mask = resource_values == -1.0
+        present_mask = ~absent_mask
 
-#     world.reset()
-#     _render(renderer, world, resource_consumed, 20)
+        # Keep absent resources
+        normalized_obs[resource_idx[absent_mask]] = -1.0
 
-#     while True:
-#         action = random.randint(0, len(act) - 1)
-#         resource_consumed, score, _ = world.perform_agent_action(act(action))
+        # Normalize only present ones
+        normalized_obs[resource_idx[present_mask]] = (
+            resource_values[present_mask] / self._raw_high[resource_idx[present_mask]]
+        )
 
-#         _render(renderer, world, resource_consumed, score)
-
-
-# def _render(renderer, world, resource_consumed, score):
-#     renderer.render(
-#         world.get_agent_pos(),
-#         resource_consumed,
-#         world.get_resource_pos(),
-#         score,
-#     )
-
-
-# if __name__ == "__main__":
-#     testEnvironment()
+        return normalized_obs
