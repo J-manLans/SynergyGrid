@@ -28,7 +28,7 @@ class PygameRenderer:
 
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
-        self.fps = fps
+        self.step_fps = fps
         self._init_colors()
 
         # Default font
@@ -98,6 +98,128 @@ class PygameRenderer:
         self._update()
         self._process_events()
 
+    # ------------------------- #
+    #      New Render Test      #
+    # ------------------------- #
+
+    def render2(
+        self,
+        agent_pos: list[int],
+        is_active_statuses: list[bool],
+        resource_positions: list[list[np.int64]],
+        resource_types: list[ResourceMeta],
+        agent_score: int,
+    ) -> None:
+        """
+        Blocking render: animate agent over a fixed number of frames while everything
+        else stays visually static. Simple linear interpolation.
+        """
+
+        step_duration = 0.5
+        frames_per_step = 10
+        render_fps = int(frames_per_step / step_duration)
+
+        # --- Snapshot resources ---
+        snapshot_resource_positions = [
+            (int(p[0]), int(p[1])) for p in resource_positions
+        ]
+        snapshot_resource_types = list(resource_types)
+
+        # --- Track last cell ---
+        target = [int(agent_pos[0]), int(agent_pos[1])]
+        if not hasattr(self, "_last_agent_cell"):
+            self._last_agent_cell = [target[0], target[1]]
+        last = self._last_agent_cell
+
+        # --- Clamp diagonal moves ---
+        dr = target[0] - last[0]
+        dc = target[1] - last[1]
+        if dr != 0 and dc != 0:
+            if abs(dr) >= abs(dc):
+                target = [last[0] + (1 if dr > 0 else -1), last[1]]
+            else:
+                target = [last[0], last[1] + (1 if dc > 0 else -1)]
+
+        # --- Animate agent if moving ---
+        if target != last:
+            for frame in range(frames_per_step + 1):
+                t = frame / float(frames_per_step)
+                x_render = ((1.0 - t) * last[1] + t * target[1]) * self.cell_width
+                y_render = ((1.0 - t) * last[0] + t * target[0]) * self.cell_height
+
+                self.window_surface.fill(self.background_clr)
+                self._draw_floor_and_resources(
+                    snapshot_resource_positions,
+                    snapshot_resource_types,
+                    is_active_statuses,
+                )
+                self._draw_agent(x_render, y_render)
+                self._draw_hud(agent_score)
+
+                pygame.display.update()
+                self._process_quit_events()
+                self.clock.tick(render_fps)
+
+            # snap logical cell
+            self._last_agent_cell = [target[0], target[1]]
+
+        else:
+            # no movement, single frame
+            x_render = target[1] * self.cell_width
+            y_render = target[0] * self.cell_height
+
+            self.window_surface.fill(self.background_clr)
+            self._draw_floor_and_resources(
+                snapshot_resource_positions, snapshot_resource_types, is_active_statuses
+            )
+            self._draw_agent(x_render, y_render)
+            self._draw_hud(agent_score)
+
+            pygame.display.update()
+            self._process_quit_events()
+            self.clock.tick(render_fps)
+
+    # ------------------------- #
+    #      Helper Methods       #
+    # ------------------------- #
+
+    def _draw_floor_and_resources(
+        self, snapshot_resource_positions, snapshot_resource_types, is_active_statuses
+    ):
+        """Draw floor tiles and resources (snapshot)"""
+        for r in range(self.grid_rows):
+            for c in range(self.grid_cols):
+                pos = (c * self.cell_width, r * self.cell_height)
+                self.window_surface.blit(self.floor_img, pos)
+
+                for i in range(len(is_active_statuses)):
+                    if is_active_statuses[i]:
+                        res_r, res_c = snapshot_resource_positions[i]
+                        if (r, c) == (res_r, res_c):
+                            self._draw_resource(snapshot_resource_types[i], pos)
+
+    def _draw_agent(self, x_pixel, y_pixel):
+        """Draw agent at a specific pixel position"""
+        self.window_surface.blit(self.agent_img, (int(x_pixel), int(y_pixel)))
+
+    def _draw_hud(self, agent_score):
+        """Draw HUD / score"""
+        text = self.font.render(
+            f"Score: {agent_score}", True, self.text_clr, self.background_clr
+        )
+        text_pos = (0, self.window_size[1] - self.action_info_height)
+        self.window_surface.blit(text, text_pos)
+
+    def _process_quit_events(self):
+        """Handle quitting / ESC"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+
     # ================= #
     #      Helpers      #
     # ================= #
@@ -107,8 +229,8 @@ class PygameRenderer:
     def _init_colors(self) -> None:
         """Sets all the colors the game uses"""
 
-        self.background_clr = (45, 29, 29)
-        self.text_clr = (255, 246, 213)
+        self.background_clr = (26, 26, 26)
+        self.text_clr = (0, 210, 210)
 
     def _load_graphics(self):
         # Load graphics
@@ -161,10 +283,10 @@ class PygameRenderer:
                     elif event.key == pygame.K_SPACE:
                         waiting = False
 
-            self.clock.tick(self.fps)
+            self.clock.tick(self.step_fps)
 
     def _update(self):
         """Refreshes the display and limits FPS"""
 
         pygame.display.update()
-        self.clock.tick(self.fps)
+        self.clock.tick(self.step_fps)

@@ -8,12 +8,13 @@ from synergygrid.core import (
 )
 import numpy as np
 from numpy.random import Generator, default_rng
+from typing import Final
 
 
 # TODO: make multiple active resources possible (max 3)
 class GridWorld:
-    _INACTIVE_RESOURCES: list[BaseResource]
-    _ALL_RESOURCES: list[BaseResource]
+    _INACTIVE_RESOURCES: list[BaseResource] = []
+    _ALL_RESOURCES: Final[list[BaseResource]]
     _ACTIVE_RESOURCES: list[BaseResource] = []
 
     # ================= #
@@ -29,6 +30,8 @@ class GridWorld:
         self.grid_cols = grid_cols
         self.agent = SynergyAgent(grid_rows, grid_cols)
 
+        self._ALL_RESOURCES = self._create_resources(self.max_active_resources)
+
     def reset(self, rng: Generator | None = None) -> None:
         """
         Reset the agent to its starting position and re-spawns the resource at a random location
@@ -36,13 +39,16 @@ class GridWorld:
 
         self.agent.reset()  # Initialize Agents starting position
 
+        self._ACTIVE_RESOURCES.clear()
+        self._INACTIVE_RESOURCES.clear()
+        self._INACTIVE_RESOURCES = list(self._ALL_RESOURCES)
+        for resource in self._ALL_RESOURCES:
+            resource.reset()
+
         if rng == None:
             rng = default_rng()
 
         self.rng = rng
-
-        self._ALL_RESOURCES = self._create_resources(self.max_active_resources)
-        self._INACTIVE_RESOURCES = list(self._ALL_RESOURCES)
 
         # Initialize the resource's position
         self._spawn_random_resource()
@@ -94,7 +100,7 @@ class GridWorld:
     def _create_resources(
         self, max_active_resources: int, ratio=(0.75, 0.25)
     ) -> list[BaseResource]:
-        # TODO: the ratio works for two resources, need to look over this when more is added
+        # TODO: the ratio works for two resource types, need to look over this when more is added
         n_pos = max(1, int(max_active_resources * ratio[0]))
         n_neg = max_active_resources - n_pos
 
@@ -120,13 +126,15 @@ class GridWorld:
         self._INACTIVE_RESOURCES.append(depleted)
 
     def _spawn_random_resource(self):
-        available_resources = len(self._INACTIVE_RESOURCES)
+        available_resources = [
+            r for r in self._INACTIVE_RESOURCES if r.timer.is_completed()
+        ]
 
         if (
-            available_resources > 0
+            len(available_resources) > 0
             and len(self._ACTIVE_RESOURCES) < self.max_active_resources
         ):
-            resource_idx = self.rng.integers(0, available_resources)
+            resource_idx = self.rng.integers(0, len(available_resources))
             resource = self._INACTIVE_RESOURCES.pop(resource_idx)
 
             while True:

@@ -78,11 +78,11 @@ def main():
         # Choose to use an agent or just random sampling
         agent = True
         # Choose to train or run the agent
-        training = True
+        training = False
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
-        agent_steps = "204800"
+        agent_steps = "317440"
         # Num of timesteps for training or model selection when running
         timesteps = 10000
         # Number of training iterations

@@ -43,6 +43,10 @@ class BaseResource(ABC):
         self.type = type
         self.timer = self.Timer()
 
+    def reset(self):
+        self.is_active = False
+        self.timer.set(0)
+
     # ================= #
     #        API        #
     # ================= #

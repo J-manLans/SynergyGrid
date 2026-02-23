@@ -1,11 +1,12 @@
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-from synergygrid.core import GridWorld, AgentAction, SynergyType, DirectType
+from synergygrid.core import GridWorld, AgentAction, DirectType
 from synergygrid.rendering import PygameRenderer
+from numpy.typing import NDArray
+from typing import Any
 
 
-# The custom environment must inherit from gym.Env
 class SynergyGridEnv(gym.Env):
     """
     SynergyGrid reinforcement learning environment.
@@ -14,9 +15,10 @@ class SynergyGridEnv(gym.Env):
     """
 
     # Metadata required by Gym.
-    # "human" for Pygame visualization, "ansi" for console output.
-    # FPS set low since the agent moves discretely between grid cells.
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+    # "human" for Pygame visualization.
+    # FPS caps the render() update rate; each call corresponds to one logic step, not full game fps.
+    # Sub-loop in PygameRenderer.render() creates smooth animation between steps.
+    metadata = {"render_modes": ["human"], "render_fps": 2}
 
     # ================= #
     #       Init        #
@@ -35,7 +37,7 @@ class SynergyGridEnv(gym.Env):
         self._init_configurable_vars(grid_rows, grid_cols, max_steps, render_mode)
         self._init_episode_vars()
         self._init_world(max_active_resources, grid_rows, grid_cols)
-        if render_mode == "human":
+        if self.render_mode == "human":
             self._init_renderer(grid_rows, grid_cols)
 
         # Set up Gymnasium environment:
@@ -43,71 +45,52 @@ class SynergyGridEnv(gym.Env):
         # Gymnasium also requires us to define the action space — which is the agent's possible
         # actions. Training code can call action_space.sample() to randomly select an action.
         self.action_space = spaces.Discrete(len(AgentAction))
-
         self._setup_obs_space()
 
     # ======================== #
     #    Gymnasium contract    #
     # ======================== #
 
-    def reset(self, *, seed=None, options=None):
+    def reset(self, *, seed=None, options=None) -> tuple[NDArray[np.float32], dict[str, Any]]:
         # Gymnasium requires this call to control randomness and reproduce scenarios.
         super().reset(seed=seed)
 
         # Reset the world.
         self._init_episode_vars()
-        self.world.reset(self.np_random)
+        self._world.reset(self.np_random)
 
         if self.render_mode == "human":
             self.render()
 
-        # Constructs the observation state: [agent_row, agent_col, resource_row, resource_col]
-        # obs = np.concatenate(
-        #     (self.world.agent.position, self.world.resource.position), dtype=np.int32
-        # )
-
         obs = self._get_observation()
-
-        # print('-----------------NEW EPISODE-----------------', obs)
 
         # Return observation and info (not used)
         return self._normalize_obs(obs), {}
 
-    def step(self, action):
-        # Perform action
-        reward = self.world.perform_agent_action(AgentAction(action))
-        self.step_count_down -= 1
+    def step(
+        self, action: AgentAction
+    ) -> tuple[NDArray[np.float32], int, bool, bool, dict[str, Any]]:
+        # Perform action and adjust variables affected by it
+        reward = self._world.perform_agent_action(AgentAction(action))
+        self._step_count_down -= 1
+        truncated = self._step_count_down <= 0
+        terminated = self._world.agent.score <= 0
 
-        # Render
         if self.render_mode == "human":
             self.render()
 
-        # Prep Gymnasium variables
-        # obs = np.concatenate(
-        #     (self.world.agent.position, self.world.resource.position), dtype=np.int32
-        # )
         obs = self._get_observation()
-        norm_obs = self._normalize_obs(obs)
-
-        # print(
-        #     f"{obs}\nreward: {reward}\nscore: {self.world.agent.score}\nresource type: {self.world.resource.type.subtype}\n{'remaining time tile re-spawn: ' if self.world.resource.consumed else 'remaining time tile de-spawn: '}{self.world.resource.timer.remaining}\n"
-        # )
-
-        truncated = self.step_count_down <= 0
-        terminated = self.world.agent.score <= 0
 
         # Return observation, reward, terminated, truncated and info (not used)
-        return norm_obs, reward, terminated, truncated, {}
+        return self._normalize_obs(obs), reward, terminated, truncated, {}
 
-    def render(self):
-        self.world.get_resource_is_active_status()
-
-        self.renderer.render(
-            self.world.agent.position,
-            self.world.get_resource_is_active_status(),
-            self.world.get_resource_positions(),
-            self.world.get_resource_types(),
-            self.world.agent.score,
+    def render(self) -> None:
+        self._renderer.render(
+            self._world.agent.position,
+            self._world.get_resource_is_active_status(),
+            self._world.get_resource_positions(),
+            self._world.get_resource_types(),
+            self._world.agent.score,
         )
 
     # ================== #
@@ -125,22 +108,24 @@ class SynergyGridEnv(gym.Env):
     ) -> None:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
-        self.max_steps = max_steps
+        self._max_steps = max_steps
         self.render_mode = render_mode
 
-    def _init_world(self, max_active_resources: int, grid_rows, grid_cols) -> None:
-        self.world = GridWorld(
+    def _init_world(
+        self, max_active_resources: int, grid_rows: int, grid_cols: int
+    ) -> None:
+        self._world = GridWorld(
             max_active_resources, grid_rows=grid_rows, grid_cols=grid_cols
         )
 
-    def _init_renderer(self, grid_rows, grid_cols) -> None:
-        self.renderer = PygameRenderer(
+    def _init_renderer(self, grid_rows: int, grid_cols: int) -> None:
+        self._renderer = PygameRenderer(
             grid_rows=grid_rows,
             grid_cols=grid_cols,
             fps=self.metadata["render_fps"],
         )
 
-    def _setup_obs_space(self):
+    def _setup_obs_space(self) -> None:
         """
         Gymnasium requires an observation space definition. Here we represent the state as a flat
         vector. The space is used by Gymnasium to validate observations returned by reset() and step().
@@ -152,15 +137,28 @@ class SynergyGridEnv(gym.Env):
         (0..1 for active features, -1 for absent resource fields)
         """
         # original raw bounds (match your _get_observation() ordering)
-        raw_low = np.array([0, 0, 0, -1, -1, -1, 0], dtype=np.float32)
+        raw_low = np.array(
+            [0, 0, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0], dtype=np.float32
+        )
         raw_high = np.array(
             [
-                self.max_steps,  # episode length
+                self._max_steps,  # episode length
                 self.grid_rows - 1,  # agent_row max
                 self.grid_cols - 1,  # agent_col max
+                # resource 1
                 self.grid_rows - 1,  # resource_row max
                 self.grid_cols - 1,  # resource_col max
                 len(DirectType) - 1,  # resource_type max
+                (self.grid_rows - 1) + (self.grid_cols - 1),  # timer max
+                # resource 2
+                self.grid_rows - 1,
+                self.grid_cols - 1,
+                len(DirectType) - 1,
+                (self.grid_rows - 1) + (self.grid_cols - 1),  # timer max
+                # resource 3
+                self.grid_rows - 1,
+                self.grid_cols - 1,
+                len(DirectType) - 1,
                 (self.grid_rows - 1) + (self.grid_cols - 1),  # timer max
             ],
             dtype=np.float32,
@@ -180,8 +178,27 @@ class SynergyGridEnv(gym.Env):
 
         # normalized observation space the agent will receive:
         # inactive resources keep -1 as a valid "low" value; active features map to 0..1
-        low_norm = np.array([0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0], dtype=np.float32)
-        high_norm = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32)
+        low_norm = np.array(
+            [
+                0.0,
+                0.0,
+                0.0,
+                -1.0,
+                -1.0,
+                -1.0,
+                0.0,
+                -1.0,
+                -1.0,
+                -1.0,
+                0.0,
+                -1.0,
+                -1.0,
+                -1.0,
+                0.0,
+            ],
+            dtype=np.float32,
+        )
+        high_norm = np.array([1.0] * 15, dtype=np.float32)
         self.observation_space = spaces.Box(
             low=low_norm, high=high_norm, dtype=np.float32
         )
@@ -189,54 +206,97 @@ class SynergyGridEnv(gym.Env):
     # === Global === #
 
     def _init_episode_vars(self) -> None:
-        self.step_count_down = self.max_steps
+        self._step_count_down = self._max_steps
 
-    def _get_observation(self):
+    def _get_observation(self) -> NDArray[np.float32]:
+        # TODO: see how to not hardcode this
         return np.array(
             [
-                self.step_count_down,
-                self.world.agent.position[0],
-                self.world.agent.position[1],
-                (
-                    self.world.get_resource_positions()[0][0]
-                    if self.world.get_resource_is_active_status()[0]
+                self._step_count_down,
+                self._world.agent.position[0],
+                self._world.agent.position[1],
+                (  # Resource 1
+                    self._world.get_resource_positions()[0][0]
+                    if self._world.get_resource_is_active_status()[0]
                     else -1
                 ),
                 (
-                    self.world.get_resource_positions()[0][1]
-                    if self.world.get_resource_is_active_status()[0]
+                    self._world.get_resource_positions()[0][1]
+                    if self._world.get_resource_is_active_status()[0]
                     else -1
                 ),
                 (
-                    self.world.get_resource_types()[0].subtype.value
-                    if self.world.get_resource_is_active_status()[0]
+                    self._world.get_resource_types()[0].subtype.value
+                    if self._world.get_resource_is_active_status()[0]
                     else -1
                 ),
                 (
-                    self.world.get_resource_timers()[0].remaining
-                    if self.world.get_resource_is_active_status()[0]
+                    self._world.get_resource_timers()[0].remaining
+                    if self._world.get_resource_is_active_status()[0]
+                    else 0
+                ),
+                (  # Resource 2
+                    self._world.get_resource_positions()[1][0]
+                    if self._world.get_resource_is_active_status()[1]
+                    else -1
+                ),
+                (
+                    self._world.get_resource_positions()[1][1]
+                    if self._world.get_resource_is_active_status()[1]
+                    else -1
+                ),
+                (
+                    self._world.get_resource_types()[1].subtype.value
+                    if self._world.get_resource_is_active_status()[1]
+                    else -1
+                ),
+                (
+                    self._world.get_resource_timers()[1].remaining
+                    if self._world.get_resource_is_active_status()[1]
+                    else 0
+                ),
+                (  # Resource 3
+                    self._world.get_resource_positions()[2][0]
+                    if self._world.get_resource_is_active_status()[2]
+                    else -1
+                ),
+                (
+                    self._world.get_resource_positions()[2][1]
+                    if self._world.get_resource_is_active_status()[2]
+                    else -1
+                ),
+                (
+                    self._world.get_resource_types()[2].subtype.value
+                    if self._world.get_resource_is_active_status()[2]
+                    else -1
+                ),
+                (
+                    self._world.get_resource_timers()[2].remaining
+                    if self._world.get_resource_is_active_status()[2]
                     else 0
                 ),
             ],
             dtype=np.float32,
         )
 
-    def _normalize_obs(self, obs):
+    def _normalize_obs(self, obs: NDArray[np.float32]) -> NDArray[np.float32]:
         """
         Normalize observation to 0..1 while preserving sentinel values (-1) for absent resources.
 
-        :param obs: raw observation array (shape: 7,) from _get_observation()
+        :param obs: raw observation array (shape: 15,) from _get_observation()
         Returns:
-            normalized_obs: float32 np.array (7,) where:
+            normalized_obs: float32 np.array (15,) where:
             - regular features scaled 0..1
             - sentinel fields are -1.0 when absent, otherwise scaled 0..1
         """
 
         # Prepare output array
         normalized_obs = np.empty_like(obs, dtype=np.float32)
+
         # Create resource and non-resource indices
         resource_idx = np.where(self.resource_mask)[0]
         non_resource_idx = np.where(~self.resource_mask)[0]
+
         # Prep the non-resource indices
         normalized_obs[non_resource_idx] = (
             obs[non_resource_idx] / self._raw_high[non_resource_idx]
