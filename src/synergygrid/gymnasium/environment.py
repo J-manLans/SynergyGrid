@@ -34,7 +34,9 @@ class SynergyGridEnv(gym.Env):
     ):
         # Set up bench environment;
 
-        self._init_configurable_vars(grid_rows, grid_cols, max_steps, render_mode)
+        self._init_vars(
+            max_active_resources, grid_rows, grid_cols, max_steps, render_mode
+        )
         self._init_episode_vars()
         self._init_world(max_active_resources, grid_rows, grid_cols)
         if self.render_mode == "human":
@@ -51,7 +53,9 @@ class SynergyGridEnv(gym.Env):
     #    Gymnasium contract    #
     # ======================== #
 
-    def reset(self, *, seed=None, options=None) -> tuple[NDArray[np.float32], dict[str, Any]]:
+    def reset(
+        self, *, seed=None, options=None
+    ) -> tuple[NDArray[np.float32], dict[str, Any]]:
         # Gymnasium requires this call to control randomness and reproduce scenarios.
         super().reset(seed=seed)
 
@@ -99,13 +103,15 @@ class SynergyGridEnv(gym.Env):
 
     # === Init === #
 
-    def _init_configurable_vars(
+    def _init_vars(
         self,
+        max_active_resources: int,
         grid_rows: int,
         grid_cols: int,
         max_steps: int,
         render_mode: str | None,
     ) -> None:
+        self.max_active_resources = max_active_resources
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self._max_steps = max_steps
@@ -132,76 +138,74 @@ class SynergyGridEnv(gym.Env):
 
         Set up:
         - self._raw_low / self._raw_high: the original raw ranges (used for normalization)
-        - self._sentinel_mask: boolean mask of indices that use -1 as "absent"
+        - self._sentinel_mask: boolean mask that indicates "absent" resources
         - self.observation_space: the normalized observation space that agents will see
         (0..1 for active features, -1 for absent resource fields)
         """
-        # original raw bounds (match your _get_observation() ordering)
-        raw_low = np.array(
-            [0, 0, 0, -1, -1, -1, 0, -1, -1, -1, 0, -1, -1, -1, 0], dtype=np.float32
-        )
-        raw_high = np.array(
-            [
-                self._max_steps,  # episode length
-                self.grid_rows - 1,  # agent_row max
-                self.grid_cols - 1,  # agent_col max
-                # resource 1
-                self.grid_rows - 1,  # resource_row max
-                self.grid_cols - 1,  # resource_col max
-                len(DirectType) - 1,  # resource_type max
-                (self.grid_rows - 1) + (self.grid_cols - 1),  # timer max
-                # resource 2
-                self.grid_rows - 1,
-                self.grid_cols - 1,
-                len(DirectType) - 1,
-                (self.grid_rows - 1) + (self.grid_cols - 1),  # timer max
-                # resource 3
-                self.grid_rows - 1,
-                self.grid_cols - 1,
-                len(DirectType) - 1,
-                (self.grid_rows - 1) + (self.grid_cols - 1),  # timer max
-            ],
-            dtype=np.float32,
-        )
+        # original raw bounds — match _get_observation()
+        raw_low, raw_high = self._build_observation_bounds(False)
 
         # store raw bounds for use in normalize_obs()
         self._raw_high = raw_high
 
-        if np.any(raw_high - raw_low == 0):
-            raise ValueError(
-                "raw_high must be strictly greater than raw_low for all features"
-            )
-
         # Absent resource mask: True where low == -1.0 (these fields mean "absent" when -1)
         # This mask will be used to keep -1 as a special value instead of normalizing it.
-        self.resource_mask = raw_low == -1.0
+        self._resource_mask = raw_low == -1.0
 
-        # normalized observation space the agent will receive:
+        # normalized bounds — match _normalize_obs()
         # inactive resources keep -1 as a valid "low" value; active features map to 0..1
-        low_norm = np.array(
-            [
-                0.0,
-                0.0,
-                0.0,
-                -1.0,
-                -1.0,
-                -1.0,
-                0.0,
-                -1.0,
-                -1.0,
-                -1.0,
-                0.0,
-                -1.0,
-                -1.0,
-                -1.0,
-                0.0,
-            ],
-            dtype=np.float32,
-        )
-        high_norm = np.array([1.0] * 15, dtype=np.float32)
+        low_norm, high_norm = self._build_observation_bounds(True)
+
         self.observation_space = spaces.Box(
             low=low_norm, high=high_norm, dtype=np.float32
         )
+
+    def _build_observation_bounds(
+        self, normalized: bool
+    ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
+        if normalized:
+            agent_and_ep_low = 0.0
+            no_resource = -1.0
+            r_timer_low = 0.0
+            max_steps = 1.0
+            max_row = 1.0
+            max_col = 1.0
+            max_resource_type = 1.0
+            r_timer_high = 1.0
+        else:
+            agent_and_ep_low = 0
+            no_resource = -1
+            r_timer_low = 0
+            max_steps = self._max_steps
+            max_row = self.grid_rows - 1
+            max_col = self.grid_cols - 1
+            max_resource_type = len(DirectType) - 1
+            r_timer_high = (self.grid_rows - 1) + (self.grid_cols - 1)
+
+        low = [agent_and_ep_low, agent_and_ep_low, agent_and_ep_low]
+        low.extend(
+            [no_resource, no_resource, no_resource, r_timer_low]
+            * self.max_active_resources
+        )
+        high = [max_steps, max_row, max_col]
+        high.extend(
+            [max_row, max_col, max_resource_type, r_timer_high]
+            * self.max_active_resources
+        )
+
+        low_arr = np.asarray(low, dtype=np.float32)
+        high_arr = np.asarray(high, dtype=np.float32)
+
+        if low_arr.shape != high_arr.shape:
+            raise ValueError(
+                f"low/high shape mismatch: {low_arr.shape} != {high_arr.shape}"
+            )
+        if np.any(high_arr <= low_arr):
+            raise ValueError(
+                "All high bounds must be greater than low bounds for raw ranges"
+            )
+
+        return low_arr, high_arr
 
     # === Global === #
 
@@ -209,75 +213,35 @@ class SynergyGridEnv(gym.Env):
         self._step_count_down = self._max_steps
 
     def _get_observation(self) -> NDArray[np.float32]:
-        # TODO: see how to not hardcode this
-        return np.array(
-            [
-                self._step_count_down,
-                self._world.agent.position[0],
-                self._world.agent.position[1],
-                (  # Resource 1
-                    self._world.get_resource_positions()[0][0]
-                    if self._world.get_resource_is_active_status()[0]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_positions()[0][1]
-                    if self._world.get_resource_is_active_status()[0]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_types()[0].subtype.value
-                    if self._world.get_resource_is_active_status()[0]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_timers()[0].remaining
-                    if self._world.get_resource_is_active_status()[0]
-                    else 0
-                ),
-                (  # Resource 2
-                    self._world.get_resource_positions()[1][0]
-                    if self._world.get_resource_is_active_status()[1]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_positions()[1][1]
-                    if self._world.get_resource_is_active_status()[1]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_types()[1].subtype.value
-                    if self._world.get_resource_is_active_status()[1]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_timers()[1].remaining
-                    if self._world.get_resource_is_active_status()[1]
-                    else 0
-                ),
-                (  # Resource 3
-                    self._world.get_resource_positions()[2][0]
-                    if self._world.get_resource_is_active_status()[2]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_positions()[2][1]
-                    if self._world.get_resource_is_active_status()[2]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_types()[2].subtype.value
-                    if self._world.get_resource_is_active_status()[2]
-                    else -1
-                ),
-                (
-                    self._world.get_resource_timers()[2].remaining
-                    if self._world.get_resource_is_active_status()[2]
-                    else 0
-                ),
-            ],
-            dtype=np.float32,
-        )
+        """
+        Build a flat observation vector dynamically based on max_active_resources.
+        - Uses sentinel -1 for absent resource position/type and 0 for absent timers.
+        """
+        # Get step + agent info
+        agent_row, agent_col = self._world.agent.position
+        obs: list[float] = [self._step_count_down, agent_row, agent_col]
+
+        # Cache resource info
+        positions = self._world.get_resource_positions()
+        types = self._world.get_resource_types()
+        timers = self._world.get_resource_timers()
+        active = self._world.get_resource_is_active_status()
+
+        # For each resource slot, append (row, col, type, timer) or absent values
+        for i in range(self.max_active_resources):
+            if i < len(active) and active[i]:
+                # Resource is active: extract real values
+                pos = positions[i]
+                r_type = types[i].subtype.value
+                r_timer = timers[i].remaining
+                obs.extend(
+                    [float(pos[0]), float(pos[1]), float(r_type), float(r_timer)]
+                )
+            else:
+                # Resource inactive or slot unused: sentinel values
+                obs.extend([-1, -1, -1, 0])
+
+        return np.array(obs, dtype=np.float32)
 
     def _normalize_obs(self, obs: NDArray[np.float32]) -> NDArray[np.float32]:
         """
@@ -294,8 +258,8 @@ class SynergyGridEnv(gym.Env):
         normalized_obs = np.empty_like(obs, dtype=np.float32)
 
         # Create resource and non-resource indices
-        resource_idx = np.where(self.resource_mask)[0]
-        non_resource_idx = np.where(~self.resource_mask)[0]
+        resource_idx = np.where(self._resource_mask)[0]
+        non_resource_idx = np.where(~self._resource_mask)[0]
 
         # Prep the non-resource indices
         normalized_obs[non_resource_idx] = (
