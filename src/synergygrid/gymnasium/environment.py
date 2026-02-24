@@ -18,7 +18,7 @@ class SynergyGridEnv(gym.Env):
     # "human" for Pygame visualization.
     # FPS caps the render() update rate; each call corresponds to one logic step, not full game fps.
     # Sub-loop in PygameRenderer.render() creates smooth animation between steps.
-    metadata = {"render_modes": ["human"], "render_fps": 2}
+    metadata = {"render_modes": ["human"], "render_fps": 4}
 
     # ================= #
     #       Init        #
@@ -89,7 +89,7 @@ class SynergyGridEnv(gym.Env):
         return self._normalize_obs(obs), reward, terminated, truncated, {}
 
     def render(self) -> None:
-        self._renderer.render(
+        self._renderer.render_with_animation(
             self._world._agent.position,
             self._world.get_resource_is_active_status(),
             self._world.get_resource_positions(),
