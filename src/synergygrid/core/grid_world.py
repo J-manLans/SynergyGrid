@@ -13,9 +13,9 @@ from typing import Final
 
 # TODO: make multiple active resources possible (max 3)
 class GridWorld:
-    _INACTIVE_RESOURCES: list[BaseResource] = []
     _ALL_RESOURCES: Final[list[BaseResource]]
-    _ACTIVE_RESOURCES: list[BaseResource] = []
+    _inactive_resources: list[BaseResource] = []
+    _active_resources: list[BaseResource] = []
 
     # ================= #
     #       Init        #
@@ -23,25 +23,26 @@ class GridWorld:
 
     def __init__(self, max_active_resources: int, grid_rows: int, grid_cols: int):
         """
-        Initializes the grid world. Defines the game world's size and initializes the agent and resource.
+        Initializes the grid world. Defines the game world's size and initializes the agent and resources.
         """
-        self.max_active_resources = max_active_resources
+
+        self._max_active_resources = max_active_resources
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
-        self.agent = SynergyAgent(grid_rows, grid_cols)
+        self._agent = SynergyAgent(grid_rows, grid_cols)
 
-        self._ALL_RESOURCES = self._create_resources(self.max_active_resources)
+        self._ALL_RESOURCES = self._create_resources(self._max_active_resources)
 
     def reset(self, rng: Generator | None = None) -> None:
         """
         Reset the agent to its starting position and re-spawns the resource at a random location
         """
 
-        self.agent.reset()  # Initialize Agents starting position
+        self._agent.reset()  # Initialize Agents starting position
 
-        self._ACTIVE_RESOURCES.clear()
-        self._INACTIVE_RESOURCES.clear()
-        self._INACTIVE_RESOURCES = list(self._ALL_RESOURCES)
+        self._active_resources.clear()
+        self._inactive_resources.clear()
+        self._inactive_resources = list(self._ALL_RESOURCES)
         for resource in self._ALL_RESOURCES:
             resource.reset()
 
@@ -61,18 +62,18 @@ class GridWorld:
 
     def perform_agent_action(self, agent_action: AgentAction) -> int:
         reward = 0
-        self.agent.perform_action(agent_action)
+        self._agent.perform_action(agent_action)
 
         for resource in self._ALL_RESOURCES:
             if resource.is_active:
-                if self._update_timer_and_check_if_completed(resource):
+                if self._update_timer_and_return_is_completed(resource):
                     resource.deplete_resource()
                     self._remove_resource(resource)
-                elif self.agent.position == resource.position:
-                    reward = self.agent.consume_resource(resource)
+                elif self._agent.position == resource.position:
+                    reward = self._agent.consume_resource(resource)
                     self._remove_resource(resource)
             else:
-                if self._update_timer_and_check_if_completed(resource):
+                if self._update_timer_and_return_is_completed(resource):
                     self._spawn_random_resource()
 
         return reward
@@ -114,28 +115,28 @@ class GridWorld:
 
     # === API === #
 
-    def _update_timer_and_check_if_completed(self, resource: BaseResource) -> bool:
+    def _update_timer_and_return_is_completed(self, resource: BaseResource) -> bool:
         resource.timer.tick()
         return resource.timer.is_completed()
 
-    # === Global === #
-
     def _remove_resource(self, resource: BaseResource):
-        idx = self._ACTIVE_RESOURCES.index(resource)
-        depleted = self._ACTIVE_RESOURCES.pop(idx)
-        self._INACTIVE_RESOURCES.append(depleted)
+        idx = self._active_resources.index(resource)
+        depleted = self._active_resources.pop(idx)
+        self._inactive_resources.append(depleted)
+
+    # === Global === #
 
     def _spawn_random_resource(self):
         available_resources = [
-            r for r in self._INACTIVE_RESOURCES if r.timer.is_completed()
+            r for r in self._inactive_resources if r.timer.is_completed()
         ]
 
         if (
             len(available_resources) > 0
-            and len(self._ACTIVE_RESOURCES) < self.max_active_resources
+            and len(self._active_resources) < self._max_active_resources
         ):
             resource_idx = self.rng.integers(0, len(available_resources))
-            resource = self._INACTIVE_RESOURCES.pop(resource_idx)
+            resource = self._inactive_resources.pop(resource_idx)
 
             while True:
                 position = [
@@ -145,20 +146,20 @@ class GridWorld:
 
                 if self._empty_spawn_cell(position):
                     resource.spawn(position)
-                    self._ACTIVE_RESOURCES.append(resource)
+                    self._active_resources.append(resource)
                     break
 
     def _empty_spawn_cell(self, position: list[np.int64]) -> bool:
         # Check against agent
-        if position == self.agent.position:
+        if position == self._agent.position:
             return False
 
         # If there are no active resources we can spawn right away
-        if len(self._ACTIVE_RESOURCES) == 0:
+        if len(self._active_resources) == 0:
             return True
 
         # Check against all active resources
-        for r in self._ACTIVE_RESOURCES:
+        for r in self._active_resources:
             if position == r.position:
                 return False
 

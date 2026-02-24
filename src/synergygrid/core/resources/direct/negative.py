@@ -5,8 +5,6 @@ from synergygrid.core.resources import (
     DirectType,
     Tier,
 )
-from typing import Final
-from numpy.random import Generator
 
 
 class NegativeResource(BaseResource):

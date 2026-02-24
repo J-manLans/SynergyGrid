@@ -78,7 +78,7 @@ class SynergyGridEnv(gym.Env):
         reward = self._world.perform_agent_action(AgentAction(action))
         self._step_count_down -= 1
         truncated = self._step_count_down <= 0
-        terminated = self._world.agent.score <= 0
+        terminated = self._world._agent.score <= 0
 
         if self.render_mode == "human":
             self.render()
@@ -90,11 +90,11 @@ class SynergyGridEnv(gym.Env):
 
     def render(self) -> None:
         self._renderer.render(
-            self._world.agent.position,
+            self._world._agent.position,
             self._world.get_resource_is_active_status(),
             self._world.get_resource_positions(),
             self._world.get_resource_types(),
-            self._world.agent.score,
+            self._world._agent.score,
         )
 
     # ================== #
@@ -218,7 +218,7 @@ class SynergyGridEnv(gym.Env):
         - Uses sentinel -1 for absent resource position/type and 0 for absent timers.
         """
         # Get step + agent info
-        agent_row, agent_col = self._world.agent.position
+        agent_row, agent_col = self._world._agent.position
         obs: list[float] = [self._step_count_down, agent_row, agent_col]
 
         # Cache resource info

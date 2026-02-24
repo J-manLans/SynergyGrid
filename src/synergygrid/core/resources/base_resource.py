@@ -36,7 +36,8 @@ class BaseResource(ABC):
         type: ResourceMeta,
     ):
         """Defines the game world so resources know their bounds"""
-        self._world_boundaries = world_boundaries  # (row, col) of the grid
+        self._world_boundaries = world_boundaries
+        # Max steps needed to reach resource diagonally anywhere on the grid
         self._LIFE_SPAN = (world_boundaries[0] - 1) + (world_boundaries[1] - 1)
         self._cool_down = cool_down
         self._reward = reward

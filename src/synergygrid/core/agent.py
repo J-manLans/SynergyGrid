@@ -22,25 +22,23 @@ class SynergyAgent:
         """
         Initializes the agent.
 
-        Defines the game world so the agent know its bounds, set its starting score and initializes the last action to an empty string so the renderer will have something to work with before its first action.
+        Defines the game world so the agent know its bounds, set its starting score and store it for later resetting.
         """
 
-        self.grid_rows = grid_rows
-        self.grid_cols = grid_cols
-        self.starting_score = starting_score
+        self._grid_rows = grid_rows
+        self._grid_cols = grid_cols
         self.score = starting_score
+        self._starting_score = starting_score
 
     def reset(self) -> None:
         """Initialize Agents starting position at the center of the grid and reset its score"""
 
-        self.position = [self.grid_rows // 2, self.grid_cols // 2]
-        self.score = self.starting_score
+        self.position = [self._grid_rows // 2, self._grid_cols // 2]
+        self.score = self._starting_score
 
     # ================= #
     #        API        #
     # ================= #
-
-    # === Logic === #
 
     def perform_action(self, agent_action: AgentAction) -> None:
         """Performs current action"""
@@ -49,11 +47,11 @@ class SynergyAgent:
         if agent_action == AgentAction.LEFT:
             self._moveTowardsMinBound(1)
         elif agent_action == AgentAction.RIGHT:
-            self._moveTowardsMaxBound(1, self.grid_cols - 1)
+            self._moveTowardsMaxBound(1, self._grid_cols - 1)
         elif agent_action == AgentAction.UP:
             self._moveTowardsMinBound(0)
         elif agent_action == AgentAction.DOWN:
-            self._moveTowardsMaxBound(0, self.grid_rows - 1)
+            self._moveTowardsMaxBound(0, self._grid_rows - 1)
 
     def consume_resource(self, resource: BaseResource) -> int:
         """Consumes the resource, add its reward to its score and returns the reward"""

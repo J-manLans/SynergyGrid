@@ -6,9 +6,6 @@ from synergygrid.core.resources import (
     Tier,
 )
 
-from numpy.random import Generator
-from typing import Final
-
 
 class PositiveResource(BaseResource):
     """
