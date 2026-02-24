@@ -6,6 +6,8 @@ from synergygrid.agentrunner import AgentRunner
 from synergygrid.config import environment
 
 
+# TODO: this only accompanies the stable baselines3 models as of now. We need to crete a more
+# modular agent base class that can accompany many different models
 def train_agent(
     runner: AgentRunner,
     continue_training=False,
@@ -71,7 +73,11 @@ def train_agent(
             )
 
             # Train the model
-            model.learn(total_timesteps=timesteps, reset_num_timesteps=False)
+            model.learn(
+                total_timesteps=timesteps,
+                tb_log_name=f"{date} {runner.algorithm}",
+                reset_num_timesteps=False,
+            )
 
             # Save the model
             save_path = (

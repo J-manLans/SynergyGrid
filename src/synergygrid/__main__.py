@@ -74,7 +74,7 @@ def main():
 
     if len(sys.argv) == 1:
         # Pick algorithm to train or evaluate
-        algorithm = alg[2]
+        algorithm = alg[0]
         # Choose to use an agent or just random sampling
         agent = True
         # Choose to train or run the agent
@@ -82,11 +82,11 @@ def main():
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
-        agent_steps = "10500"
+        agent_steps = "317440"
         # Num of timesteps for training or model selection when running
-        timesteps = 10500
+        timesteps = 10000
         # Number of training iterations
-        iterations = 2
+        iterations = 20
     else:
         args = __parse_args()  # python -m experiments -h for info
         algorithm = args.alg

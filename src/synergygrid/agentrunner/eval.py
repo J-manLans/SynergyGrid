@@ -35,9 +35,7 @@ def evaluate_agent(runner: AgentRunner, agent_steps: str, trained_model: bool):
     while not done:
         obs, _, terminated, truncated, _ = env.step(get_action(obs))
 
-        # Reset if resource is found or exit environment if truncated.
-        if terminated:
-            env.reset()
-        done = truncated
+        # Exit environment if terminated or truncated.
+        done = truncated or terminated
 
     env.close()
