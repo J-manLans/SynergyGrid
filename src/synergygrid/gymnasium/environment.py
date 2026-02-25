@@ -163,6 +163,11 @@ class SynergyGridEnv(gym.Env):
     def _build_observation_bounds(
         self, normalized: bool
     ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
+        # TODO: remove episode remaining steps, I don't think it adds anything for learning, the
+        # agent didn't start to move to the center when no resources were present. But test train
+        # an agent with and without on one resource first before removing.
+        #
+        # Also group logical units together like all agents data and resource data together
         if normalized:
             agent_and_ep_low = 0.0
             no_resource = -1.0
@@ -182,12 +187,16 @@ class SynergyGridEnv(gym.Env):
             max_resource_type = len(DirectType) - 1
             r_timer_high = (self.grid_rows - 1) + (self.grid_cols - 1)
 
-        low = [agent_and_ep_low, agent_and_ep_low, agent_and_ep_low]
+        # episode length and agent position
+        low = [agent_and_ep_low] * 3
+        # resource data
         low.extend(
             [no_resource, no_resource, no_resource, r_timer_low]
             * self.max_active_resources
         )
+        # episode length and agent position
         high = [max_steps, max_row, max_col]
+        # resource data
         high.extend(
             [max_row, max_col, max_resource_type, r_timer_high]
             * self.max_active_resources

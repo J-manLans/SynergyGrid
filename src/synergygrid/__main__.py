@@ -75,7 +75,7 @@ def main():
     if len(sys.argv) == 1:
         # Pick algorithm to train or evaluate
         algorithm = alg[0]
-        # Choose to use an agent or just random sampling
+        # Choose to use an agent or just random sampling (for debugging the environment)
         agent = True
         # Choose to train or run the agent
         training = False
