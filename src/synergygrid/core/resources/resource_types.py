@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class ResourceCategory(Enum):
@@ -14,9 +14,7 @@ class Tier(Enum):
 
 
 class SynergyType(Enum):
-    REVERT_SCORE = 0
-    PERCEPTION = 1
-    ENV_EFFECT = 2
+    TIER = 0
 
 
 class DirectType(Enum):
@@ -28,5 +26,6 @@ class ResourceMeta:
     def __init__(
         self, category: ResourceCategory, subtype: DirectType | SynergyType, tier: Tier
     ):
-        self.category = category  # ResourceCategory
-        self.subtype = subtype  # SynergyType or None
+        self.category = category # For finding correct image to render together with subtype
+        self.subtype = subtype # Render + for identifying subtype to the agent
+        self.tier = tier # TODO: clarify this when feature fully implemented
