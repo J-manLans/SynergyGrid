@@ -2,8 +2,7 @@ from synergygrid.core.resources import (
     BaseResource,
     ResourceMeta,
     ResourceCategory,
-    DirectType,
-    Tier
+    DirectType
 )
 
 
@@ -21,11 +20,18 @@ class PositiveResource(BaseResource):
     ):
         super().__init__(
             world_boundaries,
-            self._POSITIVE_BASE_REWARD,
             cool_down,
             ResourceMeta(
                 category=ResourceCategory.DIRECT,
                 subtype=DirectType.POSITIVE,
-                tier=Tier.ZERO
+                tier=0
             )
         )
+
+    # ================= #
+    #        API        #
+    # ================= #
+
+    def consume(self) -> int:
+        super().preConsume()
+        return self._POSITIVE_BASE_REWARD

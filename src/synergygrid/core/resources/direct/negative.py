@@ -2,9 +2,9 @@ from synergygrid.core.resources import (
     BaseResource,
     ResourceMeta,
     ResourceCategory,
-    DirectType,
-    Tier,
+    DirectType
 )
+from typing import Final
 
 
 class NegativeResource(BaseResource):
@@ -12,20 +12,31 @@ class NegativeResource(BaseResource):
     A resource that gives the agent a negative score.
     """
 
+    _REWARD: Final[int] = -3
+
     # ================= #
     #       Init        #
     # ================= #
 
     def __init__(
-        self, world_boundaries: tuple[int, int], reward: int = -3, cool_down: int = 7
+        self, world_boundaries: tuple[int, int], cool_down: int = 7
     ):
         super().__init__(
             world_boundaries,
-            reward,
             cool_down,
             ResourceMeta(
                 category=ResourceCategory.DIRECT,
                 subtype=DirectType.NEGATIVE,
-                tier=Tier.ZERO
+                tier=-1
             )
         )
+
+    # ================= #
+    #        API        #
+    # ================= #
+
+    # TODO: continue here
+
+    def consume(self) -> int:
+        super().preConsume()
+        return self._REWARD

@@ -3,8 +3,7 @@ import json
 from os import path
 import sys
 import numpy as np
-from synergygrid.core import ResourceMeta, ResourceCategory, DirectType
-import math
+from synergygrid.core import ResourceMeta, ResourceCategory, DirectType, SynergyType
 
 
 class PygameRenderer:
@@ -210,10 +209,23 @@ class PygameRenderer:
 
     def _draw_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
         if resource_meta.category == ResourceCategory.DIRECT:
-            if resource_meta.subtype == DirectType.POSITIVE:
-                self.window_surface.blit(self.graphics["positive_resource"], pos)
-            elif resource_meta.subtype == DirectType.NEGATIVE:
-                self.window_surface.blit(self.graphics["negative_resource"], pos)
+            self._draw_direct_resource(resource_meta, pos)
+        else:
+            self._draw_synergy_resource(resource_meta, pos)
+
+    def _draw_direct_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
+        if resource_meta.subtype == DirectType.POSITIVE:
+            self.window_surface.blit(self.graphics["positive_resource"], pos)
+        elif resource_meta.subtype == DirectType.NEGATIVE:
+            self.window_surface.blit(self.graphics["negative_resource"], pos)
+
+    def _draw_synergy_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
+        if resource_meta.subtype == SynergyType.TIER:
+            self._draw_tier_resource(resource_meta, pos)
+
+    def _draw_tier_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
+        tier = resource_meta.tier
+        self.window_surface.blit(self.graphics[f"tier_{tier}_resource"], pos)
 
     def _draw_agent(self, pos: tuple[int, int]):
         """Draw agent at a specific pixel position"""

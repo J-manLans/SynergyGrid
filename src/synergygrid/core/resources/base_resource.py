@@ -32,7 +32,6 @@ class BaseResource(ABC):
     def __init__(
         self,
         world_boundaries: tuple[int, int],
-        reward: int,
         cool_down: int,
         type: ResourceMeta,
     ):
@@ -41,7 +40,6 @@ class BaseResource(ABC):
         # Max steps needed to reach resource diagonally anywhere on the grid
         self._LIFE_SPAN = (world_boundaries[0] - 1) + (world_boundaries[1] - 1)
         self._cool_down = cool_down
-        self._reward = reward
         self.type = type
         self.timer = self.Timer()
 
@@ -53,14 +51,13 @@ class BaseResource(ABC):
     #        API        #
     # ================= #
 
-    def consume(self) -> int:
+    def preConsume(self):
         """
-        Defines how an agent interacts with the resource.
+        Sets up the consume() method.
         """
 
         self.is_active = False
         self.timer.set(self._cool_down)
-        return self._reward
 
     def deplete_resource(self) -> None:
         """
@@ -78,3 +75,14 @@ class BaseResource(ABC):
         self.position = position
         self.is_active = True
         self.timer.set(self._LIFE_SPAN)
+
+    # ================= #
+    #      Abstract     #
+    # ================= #
+
+
+    @abstractmethod
+    def consume(self) -> int:
+        """
+        Defines how an agent interacts with the resource.
+        """

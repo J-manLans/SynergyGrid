@@ -6,13 +6,6 @@ class ResourceCategory(Enum):
     SYNERGY = 1
 
 
-class Tier(Enum):
-    ZERO = 0
-    ONE = 1
-    TWO = 2
-    THREE = 3
-
-
 class SynergyType(Enum):
     TIER = 0
 
@@ -24,7 +17,7 @@ class DirectType(Enum):
 
 class ResourceMeta:
     def __init__(
-        self, category: ResourceCategory, subtype: DirectType | SynergyType, tier: Tier
+        self, category: ResourceCategory, subtype: DirectType | SynergyType, tier: int
     ):
         self.category = category # For finding correct image to render together with subtype
         self.subtype = subtype # Render + for identifying subtype to the agent
