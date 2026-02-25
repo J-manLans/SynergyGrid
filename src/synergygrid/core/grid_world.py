@@ -5,6 +5,7 @@ from synergygrid.core import (
     BaseResource,
     PositiveResource,
     NegativeResource,
+    TierResource
 )
 import numpy as np
 from numpy.random import Generator, default_rng
@@ -21,7 +22,7 @@ class GridWorld:
     #       Init        #
     # ================= #
 
-    def __init__(self, max_active_resources: int, grid_rows: int, grid_cols: int):
+    def __init__(self, max_active_resources: int, grid_rows: int, grid_cols: int, max_tier:int = 3):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
         """
@@ -31,7 +32,7 @@ class GridWorld:
         self.grid_cols = grid_cols
         self._agent = SynergyAgent(grid_rows, grid_cols)
 
-        self._ALL_RESOURCES = self._create_resources(self._max_active_resources)
+        self._ALL_RESOURCES = self._create_resources(max_tier)
 
     def reset(self, rng: Generator | None = None) -> None:
         """
@@ -98,20 +99,32 @@ class GridWorld:
 
     # === Init === #
 
-    def _create_resources(
-        self, max_active_resources: int, ratio=(0.75, 0.25)
-    ) -> list[BaseResource]:
-        # TODO: the ratio works for two resource types, need to look over this when more is added
-        n_pos = max(1, int(max_active_resources * ratio[0]))
-        n_neg = max_active_resources - n_pos
-
+    def _create_resources(self, max_tier: int) -> list[BaseResource]:
         resources = []
+        n_pos = n_neg = n_tier = 0
+
+        if max_tier > 0:
+            ratio=(0.50, 0.20, 0.30)
+            n_pos = self.compute_spawn_count(ratio[0])
+            n_neg = self.compute_spawn_count(ratio[1])
+            n_tier = self.compute_spawn_count(ratio[2])
+        else:
+            ratio=(0.75, 0.25)
+            n_pos = self.compute_spawn_count(ratio[0])
+            n_neg = self.compute_spawn_count(ratio[1])
+
         for _ in range(n_pos):
             resources.append(PositiveResource((self.grid_rows, self.grid_cols)))
         for _ in range(n_neg):
             resources.append(NegativeResource((self.grid_rows, self.grid_cols)))
+        for tier in range(1, max_tier + 1):
+            for _ in range(n_tier):
+                resources.append(TierResource(tier, (self.grid_rows, self.grid_cols)))
 
         return resources
+
+    def compute_spawn_count(self, ratio: float) -> int:
+        return  max(1, int(self._max_active_resources * ratio + 0.5))
 
     # === API === #
 

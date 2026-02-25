@@ -26,6 +26,6 @@ class NegativeResource(BaseResource):
             ResourceMeta(
                 category=ResourceCategory.DIRECT,
                 subtype=DirectType.NEGATIVE,
-                tier=Tier.ZERO,
-            ),
+                tier=Tier.ZERO
+            )
         )

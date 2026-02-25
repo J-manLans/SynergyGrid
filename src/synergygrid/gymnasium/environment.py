@@ -89,7 +89,7 @@ class SynergyGridEnv(gym.Env):
         return self._normalize_obs(obs), reward, terminated, truncated, {}
 
     def render(self) -> None:
-        self._renderer.render_with_animation(
+        self._renderer.render(
             self._world._agent.position,
             self._world.get_resource_is_active_status(),
             self._world.get_resource_positions(),

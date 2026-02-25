@@ -9,6 +9,7 @@ class BaseResource(ABC):
     position = [np.int64(0), np.int64(0)]
     _cool_down: int
     _LIFE_SPAN: Final[int]
+    _POSITIVE_BASE_REWARD: Final[int] = 5
 
     class Timer:
         def __init__(self):

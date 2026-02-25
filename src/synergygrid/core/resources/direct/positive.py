@@ -3,7 +3,7 @@ from synergygrid.core.resources import (
     ResourceMeta,
     ResourceCategory,
     DirectType,
-    Tier,
+    Tier
 )
 
 
@@ -17,15 +17,15 @@ class PositiveResource(BaseResource):
     # ================= #
 
     def __init__(
-        self, world_boundaries: tuple[int, int], reward: int = 5, cool_down: int = 5
+        self, world_boundaries: tuple[int, int], cool_down: int = 5
     ):
         super().__init__(
             world_boundaries,
-            reward,
+            self._POSITIVE_BASE_REWARD,
             cool_down,
             ResourceMeta(
                 category=ResourceCategory.DIRECT,
                 subtype=DirectType.POSITIVE,
-                tier=Tier.ZERO,
-            ),
+                tier=Tier.ZERO
+            )
         )
