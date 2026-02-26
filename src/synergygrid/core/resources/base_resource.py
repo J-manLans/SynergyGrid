@@ -10,6 +10,7 @@ class BaseResource(ABC):
     _cool_down: int
     _LIFE_SPAN: Final[int]
     _POSITIVE_BASE_REWARD: Final[int] = 5
+    _chained_tiers: list[int]
 
     class Timer:
         def __init__(self):

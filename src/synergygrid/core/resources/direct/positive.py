@@ -9,6 +9,8 @@ from synergygrid.core.resources import (
 class PositiveResource(BaseResource):
     """
     A resource that gives the agent a positive score.
+
+    It also serves as a base for the tier resource chain.
     """
 
     # ================= #
