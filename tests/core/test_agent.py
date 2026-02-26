@@ -2,50 +2,102 @@ import pytest
 from synergygrid.core.agent import AgentAction, SynergyAgent
 
 
-class DummyResource:
+class DummyPositiveResource:
     """
-    Minimal stub resource used for testing.
+    Minimal stub resource for testing.
 
-    Simulates a resource that always returns a fixed reward
-    when consumed. This isolates the agent logic from the
-    actual resource implementation.
+    Simulates a resource that always returns a fixed positive reward
+    when consumed. Used to isolate agent logic from resource logic.
     """
     def consume(self):
         return 5
+
+
+class DummyNegativeResource:
+    """
+    Minimal stub resource for testing.
+
+    Simulates a resource that always returns a fixed negative reward
+    when consumed. Used to test score deduction logic.
+    """
+    def consume(self):
+        return -5
 
 
 class TestAgent:
     """
     Unit tests for the SynergyAgent class.
 
-    Verifies:
-    - Initial positioning and score initialization
-    - Movement behavior for all valid actions
-    - Boundary handling at grid edges
-    - Reset functionality
-    - Resource consumption and score updates
+    Tests cover:
+    - Agent initialization and score
+    - Movement in all directions
+    - Boundary handling
+    - Reset behavior
+    - Resource consumption (positive and negative)
+    - Edge cases (minimal grid, invalid inputs)
     """
 
     @pytest.fixture
     def agent(self):
         """
-        Creates a SynergyAgent instance on a 6x6 grid
-        with a starting score of 10 and resets it to
-        its initial state.
+        Returns a SynergyAgent instance on a 6x6 grid with a starting score of 10,
+        reset to its initial state. Used as a reusable fixture for most tests.
         """
         agent = SynergyAgent(grid_rows=6, grid_cols=6, starting_score=10)
         agent.reset()
 
         return agent
 
-    def test_initial_position_center(self, agent):
+    @pytest.mark.parametrize(
+        "y, x, expected_position",
+        [
+            (6, 6, [3, 3]),
+            (5, 5, [2, 2]),
+            (1, 1, [0, 0]),
+        ]
+    )
+    def test_initial_positions(self, y, x, expected_position):
         """
-        Ensures that after reset:
-        - The agent starts in the center of the grid.
-        - The score is initialized correctly.
+        Check that the agent starts at the center of the grid when reset,
+        for various grid sizes.
         """
-        assert agent.position == [3, 3]
-        assert agent.score == 10
+        agent = SynergyAgent(grid_rows=y, grid_cols=x)
+        agent.reset()
+
+        assert agent.position == expected_position
+
+    @pytest.mark.parametrize(
+        "y, x",
+        [
+            (1, 0),
+            (0, 1),
+            (0, 0)
+        ]
+    )
+    def test_invalid_initial_positions(self, y, x):
+        """
+        Ensure that creating a SynergyAgent with invalid grid dimensions
+        (rows or columns <= 0) raises a ValueError.
+        """
+        with pytest.raises(ValueError):
+            SynergyAgent(y, x)
+
+    @pytest.mark.parametrize(
+        "score",
+        [
+            100,
+            0,
+            -100
+        ]
+    )
+    def test_initial_score(self, score):
+        """
+        Ensure that the agent's score is initialized to the starting value
+        after creation.
+        """
+        agent = SynergyAgent(1, 1, score)
+
+        assert agent.score == score
 
     @pytest.mark.parametrize(
         "action, expected_position",
@@ -54,16 +106,31 @@ class TestAgent:
             (AgentAction.LEFT, [3, 2]),
             (AgentAction.UP, [2, 3]),
             (AgentAction.DOWN, [4, 3]),
-        ],
+        ]
     )
     def test_movement(self, agent, action, expected_position):
         """
-        Verifies that each movement action correctly
-        updates the agent's position when not at a boundary.
+        Verify that each movement action correctly updates the agent's position
+        when not at a boundary.
         """
         agent.perform_action(action)
 
         assert agent.position == expected_position
+
+    @pytest.mark.parametrize(
+        "action",
+        [
+            None,
+            "LEFT"
+        ]
+    )
+    def test_invalid_movement(self, agent, action):
+        """
+        Ensure that passing an invalid value to perform_action
+        (anything other than an AgentAction enum) raises a TypeError.
+        """
+        with pytest.raises(TypeError):
+            agent.perform_action(action)
 
     @pytest.mark.parametrize(
         "position, action, expected_position",
@@ -76,18 +143,38 @@ class TestAgent:
     )
     def test_boundaries(self, agent, position, action, expected_position):
         """
-        Ensures that the agent does not move outside
-        the grid boundaries when attempting invalid moves.
+        Ensure the agent does not move outside the grid boundaries
+        when attempting moves at edges.
         """
-        agent.position = position
+        agent.position = position.copy()
         agent.perform_action(action)
 
         assert agent.position == expected_position
 
+    @pytest.mark.parametrize(
+        "action",
+        [
+            AgentAction.LEFT,
+            AgentAction.RIGHT,
+            AgentAction.UP,
+            AgentAction.DOWN
+        ]
+    )
+    def test_edge_case_boundaries(self, action):
+        """
+        Verify that on a minimal 1x1 grid, the agent cannot move
+        in any direction and remains at [0, 0].
+        """
+        agent = SynergyAgent(1, 1)
+        agent.reset()
+        agent.perform_action(action)
+
+        assert agent.position == [0, 0]
+
     def test_reset_restores_position(self, agent):
         """
-        Ensures that calling reset() restores the agent's
-        position to the center of the grid.
+        Ensure that calling reset() restores the agent's position
+        to the center of the grid.
         """
         starting_position = agent.position.copy()
         agent.position = [0, 0]
@@ -97,23 +184,33 @@ class TestAgent:
 
     def test_reset_restores_score(self, agent):
         """
-        Ensures that calling reset() restores the agent's
-        score to its original starting value.
+        Ensure that calling reset() restores the agent's score
+        to its original starting value.
         """
         starting_score = agent.score
         agent.score += 10
         agent.reset()
-        
+
         assert agent.score == starting_score
 
     def test_consume_resource_adds_score(self, agent):
         """
-        Verifies that consuming a resource:
-        - Returns the correct reward value
-        - Increases the agent's score accordingly
+        Verify that consuming a positive resource increases the agent's score
+        and returns the correct reward value.
         """
-        resource = DummyResource()
+        resource = DummyPositiveResource()
         reward = agent.consume_resource(resource)
 
         assert reward == 5
         assert agent.score == 15
+
+    def test_consume_negative_resource_reduces_score(self, agent):
+        """
+        Verify that consuming a negative resource decreases the agent's score
+        and returns the correct negative reward value.
+        """
+        resource = DummyNegativeResource()
+        reward = agent.consume_resource(resource)
+
+        assert reward == -5
+        assert agent.score == 5
