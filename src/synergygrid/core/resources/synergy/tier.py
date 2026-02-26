@@ -16,8 +16,8 @@ class TierResource(BaseResource):
     """
 
     _REWARD: Final[int]
-    _reward_growth: str = 'linear'
-    _scoring_type: str = 'step wise'
+    _linear_reward_growth: bool = True
+    _step_wise_scoring_type: bool = True
 
 
     # ================= #
@@ -25,7 +25,7 @@ class TierResource(BaseResource):
     # ================= #
 
     def __init__(
-        self, tier, world_boundaries: tuple[int, int], cool_down: int = 10
+        self, tier, world_boundaries: tuple[int, int], cool_down: int = 10, _step_wise_scoring_type: bool = True
     ):
         self._REWARD = self._calculate_reward(tier + 1)
 
@@ -42,10 +42,11 @@ class TierResource(BaseResource):
     def _calculate_reward(self, multiplier: int) -> int:
         reward = 0
 
-        if self._reward_growth == 'linear':
+        if self._linear_reward_growth:
             reward = self._POSITIVE_BASE_REWARD * multiplier
-        # TODO: just for experimenting if incentive structure change if we power up the reward
-        elif self._reward_growth == 'exponential':
+        # TODO: just for testing if incentive structure for the agent changes if we power up the
+        # reward, remove if not necessary
+        else:
             reward = int(self._POSITIVE_BASE_REWARD * (1.5 ** multiplier))
 
         return reward
@@ -55,25 +56,26 @@ class TierResource(BaseResource):
     # ================= #
 
     def consume(self) -> int:
-        super().preConsume()
+        super()._consume()
 
         # If no tiers have been chained yet, just return nothing
         if len(self._chained_tiers) == 0:
             return 0
 
-        if self._scoring_type == 'step wise':
-            # If the last chained tier was the one below this one, return the reward
-            if self._chained_tiers[-1] == self.type.tier - 1:
-                self._chained_tiers.append(self.type.tier)
-                return self._REWARD
+        # Two types of scoring:
+        # Reward at every correct collected tier resource
+        if self._step_wise_scoring_type:
+            return self._resolve_tier_progression(self._REWARD, 0)
 
-            # Clear the chain array and return 0 else
-            self._chained_tiers.clear()
-            return 0
-        else:
-            if self._chained_tiers[-1] == self.type.tier - 1:
-                self._chained_tiers.append(self.type.tier)
-                return 0
+        # Or reward only when the current chain is broken
+        return self._resolve_tier_progression(0, self._REWARD)
 
-            self._chained_tiers.clear()
-            return self._REWARD
+    # ================= #
+    #      Helpers      #
+    # ================= #
+
+    def _resolve_tier_progression(self, chain_reward: int, break_reward: int) -> int:
+        if self._chained_tiers[-1] == self.meta.tier - 1:
+            return super()._chain_tier(chain_reward)
+
+        return super()._break_tier_chain(break_reward)

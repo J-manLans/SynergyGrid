@@ -88,7 +88,7 @@ class GridWorld:
         return [r.is_active for r in self._ALL_RESOURCES]
 
     def get_resource_types(self) -> list[ResourceMeta]:
-        return [r.type for r in self._ALL_RESOURCES]
+        return [r.meta for r in self._ALL_RESOURCES]
 
     def get_resource_timers(self) -> list[BaseResource.Timer]:
         return [r.timer for r in self._ALL_RESOURCES]

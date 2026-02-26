@@ -35,8 +35,6 @@ class NegativeResource(BaseResource):
     #        API        #
     # ================= #
 
-    # TODO: continue here
-
     def consume(self) -> int:
-        super().preConsume()
-        return self._REWARD
+        super()._consume()
+        return super()._break_tier_chain(self._REWARD)
