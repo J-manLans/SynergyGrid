@@ -35,5 +35,5 @@ class PositiveResource(BaseResource):
     # ================= #
 
     def consume(self) -> int:
-        super().preConsume()
-        return self._POSITIVE_BASE_REWARD
+        super()._consume()
+        return super()._chain_tier(self._POSITIVE_BASE_REWARD)
