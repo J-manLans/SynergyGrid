@@ -1,6 +1,5 @@
 from enum import Enum
 from synergygrid.core.resources import BaseResource
-from typing import Final
 
 
 class AgentAction(Enum):

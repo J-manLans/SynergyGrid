@@ -10,6 +10,7 @@ class DummyResource:
     when consumed. This isolates the agent logic from the
     actual resource implementation.
     """
+
     def consume(self):
         return 5
 
@@ -103,7 +104,7 @@ class TestAgent:
         starting_score = agent.score
         agent.score += 10
         agent.reset()
-        
+
         assert agent.score == starting_score
 
     def test_consume_resource_adds_score(self, agent):

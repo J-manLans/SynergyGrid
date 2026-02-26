@@ -15,17 +15,15 @@ class TierResource(BaseResource):
     To get reward for a tier 3 resource a tier 0, tier 1 and tier 2 must have first been collected on that order without breaking the chain.
     """
 
-    _REWARD: Final[int]
     _linear_reward_growth: bool = True
     _step_wise_scoring_type: bool = True
-
 
     # ================= #
     #       Init        #
     # ================= #
 
     def __init__(
-        self, tier, world_boundaries: tuple[int, int], cool_down: int = 10, _step_wise_scoring_type: bool = True
+        self, tier, world_boundaries: tuple[int, int], cool_down: int = 10
     ):
         self._REWARD = self._calculate_reward(tier + 1)
 
@@ -38,18 +36,6 @@ class TierResource(BaseResource):
                 tier=tier
             )
         )
-
-    def _calculate_reward(self, multiplier: int) -> int:
-        reward = 0
-
-        if self._linear_reward_growth:
-            reward = self._POSITIVE_BASE_REWARD * multiplier
-        # TODO: just for testing if incentive structure for the agent changes if we power up the
-        # reward, remove if not necessary
-        else:
-            reward = int(self._POSITIVE_BASE_REWARD * (1.5 ** multiplier))
-
-        return reward
 
     # ================= #
     #        API        #
@@ -73,6 +59,18 @@ class TierResource(BaseResource):
     # ================= #
     #      Helpers      #
     # ================= #
+
+    def _calculate_reward(self, multiplier: int) -> int:
+        reward = 0
+
+        if self._linear_reward_growth:
+            reward = self._POSITIVE_BASE_REWARD * multiplier
+        # TODO: just for testing if incentive structure for the agent changes if we power up the
+        # reward, remove if not necessary
+        else:
+            reward = int(self._POSITIVE_BASE_REWARD * (1.5 ** multiplier))
+
+        return reward
 
     def _resolve_tier_progression(self, chain_reward: int, break_reward: int) -> int:
         if self._chained_tiers[-1] == self.meta.tier - 1:

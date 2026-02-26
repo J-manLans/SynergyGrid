@@ -91,9 +91,9 @@ class SynergyGridEnv(gym.Env):
     def render(self) -> None:
         self._renderer.render(
             self._world._agent.position,
-            self._world.get_resource_is_active_status(),
-            self._world.get_resource_positions(),
-            self._world.get_resource_types(),
+            self._world.get_resource_is_active_status(True),
+            self._world.get_resource_positions(True),
+            self._world.get_resource_types(True),
             self._world._agent.score,
         )
 
@@ -231,10 +231,10 @@ class SynergyGridEnv(gym.Env):
         obs: list[float] = [self._step_count_down, agent_row, agent_col]
 
         # Cache resource info
-        positions = self._world.get_resource_positions()
-        types = self._world.get_resource_types()
-        timers = self._world.get_resource_timers()
-        active = self._world.get_resource_is_active_status()
+        positions = self._world.get_resource_positions(False)
+        types = self._world.get_resource_types(False)
+        timers = self._world.get_resource_timers(False)
+        active = self._world.get_resource_is_active_status(False)
 
         # For each resource slot, append (row, col, type, timer) or absent values
         for i in range(self.max_active_resources):

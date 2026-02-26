@@ -81,16 +81,28 @@ class GridWorld:
 
     # === Getters === #
 
-    def get_resource_positions(self) -> list[list[np.int64]]:
+    def get_resource_positions(self, rendering: bool) -> list[list[np.int64]]:
+        if rendering:
+            return [r.position for r in self._active_resources]
+
         return [r.position for r in self._ALL_RESOURCES]
 
-    def get_resource_is_active_status(self) -> list[bool]:
+    def get_resource_is_active_status(self, rendering: bool) -> list[bool]:
+        if rendering:
+            return [r.is_active for r in self._active_resources]
+
         return [r.is_active for r in self._ALL_RESOURCES]
 
-    def get_resource_types(self) -> list[ResourceMeta]:
+    def get_resource_types(self, rendering: bool) -> list[ResourceMeta]:
+        if rendering:
+            return [r.meta for r in self._active_resources]
+
         return [r.meta for r in self._ALL_RESOURCES]
 
-    def get_resource_timers(self) -> list[BaseResource.Timer]:
+    def get_resource_timers(self, rendering: bool) -> list[BaseResource.Timer]:
+        if rendering:
+            return [r.timer for r in self._active_resources]
+
         return [r.timer for r in self._ALL_RESOURCES]
 
     # ================= #

@@ -56,6 +56,7 @@ extras = [
 dev = [
     "pygame>=2.6",
     "matplotlib>=3.10",
+    "pytest>=9.0.2", # pytest -v path/to/file.py
     "stable-baselines3[extra]>=2.7.1",
     "swig>=4.4.1", # Generates Python bindings for C/C++ libs (needed for Box2D)
     "gymnasium[box2d]>=1.2", # RL environments with Box2D physics (LunarLander and BipedalWalker)
