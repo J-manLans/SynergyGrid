@@ -5,16 +5,12 @@ from typing import Final
 
 
 class BaseResource(ABC):
+    position = [np.int64(-1), np.int64(-1)]
     is_active = False
-    position = [np.int64(0), np.int64(0)]
-
-    _cool_down: int
     # TODO: this will be used by the obs space for an optional difficulty where the agent will be
     # aware of the current completed chain. Probably will be wise to break the obs space
     # functionality into it's own file, cause it will grow quite a bit I imagine
     _chained_tiers: Final[list[int]] = []
-
-    _LIFE_SPAN: Final[int]
     _POSITIVE_BASE_REWARD: Final[int] = 5
 
     class Timer:
@@ -79,7 +75,7 @@ class BaseResource(ABC):
         """Defines how an agent interacts with the resource."""
 
     # ================= #
-    #      Helpers     #
+    #      Helpers      #
     # ================= #
 
     def _consume(self):
