@@ -54,7 +54,7 @@ class SynergyGridEnv(gym.Env):
         self.observation_handler = ObservationHandler(
             self._world, grid_rows, grid_cols, max_steps, self._step_count_down
         )
-        self.observation_space = self.observation_handler._setup_obs_space()
+        self.observation_space = self.observation_handler.setup_obs_space()
 
     # ======================== #
     #    Gymnasium contract    #
@@ -73,10 +73,10 @@ class SynergyGridEnv(gym.Env):
         if self.render_mode == "human":
             self.render()
 
-        obs = self.observation_handler._get_observation()
+        obs = self.observation_handler.get_observation()
 
         # Return observation and info (not used)
-        return self.observation_handler._normalize_obs(obs), {}
+        return self.observation_handler.normalize_obs(obs), {}
 
     def step(
         self, action: AgentAction
@@ -90,10 +90,10 @@ class SynergyGridEnv(gym.Env):
         if self.render_mode == "human":
             self.render()
 
-        obs = self.observation_handler._get_observation()
+        obs = self.observation_handler.get_observation()
 
         # Return observation, reward, terminated, truncated and info (not used)
-        return self.observation_handler._normalize_obs(obs), reward, terminated, truncated, {}
+        return self.observation_handler.normalize_obs(obs), reward, terminated, truncated, {}
 
     def render(self) -> None:
         self._renderer.render(
