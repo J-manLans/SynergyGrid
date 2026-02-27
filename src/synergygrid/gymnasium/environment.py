@@ -1,9 +1,6 @@
 import gymnasium as gym
 from gymnasium import spaces
-import numpy as np
-from numpy.typing import NDArray
-from typing import Any
-from synergygrid.core import GridWorld, AgentAction, DirectType, ResourceCategory, BaseResource
+from synergygrid.core import GridWorld, AgentAction
 from synergygrid.rendering import PygameRenderer
 from synergygrid.gymnasium import ObservationHandler
 
@@ -60,9 +57,7 @@ class SynergyGridEnv(gym.Env):
     #    Gymnasium contract    #
     # ======================== #
 
-    def reset(
-        self, *, seed=None, options=None
-    ) -> tuple[NDArray[np.float32], dict[str, Any]]:
+    def reset(self, *, seed=None, options=None):
         # Gymnasium requires this call to control randomness and reproduce scenarios.
         super().reset(seed=seed)
 
@@ -78,9 +73,7 @@ class SynergyGridEnv(gym.Env):
         # Return observation and info (not used)
         return self.observation_handler.normalize_obs(obs), {}
 
-    def step(
-        self, action: AgentAction
-    ) -> tuple[NDArray[np.float32], int, bool, bool, dict[str, Any]]:
+    def step(self, action: AgentAction):
         # Perform action and adjust variables affected by it
         reward = self._world.perform_agent_action(AgentAction(action))
         self._step_count_down -= 1
@@ -93,7 +86,13 @@ class SynergyGridEnv(gym.Env):
         obs = self.observation_handler.get_observation()
 
         # Return observation, reward, terminated, truncated and info (not used)
-        return self.observation_handler.normalize_obs(obs), reward, terminated, truncated, {}
+        return (
+            self.observation_handler.normalize_obs(obs),
+            reward,
+            terminated,
+            truncated,
+            {},
+        )
 
     def render(self) -> None:
         self._renderer.render(
