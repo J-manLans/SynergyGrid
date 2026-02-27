@@ -70,36 +70,27 @@ class ObservationHandler:
             self._build_resource_box_bounds(True)
         )
 
-        self.observation_space = spaces.Dict(
-            {
-                "agent data": spaces.Box(
-                    # steps, row, col, current tier chain
-                    low=self._agent_low_norm,
-                    high=self._agent_high_norm,
-                    dtype=np.float32,
-                ),
-                "resources data": spaces.Box(
-                    # row, col, timer, tier
-                    low=self._resource_low_norm,
-                    high=self._resource_high_norm,
-                    dtype=np.float32,
-                ),
-                "resources type": spaces.MultiDiscrete(
-                    np.array(
-                        [
-                            [
-                                len(ResourceCategory),
-                                max(len(SynergyType), len(DirectType)),
-                            ]
-                        ]
-                        * len(self._world._ALL_RESOURCES)
-                    ),
-                    dtype=np.int64
-                )
-            }
-        )
+        self.observation_space: dict[str, spaces.Space] = {
+            "agent data": spaces.Box(
+                # steps, row, col, current tier chain
+                low=self._agent_low_norm,
+                high=self._agent_high_norm,
+                dtype=np.float32,
+            ),
+            "resources data": spaces.Box(
+                # row, col, timer, tier
+                low=self._resource_low_norm,
+                high=self._resource_high_norm,
+                dtype=np.float32,
+            )
+        }
 
-        return self.observation_space
+        for i in range(len(self._world._ALL_RESOURCES)):
+            self.observation_space[f"resource_{i}_category"] = spaces.Discrete(len(ResourceCategory))
+            self.observation_space[f"resource_{i}_kind"] = spaces.Discrete(max(len(SynergyType), len(DirectType)))
+
+
+        return spaces.Dict(self.observation_space)
 
     def get_observation(self) -> dict[str, Any]:
         agent_row, agent_col = self._world._agent.position
@@ -121,7 +112,6 @@ class ObservationHandler:
         N = len(self._world._ALL_RESOURCES)
 
         resource_data = np.tile(np.array([-1.0, -1.0, 0.0, -1.0], dtype=np.float32), (N, 1))
-        resource_type = np.zeros((N, 2), dtype=np.int64)
 
         active = self._world.get_resource_is_active_status(False)
         positions = self._world.get_resource_positions(False)
@@ -129,13 +119,18 @@ class ObservationHandler:
         tiers = self._world.get_resource_tiers(False)
         types = self._world.get_resource_types(False)
 
+        obs = {
+            "agent data": agent_data,
+            "resources data": resource_data,
+        }
+
         for i in range(N):
-            r_category = types[i].category.value
-            r_type = types[i].type.value
-            resource_type[i] = [
-                int(r_category),
-                int(r_type),
-            ]
+            r_category = int(types[i].category.value)
+            r_type = int(types[i].type.value)
+
+            obs[f"resource_{i}_category"] = r_category
+            obs[f"resource_{i}_kind"] = r_type
+
             if i < len(active) and active[i]:
                 pos = positions[i]
                 r_timer = timers[i].remaining
@@ -148,11 +143,7 @@ class ObservationHandler:
                     float(r_tier),
                 ]
 
-        return {
-            "agent data": agent_data,
-            "resources data": resource_data,
-            "resources type": resource_type,
-        }
+        return obs
 
     def normalize_obs(self, obs: dict[str, Any]) -> dict[str, Any]:
         # --- Agent --- #
@@ -172,14 +163,19 @@ class ObservationHandler:
             )
             norm_res[i] = norm_row
 
-        # --- Types unchanged --- #
-        res_type = obs["resources type"]
-
-        return {
+        norm_obs = {
             "agent data": norm_agent,
             "resources data": norm_res,
-            "resources type": res_type,
         }
+
+         # ---- Keep Discrete values unchanged ----
+        N = len(self._world._ALL_RESOURCES)
+
+        for i in range(N):
+            norm_obs[f"resource_{i}_category"] = obs[f"resource_{i}_category"]
+            norm_obs[f"resource_{i}_kind"] = obs[f"resource_{i}_kind"]
+
+        return norm_obs
 
     # ================== #
     #       Helpers      #
