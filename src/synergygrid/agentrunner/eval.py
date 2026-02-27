@@ -20,9 +20,7 @@ def evaluate_agent(runner: AgentRunner, agent_steps: str, trained_model: bool):
             # Predict action from the model
             action, _ = model.predict(obs)
             return action
-
     else:
-
         def get_action(obs):
             # Sample a random action
             action = env.action_space.sample()

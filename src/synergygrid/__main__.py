@@ -76,9 +76,9 @@ def main():
         # Pick algorithm to train or evaluate
         algorithm = alg[0]
         # Choose to use an agent or just random sampling (for debugging the environment)
-        agent = False
+        agent = True
         # Choose to train or run the agent
-        training = True
+        training = False if agent == False else True
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
