@@ -70,6 +70,8 @@ class SynergyGridEnv(gym.Env):
 
         obs = self.observation_handler.get_observation()
 
+        norm_obs = self.observation_handler.normalize_obs(obs)
+
         # Return observation and info (not used)
         return self.observation_handler.normalize_obs(obs), {}
 
@@ -84,6 +86,8 @@ class SynergyGridEnv(gym.Env):
             self.render()
 
         obs = self.observation_handler.get_observation()
+
+        norm_obs = self.observation_handler.normalize_obs(obs)
 
         # Return observation, reward, terminated, truncated and info (not used)
         return (

@@ -78,15 +78,15 @@ def main():
         # Choose to use an agent or just random sampling (for debugging the environment)
         agent = False
         # Choose to train or run the agent
-        training = False
+        training = True
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
         agent_steps = "409600"
         # Num of timesteps for training or model selection when running
-        timesteps = 10000
+        timesteps = 100000
         # Number of training iterations
-        iterations = 40
+        iterations = 4
     else:
         args = __parse_args()  # python -m experiments -h for info
         algorithm = args.alg
