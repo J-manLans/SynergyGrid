@@ -72,43 +72,36 @@ class ObservationHandler:
 
         self.observation_space = spaces.Dict(
             {
-                "agent": spaces.Dict(
-                    {
-                        "data": spaces.Box(
-                            # steps, row, col, current tier chain
-                            low=self._agent_low_norm,
-                            high=self._agent_high_norm,
-                            dtype=np.float32,
-                        )
-                    }
+                "agent data": spaces.Box(
+                    # steps, row, col, current tier chain
+                    low=self._agent_low_norm,
+                    high=self._agent_high_norm,
+                    dtype=np.float32,
                 ),
-                "resources": spaces.Dict(
-                    {
-                        "data": spaces.Box(
-                            # row, col, timer, tier
-                            low=self._resource_low_norm,
-                            high=self._resource_high_norm,
-                            dtype=np.float32,
-                        ),
-                        "type": spaces.MultiDiscrete(
-                            np.array(
-                                [
-                                    [
-                                        len(ResourceCategory),
-                                        max(len(SynergyType), len(DirectType)),
-                                    ]
-                                ]
-                                * len(self._world._ALL_RESOURCES)
-                            )
-                        ),
-                    }
+                "resources data": spaces.Box(
+                    # row, col, timer, tier
+                    low=self._resource_low_norm,
+                    high=self._resource_high_norm,
+                    dtype=np.float32,
                 ),
+                "resources type": spaces.MultiDiscrete(
+                    np.array(
+                        [
+                            [
+                                len(ResourceCategory),
+                                max(len(SynergyType), len(DirectType)),
+                            ]
+                        ]
+                        * len(self._world._ALL_RESOURCES)
+                    ),
+                    dtype=np.int64
+                )
             }
         )
 
         return self.observation_space
 
-    def get_observation(self) -> dict[str, dict[str, Any]]:
+    def get_observation(self) -> dict[str, Any]:
         agent_row, agent_col = self._world._agent.position
 
         # ---- Agent ----
@@ -127,7 +120,7 @@ class ObservationHandler:
         # ---- Resources ----
         N = len(self._world._ALL_RESOURCES)
 
-        resource_data = np.full((N, 4), [-1.0, -1.0, 0.0, -1.0], dtype=np.float32)
+        resource_data = np.tile(np.array([-1.0, -1.0, 0.0, -1.0], dtype=np.float32), (N, 1))
         resource_type = np.zeros((N, 2), dtype=np.int64)
 
         active = self._world.get_resource_is_active_status(False)
@@ -156,24 +149,20 @@ class ObservationHandler:
                 ]
 
         return {
-            "agent": {"data": agent_data},
-            "resources": {
-                "data": resource_data,
-                "type": resource_type,
-            },
+            "agent data": agent_data,
+            "resources data": resource_data,
+            "resources type": resource_type,
         }
 
-    def normalize_obs(
-        self, obs: dict[str, dict[str, Any]]
-    ) -> dict[str, dict[str, Any]]:
+    def normalize_obs(self, obs: dict[str, Any]) -> dict[str, Any]:
         # --- Agent --- #
-        agent = obs["agent"]["data"].astype(np.float32)
+        agent = obs["agent data"].astype(np.float32)
         norm_agent = self._normalize_obs_fields(
             agent, self._agent_resource_mask, self._agent_raw_high
         )
 
         # --- Resources --- #
-        norm_res = obs["resources"]["data"].astype(np.float32)
+        norm_res = obs["resources data"].astype(np.float32)
         for i in range(norm_res.shape[0]):
             row = norm_res[i]
             absent_mask = row == -1.0
@@ -184,11 +173,12 @@ class ObservationHandler:
             norm_res[i] = norm_row
 
         # --- Types unchanged --- #
-        res_type = obs["resources"]["type"]
+        res_type = obs["resources type"]
 
         return {
-            "agent": {"data": norm_agent},
-            "resources": {"data": norm_res, "type": res_type},
+            "agent data": norm_agent,
+            "resources data": norm_res,
+            "resources type": res_type,
         }
 
     # ================== #
