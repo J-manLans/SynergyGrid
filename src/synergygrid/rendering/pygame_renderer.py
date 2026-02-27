@@ -65,7 +65,7 @@ class PygameRenderer:
         is_active_statuses: list[bool],
         resource_positions: list[list[np.int64]],
         resource_types: list[ResourceMeta],
-        agent_score: int
+        agent_score: int,
     ) -> None:
         """
         Draws the game window and all its content, updates and limits the fps.
@@ -91,7 +91,7 @@ class PygameRenderer:
         self._draw_agent((col, row))
         self._draw_hud(agent_score)
 
-        self._update(self._step_fps) # TODO: also simplify this when approach is chosen
+        self._update(self._step_fps)  # TODO: also simplify this when approach is chosen
 
     def render_with_animation(
         self,
@@ -151,7 +151,7 @@ class PygameRenderer:
                 is_active_statuses,
                 resource_positions,
                 resource_types,
-                agent_score
+                agent_score,
             )
 
     # ================= #
@@ -214,13 +214,13 @@ class PygameRenderer:
             self._draw_synergy_resource(resource_meta, pos)
 
     def _draw_direct_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
-        if resource_meta.subtype == DirectType.POSITIVE:
+        if resource_meta.type == DirectType.POSITIVE:
             self.window_surface.blit(self.graphics["positive_resource"], pos)
-        elif resource_meta.subtype == DirectType.NEGATIVE:
+        elif resource_meta.type == DirectType.NEGATIVE:
             self.window_surface.blit(self.graphics["negative_resource"], pos)
 
     def _draw_synergy_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
-        if resource_meta.subtype == SynergyType.TIER:
+        if resource_meta.type == SynergyType.TIER:
             self._draw_tier_resource(resource_meta, pos)
 
     def _draw_tier_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):

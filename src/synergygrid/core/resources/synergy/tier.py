@@ -2,7 +2,7 @@ from synergygrid.core.resources import (
     BaseResource,
     ResourceMeta,
     ResourceCategory,
-    SynergyType
+    SynergyType,
 )
 from typing import Final
 
@@ -22,19 +22,15 @@ class TierResource(BaseResource):
     #       Init        #
     # ================= #
 
-    def __init__(
-        self, tier, world_boundaries: tuple[int, int], cool_down: int = 10
-    ):
+    def __init__(self, tier, world_boundaries: tuple[int, int], cool_down: int = 10):
         self._REWARD = self._calculate_reward(tier + 1)
 
         super().__init__(
             world_boundaries,
             cool_down,
             ResourceMeta(
-                category=ResourceCategory.SYNERGY,
-                subtype=SynergyType.TIER,
-                tier=tier
-            )
+                category=ResourceCategory.SYNERGY, type=SynergyType.TIER, tier=tier
+            ),
         )
 
     # ================= #
@@ -68,7 +64,7 @@ class TierResource(BaseResource):
         # TODO: just for testing if incentive structure for the agent changes if we power up the
         # reward, remove if not necessary
         else:
-            reward = int(self._POSITIVE_BASE_REWARD * (1.5 ** multiplier))
+            reward = int(self._POSITIVE_BASE_REWARD * (1.5**multiplier))
 
         return reward
 

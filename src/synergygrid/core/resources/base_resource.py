@@ -37,6 +37,9 @@ class BaseResource(ABC):
         cool_down: int,
         meta: ResourceMeta,
     ):
+        if world_boundaries[0] <= 1 or world_boundaries[1] <= 1:
+            raise ValueError("grid_cols and grid_rows should be larger than 0")
+
         self._world_boundaries = world_boundaries
         # Max steps needed to reach resource diagonally anywhere on the grid
         self._LIFE_SPAN = (world_boundaries[0] - 1) + (world_boundaries[1] - 1)
@@ -85,7 +88,7 @@ class BaseResource(ABC):
         self.timer.set(self._cool_down)
 
     def _chain_tier(self, reward: int) -> int:
-        """Adds the tier of the resource and return the given reward."""
+        """Adds the tier of the resource to the tiers list and return the given reward."""
 
         self._chained_tiers.append(self.meta.tier)
         return reward

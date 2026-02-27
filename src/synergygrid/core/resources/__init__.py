@@ -7,7 +7,7 @@ __all__ = [
     "BaseResource",
     "PositiveResource",
     "NegativeResource",
-    'TierResource',
+    "TierResource",
     "ResourceMeta",
     "ResourceCategory",
     "DirectType",
