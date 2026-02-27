@@ -12,7 +12,6 @@ from numpy.random import Generator, default_rng
 from typing import Final
 
 
-# TODO: make multiple active resources possible (max 3)
 class GridWorld:
     _ALL_RESOURCES: Final[list[BaseResource]]
     _inactive_resources: list[BaseResource] = []
