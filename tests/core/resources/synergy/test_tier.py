@@ -11,6 +11,17 @@ def _tier_params(max_tier=10):
 
 
 class TestTier:
+    """
+    Unit tests for the TierResource class.
+
+    Verifies:
+    - Step-wise reward behavior for correctly chained tiers
+    - Step-wise reward behavior for incomplete or invalid tier chains
+    - Combo reward behavior for correctly chained tiers
+    - Combo reward behavior for incomplete or invalid tier chains
+    - That the resource updates _chained_tiers correctly during consumption
+    """
+
     @pytest.fixture
     def tier_resource(self):
         """
@@ -20,6 +31,12 @@ class TestTier:
         tr.reset()
 
         return tr
+
+    @pytest.mark.parametrize("resource, resource_chain", _tier_params())
+    def test_correct_tier(self, resource: TierResource, resource_chain):
+        """Test that the tier is correct."""
+
+        assert resource.meta.tier == len(resource_chain)
 
     @pytest.mark.parametrize("resource, resource_chain", _tier_params())
     def test_successful_step_wise_consume(self, resource: TierResource, resource_chain):
@@ -49,7 +66,22 @@ class TestTier:
         """
         Test that combo consume returns the expected value when the tier chain is invalid for the resource.
         """
+
         tier_resource._step_wise_scoring_type = False
         tier_resource._chained_tiers.extend([0, 1, 2])
 
         assert tier_resource.consume() == tier_resource._REWARD
+
+    @pytest.mark.parametrize("resource, resource_chain", _tier_params())
+    def test_consume_updates_tiers_list(self, resource: TierResource, resource_chain):
+        """Test that consume adds the current tier to the chain correctly."""
+
+        resource.reset()
+        resource._chained_tiers.extend(resource_chain)  # setup initial chain
+        resource.consume()
+
+        assert resource._chained_tiers[-1] == resource.meta.tier
+
+        # Check correct order
+        expected_chain = list(range(resource.meta.tier + 1))
+        assert resource._chained_tiers == expected_chain

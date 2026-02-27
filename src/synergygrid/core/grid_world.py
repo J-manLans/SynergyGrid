@@ -5,7 +5,7 @@ from synergygrid.core import (
     BaseResource,
     PositiveResource,
     NegativeResource,
-    TierResource
+    TierResource,
 )
 import numpy as np
 from numpy.random import Generator, default_rng
@@ -22,14 +22,24 @@ class GridWorld:
     #       Init        #
     # ================= #
 
-    def __init__(self, max_active_resources: int, grid_rows: int, grid_cols: int, max_tier:int = 1):
+    def __init__(
+        self,
+        max_active_resources: int,
+        grid_rows: int,
+        grid_cols: int,
+        max_tier: int = 1,
+    ):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
         """
 
+        if grid_cols <= 1 or grid_rows <= 1:
+            raise ValueError("grid_cols and grid_rows should be larger than 0")
+
         self._max_active_resources = max_active_resources
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
+        self.max_tier = max_tier
         self._agent = SynergyAgent(grid_rows, grid_cols)
 
         self._ALL_RESOURCES = self._create_resources(max_tier)
@@ -105,6 +115,12 @@ class GridWorld:
 
         return [r.timer for r in self._ALL_RESOURCES]
 
+    def get_resource_tiers(self, rendering: bool) -> list[int]:
+        if rendering:
+            return [r.meta.tier for r in self._active_resources]
+
+        return [r.meta.tier for r in self._ALL_RESOURCES]
+
     # ================= #
     #      Helpers      #
     # ================= #
@@ -116,12 +132,12 @@ class GridWorld:
         n_pos = n_neg = n_tier = 0
 
         if max_tier > 0:
-            ratio=(0.50, 0.20, 0.30)
+            ratio = (0.50, 0.20, 0.30)
             n_pos = self.compute_spawn_count(ratio[0])
             n_neg = self.compute_spawn_count(ratio[1])
             n_tier = self.compute_spawn_count(ratio[2])
         else:
-            ratio=(0.75, 0.25)
+            ratio = (0.75, 0.25)
             n_pos = self.compute_spawn_count(ratio[0])
             n_neg = self.compute_spawn_count(ratio[1])
 
@@ -136,7 +152,7 @@ class GridWorld:
         return resources
 
     def compute_spawn_count(self, ratio: float) -> int:
-        return  max(1, int(self._max_active_resources * ratio + 0.5))
+        return max(1, int(self._max_active_resources * ratio + 0.5))
 
     # === API === #
 
