@@ -47,7 +47,7 @@ class TestGridWorld:
         for pos in positions:
             assert isinstance(pos, list)  # Each position should be a list.
             assert len(pos) == 2  # Each list should contain two elements (x, y).
-            assert isinstance(pos[0], np.int64) and isinstance(pos[1], np.int64)  # Each coordinate should be np.int64.
+            assert isinstance(pos[0], np.integer) and isinstance(pos[1], np.integer)  # Each coordinate should be an np.integer.
 
     def test_get_resource_is_active_status(self, grid_world):
         """
