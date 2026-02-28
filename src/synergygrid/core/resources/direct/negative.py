@@ -22,9 +22,7 @@ class NegativeResource(BaseResource):
         super().__init__(
             world_boundaries,
             cool_down,
-            ResourceMeta(
-                category=ResourceCategory.DIRECT, type=DirectType.NEGATIVE, tier=-1
-            ),
+            ResourceMeta(category=ResourceCategory.DIRECT, type=DirectType.NEGATIVE),
         )
 
     # ================= #
@@ -33,4 +31,5 @@ class NegativeResource(BaseResource):
 
     def consume(self) -> int:
         super()._consume()
-        return super()._break_tier_chain(self._REWARD)
+        super()._break_tier_chain()
+        return self._REWARD

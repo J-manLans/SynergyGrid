@@ -17,14 +17,16 @@ class DirectType(Enum):
 
 class ResourceMeta:
     def __init__(
-        self, category: ResourceCategory, type: DirectType | SynergyType, tier: int
+        self,
+        category: ResourceCategory,
+        type: DirectType | SynergyType,
+        tier: int | None = None,
     ):
         self.category = (
             category  # For finding correct image to render together with subtype
         )
         self.type = type  # Render + for identifying subtype to the agent
         # Resources tier.
-        # -1 if not applicable
-        # 0 for base (positive resource)
+        # 0 if not applicable
         # ...n for rest of the tier resources
-        self.tier = tier
+        self.tier = 0 if tier == None else tier

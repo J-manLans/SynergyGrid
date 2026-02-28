@@ -1,12 +1,12 @@
 from synergygrid.core.resources import (
-    BaseResource,
+    BaseTierResource,
     ResourceMeta,
     ResourceCategory,
     DirectType,
 )
 
 
-class PositiveResource(BaseResource):
+class PositiveResource(BaseTierResource):
     """
     A resource that gives the agent a positive score.
 
@@ -22,7 +22,7 @@ class PositiveResource(BaseResource):
             world_boundaries,
             cool_down,
             ResourceMeta(
-                category=ResourceCategory.DIRECT, type=DirectType.POSITIVE, tier=0
+                category=ResourceCategory.DIRECT, type=DirectType.POSITIVE, tier=1
             ),
         )
 
@@ -32,4 +32,15 @@ class PositiveResource(BaseResource):
 
     def consume(self) -> int:
         super()._consume()
-        return super()._chain_tier(self._POSITIVE_BASE_REWARD)
+        super()._resolve_tier_progression()
+        self._is_restart_needed()
+        return self._TIER_BASE_REWARD
+
+    # ================= #
+    #      Helpers      #
+    # ================= #
+
+    def _is_restart_needed(self):
+        """If we just broke the chain, restart it since this is the base for the tier resources"""
+        if len(self._chained_tiers) == 0:
+            super()._chain_tier()
