@@ -23,4 +23,8 @@ class ResourceMeta:
             category  # For finding correct image to render together with subtype
         )
         self.type = type  # Render + for identifying subtype to the agent
-        self.tier = tier  # TODO: clarify this when feature fully implemented
+        # Resources tier.
+        # -1 if not applicable
+        # 0 for base (positive resource)
+        # ...n for rest of the tier resources
+        self.tier = tier

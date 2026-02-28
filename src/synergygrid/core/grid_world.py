@@ -26,7 +26,7 @@ class GridWorld:
         max_active_resources: int,
         grid_rows: int,
         grid_cols: int,
-        max_tier: int = 1,
+        max_tier: int = 0,
     ):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
@@ -102,22 +102,22 @@ class GridWorld:
 
         return [r.is_active for r in self._ALL_RESOURCES]
 
-    def get_resource_types(self, rendering: bool) -> list[ResourceMeta]:
+    def get_resource_meta(self, rendering: bool) -> list[ResourceMeta]:
         if rendering:
             return [r.meta for r in self._active_resources]
 
         return [r.meta for r in self._ALL_RESOURCES]
 
-    def get_resource_timers(self, rendering: bool) -> list[BaseResource.Timer]:
-        if rendering:
-            return [r.timer for r in self._active_resources]
+    def get_resource_categories(self) -> list[int]:
+        return [r.meta.category.value for r in self._ALL_RESOURCES]
 
-        return [r.timer for r in self._ALL_RESOURCES]
+    def get_resource_types(self) -> list[int]:
+        return [r.meta.type.value for r in self._ALL_RESOURCES]
 
-    def get_resource_tiers(self, rendering: bool) -> list[int]:
-        if rendering:
-            return [r.meta.tier for r in self._active_resources]
+    def get_resource_life(self) -> list[int]:
+        return [r.timer.remaining for r in self._ALL_RESOURCES]
 
+    def get_resource_tiers(self) -> list[int]:
         return [r.meta.tier for r in self._ALL_RESOURCES]
 
     # ================= #

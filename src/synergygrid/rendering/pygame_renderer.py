@@ -64,7 +64,7 @@ class PygameRenderer:
         agent_pos: list[int],
         is_active_statuses: list[bool],
         resource_positions: list[list[np.int64]],
-        resource_types: list[ResourceMeta],
+        resource_meta: list[ResourceMeta],
         agent_score: int,
     ) -> None:
         """
@@ -86,7 +86,7 @@ class PygameRenderer:
         # Draw the graphics with pygame. blit() draws things in order, so we need to stack elements
         # in the order we want them to be drawn
         self._draw_floor_and_resources(
-            resource_positions, resource_types, is_active_statuses
+            resource_positions, resource_meta, is_active_statuses
         )
         self._draw_agent((col, row))
         self._draw_hud(agent_score)
@@ -98,7 +98,7 @@ class PygameRenderer:
         agent_pos: list[int],
         is_active_statuses: list[bool],
         resource_positions: list[list[np.int64]],
-        resource_types: list[ResourceMeta],
+        resource_meta: list[ResourceMeta],
         agent_score: int,
     ) -> None:
         """
@@ -129,7 +129,7 @@ class PygameRenderer:
                 # elements in the order we want them to be drawn
                 self._draw_floor_and_resources(
                     resource_positions,
-                    resource_types,
+                    resource_meta,
                     is_active_statuses,
                 )
                 self._draw_agent(coordinates)
@@ -150,7 +150,7 @@ class PygameRenderer:
                 agent_pos,
                 is_active_statuses,
                 resource_positions,
-                resource_types,
+                resource_meta,
                 agent_score,
             )
 
@@ -192,7 +192,7 @@ class PygameRenderer:
     # === API ===#
 
     def _draw_floor_and_resources(
-        self, resource_positions, resource_types, is_active_statuses
+        self, resource_positions, resource_meta, is_active_statuses
     ):
         """Draw floor tiles and resources"""
 
@@ -205,7 +205,7 @@ class PygameRenderer:
                     if is_active_statuses[i]:
                         res_r, res_c = resource_positions[i]
                         if (r, c) == (res_r, res_c):
-                            self._draw_resource(resource_types[i], pos)
+                            self._draw_resource(resource_meta[i], pos)
 
     def _draw_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
         if resource_meta.category == ResourceCategory.DIRECT:
