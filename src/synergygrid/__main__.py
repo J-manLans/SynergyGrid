@@ -76,7 +76,8 @@ def main():
         # Pick algorithm to train or evaluate
         algorithm = alg[0]
         # Choose to use an agent or just random sampling (for debugging the environment)
-        agent = True
+        agent = False
+        # If we want to test the game our selves
         # Choose to train or run the agent
         training = False if agent == False else False
         # Continue training from a saved model
@@ -97,7 +98,12 @@ def main():
         timesteps = args.timesteps
         iterations = args.iterations
 
+    control = True
     runner = AgentRunner(environment=env, algorithm=algorithm)
+
+    if control:
+        SynergyGridEnv(render_mode='human', control=control)
+        return
 
     if training:
         # Train agent
@@ -109,6 +115,7 @@ def main():
             iterations=iterations,
         )
     else:
+
         # Run environment with agent
         evaluate_agent(runner, agent_steps, agent)
 

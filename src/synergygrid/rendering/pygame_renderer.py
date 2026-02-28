@@ -66,7 +66,7 @@ class PygameRenderer:
         resource_positions: list[list[np.int64]],
         resource_meta: list[ResourceMeta],
         agent_score: int,
-    ) -> None:
+    ) -> None | str:
         """
         Draws the game window and all its content, updates and limits the fps.
 
@@ -91,7 +91,9 @@ class PygameRenderer:
         self._draw_agent((col, row))
         self._draw_hud(agent_score)
 
-        self._update(self._step_fps)  # TODO: also simplify this when approach is chosen
+        self._update(self._step_fps)  # TODO: also remove self._step_fps when approach is chosen
+        return self._process_quit_events()
+
 
     def render_with_animation(
         self,
@@ -248,16 +250,29 @@ class PygameRenderer:
         """Refreshes the display and limits FPS"""
 
         pygame.display.update()
-        self._process_quit_events()
         self.clock.tick(render_fps)
 
-    def _process_quit_events(self):
+    def _process_quit_events(self) -> None | str:
         """Handle quitting / ESC"""
 
+        action = None
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+                if event.key == pygame.K_SPACE:
+                    pass
+                if event.key == pygame.K_LEFT:
+                    action = 'left'
+                if event.key == pygame.K_DOWN:
+                    action = 'down'
+                if event.key == pygame.K_RIGHT:
+                    action = 'right'
+                if event.key == pygame.K_UP:
+                    action = 'up'
+
+        return action

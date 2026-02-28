@@ -15,7 +15,7 @@ class SynergyGridEnv(gym.Env):
     # Metadata required by Gym.
     # "human" for Pygame visualization.
     # FPS caps the render() update rate; each call corresponds to one logic step, not full game fps.
-    # Sub-loop in PygameRenderer.render() creates smooth animation between steps.
+    # Alternative sub-loop in PygameRenderer.render() creates smooth animation between steps.
     metadata = {"render_modes": ["human"], "render_fps": 4}
 
     # ================= #
@@ -29,13 +29,18 @@ class SynergyGridEnv(gym.Env):
         grid_cols: int = 5,
         max_steps: int = 100,
         render_mode: str | None = None,
+        control: bool = False
     ):
         # Set up bench environment;
 
-        self._init_vars(max_active_resources, grid_rows, grid_cols, render_mode)
+        self._init_vars(max_active_resources, grid_rows, grid_cols, render_mode, control)
         self._init_world(max_active_resources, grid_rows, grid_cols)
         if self.render_mode == "human":
             self._init_renderer(grid_rows, grid_cols)
+
+        if control:
+            self._human_play_loop()
+            return
 
         # Set up Gymnasium environment:
 
@@ -92,8 +97,8 @@ class SynergyGridEnv(gym.Env):
             {},
         )
 
-    def render(self) -> None:
-        self._renderer.render(
+    def render(self) -> None | str:
+        return self._renderer.render(
             self._world._agent.position,
             self._world.get_resource_is_active_status(True),
             self._world.get_resource_positions(True),
@@ -113,11 +118,13 @@ class SynergyGridEnv(gym.Env):
         grid_rows: int,
         grid_cols: int,
         render_mode: str | None,
+        control: bool
     ) -> None:
         self.max_active_resources = max_active_resources
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self.render_mode = render_mode
+        self.control = control
 
     def _init_world(
         self, max_active_resources: int, grid_rows: int, grid_cols: int
@@ -132,3 +139,24 @@ class SynergyGridEnv(gym.Env):
             grid_cols=grid_cols,
             fps=self.metadata["render_fps"],
         )
+
+    def _human_play_loop(self):
+        step_count_down = 100
+        self._renderer._step_fps = 60
+        self._world.reset()
+        action = str(self.render()).upper()
+
+        while True:
+            if not action == 'NONE':
+                agent_action = AgentAction[action]
+                self._world.perform_agent_action(agent_action)
+                step_count_down -= 1
+                truncated = step_count_down <= 0
+                terminated = self._world._agent.score <= 0
+
+                if terminated or truncated:
+                    break
+
+            action = str(self.render()).upper()
+
+
