@@ -26,7 +26,7 @@ class GridWorld:
         max_active_resources: int,
         grid_rows: int,
         grid_cols: int,
-        max_tier: int = 0,
+        max_tier: int = 1,
     ):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
@@ -130,7 +130,7 @@ class GridWorld:
         resources = []
         n_pos = n_neg = n_tier = 0
 
-        if max_tier > 0:
+        if max_tier > 1:
             ratio = (0.50, 0.20, 0.30)
             n_pos = self.compute_spawn_count(ratio[0])
             n_neg = self.compute_spawn_count(ratio[1])
@@ -144,7 +144,7 @@ class GridWorld:
             resources.append(PositiveResource((self.grid_rows, self.grid_cols)))
         for _ in range(n_neg):
             resources.append(NegativeResource((self.grid_rows, self.grid_cols)))
-        for tier in range(1, max_tier + 1):
+        for tier in range(2, max_tier + 1):
             for _ in range(n_tier):
                 resources.append(TierResource(tier, (self.grid_rows, self.grid_cols)))
 

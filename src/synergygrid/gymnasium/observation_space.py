@@ -6,7 +6,6 @@ from gymnasium.spaces import Dict
 from synergygrid.core import (
     GridWorld,
     ResourceCategory,
-    BaseResource,
     DirectType,
     SynergyType,
 )

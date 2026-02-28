@@ -8,7 +8,6 @@ class BaseResource(ABC):
     position = [np.int64(-1), np.int64(-1)]
     is_active = False
     _chained_tiers: Final[list[int]] = []
-    _POSITIVE_BASE_REWARD: Final[int] = 5
 
     class Timer:
         def __init__(self):
@@ -84,14 +83,7 @@ class BaseResource(ABC):
         self.is_active = False
         self.timer.set(self._cool_down)
 
-    def _chain_tier(self, reward: int) -> int:
-        """Adds the tier of the resource to the tiers list and return the given reward."""
-
-        self._chained_tiers.append(self.meta.tier)
-        return reward
-
-    def _break_tier_chain(self, reward: int) -> int:
+    def _break_tier_chain(self) -> None:
         """Clears the tier list and return the given reward."""
 
         self._chained_tiers.clear()
-        return reward
