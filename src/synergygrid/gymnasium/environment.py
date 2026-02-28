@@ -32,10 +32,7 @@ class SynergyGridEnv(gym.Env):
     ):
         # Set up bench environment;
 
-        self._init_vars(
-            max_active_resources, grid_rows, grid_cols, max_steps, render_mode
-        )
-        self._init_episode_vars()
+        self._init_vars(max_active_resources, grid_rows, grid_cols, render_mode)
         self._init_world(max_active_resources, grid_rows, grid_cols)
         if self.render_mode == "human":
             self._init_renderer(grid_rows, grid_cols)
@@ -49,7 +46,7 @@ class SynergyGridEnv(gym.Env):
         # Same goes with observation_space: this provides the agent with a structured view
         # of the world that it uses to decide its actions.
         self.observation_handler = ObservationHandler(
-            self._world, grid_rows, grid_cols, max_steps, self._step_count_down
+            self._world, grid_rows, grid_cols, max_steps
         )
         self.observation_space = self.observation_handler.setup_obs_space()
 
@@ -61,8 +58,8 @@ class SynergyGridEnv(gym.Env):
         # Gymnasium requires this call to control randomness and reproduce scenarios.
         super().reset(seed=seed)
 
-        # Reset the world.
-        self._init_episode_vars()
+        # Reset the environment.
+        self.observation_handler.reset()
         self._world.reset(self.np_random)
 
         if self.render_mode == "human":
@@ -70,28 +67,25 @@ class SynergyGridEnv(gym.Env):
 
         obs = self.observation_handler.get_observation()
 
-        norm_obs = self.observation_handler.normalize_obs(obs)
-
         # Return observation and info (not used)
         return self.observation_handler.normalize_obs(obs), {}
 
     def step(self, action: AgentAction):
         # Perform action and adjust variables affected by it
         reward = self._world.perform_agent_action(AgentAction(action))
-        self._step_count_down -= 1
-        truncated = self._step_count_down <= 0
+        self.observation_handler._step_count_down -= 1
+        truncated = self.observation_handler._step_count_down <= 0
         terminated = self._world._agent.score <= 0
 
         if self.render_mode == "human":
             self.render()
 
         obs = self.observation_handler.get_observation()
-
         norm_obs = self.observation_handler.normalize_obs(obs)
 
         # Return observation, reward, terminated, truncated and info (not used)
         return (
-            self.observation_handler.normalize_obs(obs),
+            norm_obs,
             reward,
             terminated,
             truncated,
@@ -103,7 +97,7 @@ class SynergyGridEnv(gym.Env):
             self._world._agent.position,
             self._world.get_resource_is_active_status(True),
             self._world.get_resource_positions(True),
-            self._world.get_resource_types(True),
+            self._world.get_resource_meta(True),
             self._world._agent.score,
         )
 
@@ -118,13 +112,11 @@ class SynergyGridEnv(gym.Env):
         max_active_resources: int,
         grid_rows: int,
         grid_cols: int,
-        max_steps: int,
         render_mode: str | None,
     ) -> None:
         self.max_active_resources = max_active_resources
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
-        self._max_steps = max_steps
         self.render_mode = render_mode
 
     def _init_world(
@@ -140,8 +132,3 @@ class SynergyGridEnv(gym.Env):
             grid_cols=grid_cols,
             fps=self.metadata["render_fps"],
         )
-
-    # === Global === #
-
-    def _init_episode_vars(self) -> None:
-        self._step_count_down = self._max_steps
