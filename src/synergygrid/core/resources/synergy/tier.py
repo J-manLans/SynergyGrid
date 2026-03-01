@@ -14,7 +14,7 @@ class TierResource(BaseTierResource):
     To get reward for a tier 3 resource a tier 0, tier 1 and tier 2 must have first been collected on that order without breaking the chain.
     """
 
-    _linear_reward_growth: bool = True
+    _linear_reward_growth: bool = False
     _step_wise_scoring_type: bool = True
 
     # ================= #
@@ -22,7 +22,7 @@ class TierResource(BaseTierResource):
     # ================= #
 
     def __init__(self, tier, world_boundaries: tuple[int, int], cool_down: int = 10):
-        self._REWARD = self._calculate_reward(tier + 1)
+        self._REWARD = self._calculate_reward(tier)
 
         super().__init__(
             world_boundaries,
@@ -63,6 +63,6 @@ class TierResource(BaseTierResource):
         # TODO: just for testing if incentive structure for the agent changes if we power up the
         # reward, remove if not necessary
         else:
-            reward = int(self._TIER_BASE_REWARD * (1.5**multiplier))
+            reward = int((self._TIER_BASE_REWARD * (1.5**multiplier)) + 0.5)
 
         return reward
