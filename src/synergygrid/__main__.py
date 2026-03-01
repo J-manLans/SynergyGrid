@@ -102,7 +102,7 @@ def main():
     runner = AgentRunner(environment=env, algorithm=algorithm)
 
     if control:
-        SynergyGridEnv(render_mode='human', control=control)
+        SynergyGridEnv(render_mode="human", control=control)
         return
 
     if training:

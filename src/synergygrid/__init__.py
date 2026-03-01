@@ -4,7 +4,7 @@ from .agentrunner import AgentRunner, train_agent, evaluate_agent
 
 __all__ = [
     "register_env",
-    'SynergyGridEnv',
+    "SynergyGridEnv",
     "environment",
     "algorithms",
     "AgentRunner",

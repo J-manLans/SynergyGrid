@@ -2,8 +2,5 @@
   "agent_img": "assets/sprites/agent.png",
   "positive_resource": "assets/sprites/positive_resource.png",
   "negative_resource": "assets/sprites/negative_resource.png",
-  "tier_1_resource" : "assets/sprites/tier_1_resource.png",
-  "tier_2_resource" : "assets/sprites/tier_2_resource.png",
-  "tier_3_resource" : "assets/sprites/tier_3_resource.png",
   "floor_img": "assets/tiles/floor.png"
 }
