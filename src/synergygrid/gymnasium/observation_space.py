@@ -5,6 +5,7 @@ from gymnasium import spaces
 from gymnasium.spaces import Dict
 from synergygrid.core import (
     GridWorld,
+    BaseResource,
     ResourceCategory,
     DirectType,
     SynergyType,
@@ -80,15 +81,15 @@ class ObservationHandler:
         self.agent_data[0] = self._step_count_down
         self.agent_data[1] = agent_row
         self.agent_data[2] = agent_col
-        # self.agent_data[3] = len(BaseResource._chained_tiers)
+        self.agent_data[3] = len(BaseResource._chained_tiers)
 
         # NOTE: change here
         # ---- Resources ---- #
         active = self._world.get_resource_is_active_status(False)
         positions = self._world.get_resource_positions(False)
         remaining = self._world.get_resource_life()
-        # tiers = self._world.get_resource_tiers()
-        # categories = self._world.get_resource_categories()
+        tiers = self._world.get_resource_tiers()
+        categories = self._world.get_resource_categories()
         types = self._world.get_resource_types()
 
         for i in range(len(self._world._ALL_RESOURCES)):
@@ -96,8 +97,8 @@ class ObservationHandler:
                 # NOTE: change here
                 pos = positions[i]
                 r_timer = remaining[i]
-                # r_tier = tiers[i]
-                # r_cat = int(categories[i])
+                r_tier = tiers[i]
+                r_cat = int(categories[i])
                 r_type = int(types[i])
 
                 # NOTE: change here
@@ -105,13 +106,13 @@ class ObservationHandler:
                     pos[0],
                     pos[1],
                     r_timer,
-                    # r_tier,
-                    # r_cat,
+                    r_tier,
+                    r_cat,
                     r_type,
                 ]
             else:
                 # NOTE: change here
-                self.resource_data[i] = [-1, -1, -1, -1]
+                self.resource_data[i] = [-1, -1, -1, -1, -1, -1]
 
         return {"agent data": self.agent_data, "resources data": self.resource_data}
 
@@ -164,8 +165,8 @@ class ObservationHandler:
             max_tier_chain = max(1, self._world.max_tier)
 
         # NOTE: change here
-        low = [min_steps, min_row, min_col]
-        high = [max_steps, max_row, max_col]
+        low = [min_steps, min_row, min_col, min_tier_chain]
+        high = [max_steps, max_row, max_col, max_tier_chain]
 
         low_arr = np.asarray(low, dtype=np.float32)
         high_arr = np.asarray(high, dtype=np.float32)
@@ -180,7 +181,7 @@ class ObservationHandler:
     ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
         if normalized:
             no_resource_yx = -1.0
-            min_r_timer = -1.0
+            min_r_life_span = -1.0
             min_r_tier = -1.0
             min_r_cat = -1.0
             min_r_type = -1.0
@@ -193,7 +194,7 @@ class ObservationHandler:
             max_r_type = 1.0
         else:
             no_resource_yx = -1
-            min_r_timer = -1
+            min_r_life_span = -1
             min_r_tier = -1
             min_r_cat = -1
             min_r_type = -1
@@ -209,11 +210,11 @@ class ObservationHandler:
         N = len(self._world._ALL_RESOURCES)
         # NOTE: change here
         low = np.tile(
-            [no_resource_yx, no_resource_yx, min_r_timer, min_r_type],
+            [no_resource_yx, no_resource_yx, min_r_life_span, min_r_cat, min_r_type, min_r_tier],
             (N, 1),
         )
         # NOTE: change here
-        high = np.tile([max_row, max_col, max_r_life_span, max_r_type], (N, 1))
+        high = np.tile([max_row, max_col, max_r_life_span, max_r_cat, max_r_type, max_r_tier], (N, 1))
 
         low_arr = np.asarray(low, dtype=np.float32)
         high_arr = np.asarray(high, dtype=np.float32)

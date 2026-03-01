@@ -104,7 +104,10 @@ class SynergyGridEnv(gym.Env):
     def render(self) -> None | str:
         hud_data: dict[str, int] = {}
         hud_data["score"] = self._world._agent.score
-        hud_data["moves"] = self._step_count_down
+        if self.control:
+            hud_data["moves"] = self._step_count_down
+        else:
+            hud_data["moves"] = self._observation_handler._step_count_down
         if len(BaseResource._chained_tiers) > 0:
             if BaseResource._chained_tiers[-1] == self._world.max_tier:
                 hud_data["current tier chain"] = 0
