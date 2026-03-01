@@ -17,7 +17,7 @@ class SynergyAgent:
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int = 20):
+    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int = 15):
         """
         Initializes the agent.
 
@@ -54,6 +54,8 @@ class SynergyAgent:
             self._moveTowardsMinBound(0)
         elif agent_action == AgentAction.DOWN:
             self._moveTowardsMaxBound(0, self._grid_rows - 1)
+
+        self.score -= 1
 
     def consume_resource(self, resource: BaseResource) -> int:
         """Consumes the resource, add its reward to its score and returns the reward"""

@@ -26,7 +26,7 @@ class GridWorld:
         max_active_resources: int,
         grid_rows: int,
         grid_cols: int,
-        max_tier: int = 1,
+        max_tier: int = 3,
     ):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
