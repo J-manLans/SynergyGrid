@@ -1,6 +1,5 @@
 from enum import Enum
 from synergygrid.core.resources import BaseResource
-from typing import Final
 
 
 class AgentAction(Enum):
@@ -18,12 +17,15 @@ class SynergyAgent:
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int = 20):
+    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int = 25):
         """
         Initializes the agent.
 
         Defines the game world so the agent know its bounds, set its starting score and store it for later resetting.
         """
+
+        if grid_cols <= 1 or grid_rows <= 1:
+            raise ValueError("grid_cols and grid_rows should be larger than 0")
 
         self._grid_rows = grid_rows
         self._grid_cols = grid_cols
@@ -52,6 +54,8 @@ class SynergyAgent:
             self._moveTowardsMinBound(0)
         elif agent_action == AgentAction.DOWN:
             self._moveTowardsMaxBound(0, self._grid_rows - 1)
+
+        self.score -= 1
 
     def consume_resource(self, resource: BaseResource) -> int:
         """Consumes the resource, add its reward to its score and returns the reward"""

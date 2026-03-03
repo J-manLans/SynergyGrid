@@ -1,12 +1,15 @@
 from .resource_types import *
 from .base_resource import BaseResource
-from .direct.positive import PositiveResource
-from .direct.negative import NegativeResource
+from .base_tier_resource import BaseTierResource
+from .direct import *
+from .synergy import *
 
 __all__ = [
+    "BaseTierResource",
     "BaseResource",
     "PositiveResource",
     "NegativeResource",
+    "TierResource",
     "ResourceMeta",
     "ResourceCategory",
     "DirectType",

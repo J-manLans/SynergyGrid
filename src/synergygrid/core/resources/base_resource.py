@@ -5,10 +5,9 @@ from typing import Final
 
 
 class BaseResource(ABC):
+    position = [np.int64(-1), np.int64(-1)]
     is_active = False
-    position = [np.int64(0), np.int64(0)]
-    _cool_down: int
-    _LIFE_SPAN: Final[int]
+    _chained_tiers: Final[list[int]] = []
 
     class Timer:
         def __init__(self):
@@ -31,49 +30,60 @@ class BaseResource(ABC):
     def __init__(
         self,
         world_boundaries: tuple[int, int],
-        reward: int,
         cool_down: int,
-        type: ResourceMeta,
+        meta: ResourceMeta,
     ):
-        """Defines the game world so resources know their bounds"""
+        if world_boundaries[0] <= 1 or world_boundaries[1] <= 1:
+            raise ValueError("grid_cols and grid_rows should be larger than 0")
+
         self._world_boundaries = world_boundaries
         # Max steps needed to reach resource diagonally anywhere on the grid
         self._LIFE_SPAN = (world_boundaries[0] - 1) + (world_boundaries[1] - 1)
         self._cool_down = cool_down
-        self._reward = reward
-        self.type = type
+        self.meta = meta
         self.timer = self.Timer()
 
     def reset(self):
         self.is_active = False
         self.timer.set(0)
+        self._chained_tiers.clear()
 
     # ================= #
     #        API        #
     # ================= #
 
-    def consume(self) -> int:
-        """
-        Defines how an agent interacts with the resource.
-        """
-
-        self.is_active = False
-        self.timer.set(self._cool_down)
-        return self._reward
-
     def deplete_resource(self) -> None:
-        """
-        Removes the resource without giving any reward.
-        """
+        """Removes the resource without giving any reward."""
 
         self.is_active = False
         self.timer.set(self._cool_down)
 
     def spawn(self, position: list[np.int64]):
-        """
-        Spawns the resource.
-        """
+        """Spawns the resource."""
 
         self.position = position
         self.is_active = True
         self.timer.set(self._LIFE_SPAN)
+
+    # ================= #
+    #      Abstract     #
+    # ================= #
+
+    @abstractmethod
+    def consume(self) -> int:
+        """Defines how an agent interacts with the resource."""
+
+    # ================= #
+    #      Helpers      #
+    # ================= #
+
+    def _consume(self):
+        """Sets up the consume() method."""
+
+        self.is_active = False
+        self.timer.set(self._cool_down)
+
+    def _break_tier_chain(self) -> None:
+        """Clears the tier list and return the given reward."""
+
+        self._chained_tiers.clear()
