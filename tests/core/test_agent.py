@@ -113,9 +113,11 @@ class TestAgent:
         Verify that each movement action correctly updates the agent's position
         when not at a boundary.
         """
+        initial_score = agent.score
         agent.perform_action(action)
 
         assert agent.position == expected_position
+        assert initial_score == agent.score + 1
 
     @pytest.mark.parametrize(
         "action",
