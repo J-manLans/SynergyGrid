@@ -33,7 +33,7 @@ class TestBaseResource:
     """
     @pytest.fixture
     def meta(self):
-        return ResourceMeta(ResourceCategory.DIRECT, DirectType.POSITIVE, 0)
+        return ResourceMeta(ResourceCategory.DIRECT, DirectType.POSITIVE, 1)
 
     @pytest.fixture
     def resource(self, meta):
@@ -64,8 +64,6 @@ class TestBaseResource:
     @pytest.mark.parametrize(
         "rows, cols",
         [
-            (1, 5),
-            (5, 1),
             (0, 5),
             (5, 0),
         ],
@@ -73,7 +71,7 @@ class TestBaseResource:
     def test_invalid_grid_raises(self, meta, rows, cols):
         """
         Ensure that creating a resource with invalid grid dimensions
-        (rows or columns <= 1) raises a ValueError.
+        (rows or columns < 1) raises a ValueError.
 
         This validates constructor boundary checks.
         """

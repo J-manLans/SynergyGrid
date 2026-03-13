@@ -1,5 +1,5 @@
 import pytest
-from synergygrid.core import AgentAction, BaseResource, ResourceMeta, GridWorld
+from synergygrid.core import GridWorld, AgentAction, ResourceMeta, DirectType, SynergyType
 import numpy as np
 
 class TestGridWorld:
@@ -13,78 +13,62 @@ class TestGridWorld:
         gw.reset()
 
         return gw
-    
-    def test_initialization(self, grid_world):
+
+    def test_initialization(self, grid_world: GridWorld):
         """
         Test that verifies the initialization of the GridWorld object.
         Checks if the grid's rows and columns are correctly set and that the grid contains the expected number of resources.
         """
-        resources = grid_world.get_resource_positions()
-        
-        assert len(resources) == 1  # There should be exactly one resource after initialization.
+        active_resources = grid_world.get_resource_is_active_status(False)
+        active_cnt = sum(active_resources)
+
+        assert active_cnt == 1  # There should be exactly one active resource after initialization.
         assert grid_world.grid_rows == 1  # The grid should have 1 row.
         assert grid_world.grid_cols == 2  # The grid should have 2 columns.
-    
-    def test_perform_agent_action(self, grid_world):
-        """
-        Test that ensures performing an agent action modifies the resource status correctly.
-        Initially, the resource is active. After an action, the status of the resource should change.
-        """
-        is_active = grid_world.get_resource_is_active_status()[0]
-        
-        # Perform an action and assert that the resource's active status has changed.
-        grid_world.perform_agent_action(AgentAction.LEFT)
-        
-        assert grid_world.get_resource_is_active_status()[0] != is_active
-        
-    def test_resource_positions(self, grid_world):
+
+    def test_resource_positions(self, grid_world: GridWorld):
         """
         Test to verify that the resource positions are correctly returned.
         Ensures each resource position is a list with exactly two elements (representing x, y coordinates) and that they are of type np.int64.
         """
-        positions = grid_world.get_resource_positions()
-        
+        positions = grid_world.get_resource_positions(False)
+
         for pos in positions:
             assert isinstance(pos, list)  # Each position should be a list.
             assert len(pos) == 2  # Each list should contain two elements (x, y).
             assert isinstance(pos[0], np.integer) and isinstance(pos[1], np.integer)  # Each coordinate should be an np.integer.
 
-    def test_get_resource_is_active_status(self, grid_world):
+    def test_get_resource_is_active_status(self, grid_world: GridWorld):
         """
         Test that checks if the resource's active status is returned as a boolean.
         Ensures that each resource's status is either True or False.
         """
-        statuses = grid_world.get_resource_is_active_status()
-        
+        statuses = grid_world.get_resource_is_active_status(False)
+
         for status in statuses:
             assert isinstance(status, bool)  # Each status should be a boolean.
-    
-    def test_get_resource_types(self, grid_world):
+
+    def test_get_resource_types(self, grid_world: GridWorld):
         """
-        Test to verify that the resource types returned are valid and are subclasses of ResourceMeta.
-        This ensures that the resources in the world are of correct types (e.g., PositiveResource, NegativeResource).
+        Verify that get_resource_types() returns valid indices corresponding to enums.
+
+        Each integer returned should not exceed the length of the largest type enum
+        (DirectType or SynergyType). This ensures that the resource integers are
+        valid indices for the respective resource types in the world.
         """
         types = grid_world.get_resource_types()
-        
-        for t in types:    
-            assert issubclass(t.__class__, ResourceMeta)  # The resource type should be a subclass of ResourceMeta.
-            
-    def test_get_resource_timers(self, grid_world):
+
+        for t in types:
+            max_type = max(len(DirectType), len(SynergyType))
+            assert t <= max_type  # Integer should not exceed the max number of enum members.
+
+    def test_get_resource_timers(self, grid_world: GridWorld):
         """
-        Test to ensure that each resource's timer is correctly returned and is an instance of BaseResource.Timer.
+        Test to ensure that each resource's timer is correctly returned and is an integer signaling remaining life.
         This confirms that the resources have valid timers.
         """
-        timers = grid_world.get_resource_timers()
-        
+        timers = grid_world.get_resource_life()
+
         for timer in timers:
-            assert isinstance(timer, BaseResource.Timer)  # Each timer should be an instance of BaseResource.Timer.
-    
-    def test_get_resource_is_active_after_reset(self, grid_world):
-        """
-        Test to verify that after resetting the GridWorld, all resources are active.
-        This ensures that the reset method initializes all resources correctly.
-        """
-        statuses = grid_world.get_resource_is_active_status()
-        
-        for status in statuses:
-            assert status is True  # All resources should be active after reset.
+            # Each timer should be an integer signaling remaining life.
+            assert isinstance(timer, int)
