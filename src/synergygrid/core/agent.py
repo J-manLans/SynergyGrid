@@ -17,14 +17,14 @@ class SynergyAgent:
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int = 25):
+    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int = 30):
         """
         Initializes the agent.
 
         Defines the game world so the agent know its bounds, set its starting score and store it for later resetting.
         """
 
-        if grid_cols <= 1 or grid_rows <= 1:
+        if grid_cols < 1 or grid_rows < 1:
             raise ValueError("grid_cols and grid_rows should be larger than 0")
 
         self._grid_rows = grid_rows
@@ -46,14 +46,12 @@ class SynergyAgent:
         """Performs current action"""
 
         # Move Agent to the next cell
-        if agent_action == AgentAction.LEFT:
-            self._moveTowardsMinBound(1)
-        elif agent_action == AgentAction.RIGHT:
-            self._moveTowardsMaxBound(1, self._grid_cols - 1)
-        elif agent_action == AgentAction.UP:
-            self._moveTowardsMinBound(0)
-        elif agent_action == AgentAction.DOWN:
-            self._moveTowardsMaxBound(0, self._grid_rows - 1)
+        match agent_action:
+            case AgentAction.LEFT: self._moveTowardsMinBound(1)
+            case AgentAction.RIGHT: self._moveTowardsMaxBound(1, self._grid_cols - 1)
+            case AgentAction.UP: self._moveTowardsMinBound(0)
+            case AgentAction.DOWN: self._moveTowardsMaxBound(0, self._grid_rows - 1)
+            case _: raise TypeError("This action isn't implemented")
 
         self.score -= 1
 
