@@ -8,7 +8,7 @@ from synergygrid import (
     AgentRunner,
     train_agent,
     evaluate_agent,
-    SynergyGridEnv,
+    SYNGridEnv,
 )
 
 
@@ -107,12 +107,12 @@ def main():
         iterations = args.iterations
 
     # For human controls
-    human_control = False
+    human_control = True
 
     runner = AgentRunner(environment=env, algorithm=algorithm)
 
     if human_control:
-        SynergyGridEnv(render_mode="human", human_control=human_control)
+        SYNGridEnv(render_mode="human", human_control=human_control)
         return
 
     if training:

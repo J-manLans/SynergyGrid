@@ -6,9 +6,9 @@ from synergygrid.rendering import PygameRenderer
 from synergygrid.gymnasium import ObservationHandler
 
 
-class SynergyGridEnv(gym.Env):
+class SYNGridEnv(gym.Env):
     """
-    SynergyGrid reinforcement learning environment.
+    SYNGrid reinforcement learning environment.
 
     A discrete grid-world environment for benchmarking single-agent RL.
     """
