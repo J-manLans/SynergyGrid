@@ -1,7 +1,15 @@
 import argparse
 import sys
 import re
-from synergygrid import *
+from synergygrid import (
+    algorithms,
+    environment,
+    register_env,
+    AgentRunner,
+    train_agent,
+    evaluate_agent,
+    SynergyGridEnv,
+)
 
 
 def __parse_args():
@@ -79,13 +87,13 @@ def main():
         agent = True
         # If we want to test the game our selves
         # Choose to train or run the agent
-        training = False if agent == False else False
+        training = False
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
-        agent_steps = "716800"
+        agent_steps = "1505280"
         # Num of timesteps for training or model selection when running
-        timesteps = 50000
+        timesteps = 100000
         # Number of training iterations
         iterations = 15
     else:
@@ -99,12 +107,12 @@ def main():
         iterations = args.iterations
 
     # For human controls
-    control = False
+    human_control = False
 
     runner = AgentRunner(environment=env, algorithm=algorithm)
 
-    if control:
-        SynergyGridEnv(render_mode="human", control=control)
+    if human_control:
+        SynergyGridEnv(render_mode="human", human_control=human_control)
         return
 
     if training:

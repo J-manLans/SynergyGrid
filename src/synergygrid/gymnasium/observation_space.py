@@ -62,7 +62,9 @@ class ObservationHandler:
         # normalized bounds — match _normalize_obs()
         # inactive resources keep -1 as a valid "low" value; active features map to 0..1
         agent_low_norm, agent_high_norm = self._build_agent_box_bounds(True, np.float16)
-        resource_low_norm, resource_high_norm = self._build_resource_box_bounds(True, np.float16)
+        resource_low_norm, resource_high_norm = self._build_resource_box_bounds(
+            True, np.float16
+        )
 
         self.observation_space: dict[str, spaces.Space] = {
             "agent data": spaces.Box(

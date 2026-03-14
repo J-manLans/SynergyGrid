@@ -34,7 +34,9 @@ class TestEnvironment:
         Verify that custom initialization parameters are correctly
         applied to the environment.
         """
-        env = SynergyGridEnv(max_active_resources=5, grid_rows=7, grid_cols=6, max_steps=50)
+        env = SynergyGridEnv(
+            max_active_resources=5, grid_rows=7, grid_cols=6, max_steps=50
+        )
 
         # Check that configuration parameters were stored correctly
         assert env.max_active_resources == 5
