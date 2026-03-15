@@ -1,8 +1,9 @@
+from abc import ABC
 from synergygrid.core.resources import BaseResource
 from typing import Final
 
 
-class BaseTierResource(BaseResource):
+class BaseTierResource(BaseResource, ABC):
     _TIER_BASE_REWARD: Final[int] = 2
 
     def _resolve_tier_progression(self) -> bool:

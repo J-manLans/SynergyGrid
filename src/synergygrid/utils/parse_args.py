@@ -7,9 +7,9 @@ def parse_args():
 
     parser.add_argument(
         "--alg",
-        type=str,
-        default="PPO",
-        choices=algorithms,
+        type=int,
+        default=0,
+        choices=range(len(algorithms)),
         help="Algorithm index",
     )
 

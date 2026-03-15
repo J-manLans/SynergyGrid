@@ -1,8 +1,5 @@
 import sys
 from synergygrid import (
-    algorithms,
-    environment,
-    register_env,
     AgentRunner,
     train_agent,
     evaluate_agent,
@@ -11,26 +8,22 @@ from synergygrid import (
 )
 
 def main():
-    register_env()
-    env = list(environment.keys())[0]
-    alg = list(algorithms.keys())
-
     if len(sys.argv) == 1:
         # Pick algorithm to train or evaluate
-        algorithm = alg[0]
+        algorithm = 0
         # Choose to use an agent or just random sampling (for debugging the environment)
         agent = True
         # If we want to test the game our selves
         # Choose to train or run the agent
-        training = True
+        training = False
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
         agent_steps = "1505280"
         # Num of timesteps for training or model selection when running
-        timesteps = 100000
+        timesteps = 10000
         # Number of training iterations
-        iterations = 15
+        iterations = 2
         human_control = False
     else:
         args = parse_args()  # python -m experiments -h for info
@@ -43,7 +36,7 @@ def main():
         iterations = args.iterations
         human_control = args.human_controls
 
-    runner = AgentRunner(environment=env, algorithm=algorithm)
+    runner = AgentRunner(algorithm=algorithm)
 
     if human_control:
         SYNGridEnv(render_mode="human", human_control=human_control)

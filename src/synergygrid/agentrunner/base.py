@@ -1,16 +1,20 @@
 import sys
 from pathlib import Path
-from synergygrid.config import algorithms
+from synergygrid import algorithms, environment, register_env
 
 
 class AgentRunner:
-    def __init__(self, environment: str, algorithm: str):
-        self.environment = environment
-        self.model = None
-        self.algorithm = algorithm
+    def __init__(self, algorithm: int):
+        register_env()
+        self.environment = list(environment.keys())[0]
+
+        alg = list(algorithms.keys())
+        self.algorithm = alg[algorithm]
         self.AlgorithmClass = algorithms.get(self.algorithm, {})
         if not self.AlgorithmClass:
             raise ValueError(f"Unsupported algorithm: {self.algorithm}")
+
+        self.model = None
 
     def get_model(self, agent_steps: str, env):
         """Create a path to match the latest model of the specified timesteps and load it"""
