@@ -1,3 +1,3 @@
-from .configs import environment, algorithms
+from .configs import agent_config, algorithms
 
-__all__ = ["environment", "algorithms"]
+__all__ = ["agent_config", "algorithms"]

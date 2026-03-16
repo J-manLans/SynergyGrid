@@ -12,5 +12,6 @@ def register_env():
             entry_point="synergygrid.gymnasium.environment:SYNGridEnv",
         )
 
+
 def make(render_mode: str | None) -> Env:
     return gym.make("synergy_grid-v0", render_mode=render_mode)

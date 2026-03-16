@@ -18,7 +18,7 @@ def main():
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
-        agent_steps = "1505280"
+        agent_steps = "716800"
         # Num of timesteps for training or model selection when running
         timesteps = 10000
         # Number of training iterations

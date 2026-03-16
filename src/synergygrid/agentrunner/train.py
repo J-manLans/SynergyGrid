@@ -2,7 +2,7 @@ import datetime
 from pathlib import Path
 from stable_baselines3.common.monitor import Monitor
 from synergygrid.agentrunner.base import AgentRunner
-from synergygrid.config.configs import environment
+from synergygrid.config.configs import agent_config
 from synergygrid.gymnasium.env_factory import make
 
 
@@ -32,8 +32,8 @@ def train_agent(
     date = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
 
     # Create directories for saving models and logs
-    model_dir = Path("results/models") / runner.environment
-    log_dir = Path("results/logs") / runner.environment
+    model_dir = Path("results/models")
+    log_dir = Path("results/logs")
 
     Path(model_dir).mkdir(parents=True, exist_ok=True)
     Path(log_dir).mkdir(parents=True, exist_ok=True)
@@ -42,7 +42,7 @@ def train_agent(
     env = make(None)
     # Wrap the environment with a Monitor for logging.
     # The created csv is needed for plotting our own graphs with matplotlib later.
-    monitor_file = Path(log_dir) / f"{runner.environment}_{runner.algorithm}_{date}.csv"
+    monitor_file = Path(log_dir) / f"{runner.algorithm}_{date}.csv"
     env = Monitor(env, filename=str(monitor_file))
 
     model = None
@@ -53,10 +53,7 @@ def train_agent(
     else:
         # Initialize a fresh model
         model = runner.AlgorithmClass(
-            env=env,
-            verbose=1,
-            tensorboard_log=str(log_dir),
-            **environment.get(runner.environment, {}),
+            env=env, verbose=1, tensorboard_log=str(log_dir), **agent_config
         )
 
     try:
@@ -68,9 +65,7 @@ def train_agent(
         # Once Tensorboard is loaded, it will print a URL. Follow the URL to see
         # the status of the training.
         for i in range(1, iterations + 1):
-            print(
-                f"\nTraining starting for iteration: {i}, environment: {runner.environment}\n"
-            )
+            print(f"\nTraining starting for iteration: {i}\n")
 
             # Train the model
             model.learn(
@@ -81,8 +76,7 @@ def train_agent(
 
             # Save the model
             save_path = (
-                Path(model_dir)
-                / f"{runner.algorithm}_{runner.environment}_{model.num_timesteps}_{date}"
+                Path(model_dir) / f"{runner.algorithm}_{model.num_timesteps}_{date}"
             )
             model.save(save_path)
             print(f"\nModel saved with {model.num_timesteps} time steps")
