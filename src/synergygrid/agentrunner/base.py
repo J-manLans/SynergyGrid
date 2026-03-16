@@ -1,20 +1,21 @@
 import sys
 from pathlib import Path
 from synergygrid import algorithms, environment, register_env
+from stable_baselines3.common.base_class import BaseAlgorithm
 
 
 class AgentRunner:
-    def __init__(self, algorithm: int):
+    def __init__(self, algorithm_index: int):
         register_env()
         self.environment = list(environment.keys())[0]
 
-        alg = list(algorithms.keys())
-        self.algorithm = alg[algorithm]
-        self.AlgorithmClass = algorithms.get(self.algorithm, {})
+        algorithm_names = list(algorithms.keys())
+        self.algorithm = algorithm_names[algorithm_index]
+        self.AlgorithmClass: type[BaseAlgorithm] = algorithms[self.algorithm]
 
         self.model = None
 
-    def get_model(self, agent_steps: str, env):
+    def get_model(self, agent_steps: str, env) -> BaseAlgorithm:
         """Create a path to match the latest model of the specified timesteps and load it"""
 
         if agent_steps == "":

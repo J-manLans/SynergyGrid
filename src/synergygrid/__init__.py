@@ -11,5 +11,5 @@ __all__ = [
     "AgentRunner",
     "train_agent",
     "evaluate_agent",
-    "parse_args"
+    "parse_args",
 ]

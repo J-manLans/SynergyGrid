@@ -1,11 +1,6 @@
 import sys
-from synergygrid import (
-    AgentRunner,
-    train_agent,
-    evaluate_agent,
-    SYNGridEnv,
-    parse_args
-)
+from synergygrid import AgentRunner, train_agent, evaluate_agent, SYNGridEnv, parse_args
+
 
 def main():
     if len(sys.argv) == 1:
@@ -36,7 +31,7 @@ def main():
         iterations = args.iterations
         human_control = args.human_controls
 
-    runner = AgentRunner(algorithm=algorithm)
+    runner = AgentRunner(algorithm_index=algorithm)
 
     if human_control:
         SYNGridEnv(render_mode="human", human_control=human_control)

@@ -55,7 +55,7 @@ def train_agent(
         model = runner.AlgorithmClass(
             env=env,
             verbose=1,
-            tensorboard_log=log_dir,
+            tensorboard_log=str(log_dir),
             **environment.get(runner.environment, {}),
         )
 

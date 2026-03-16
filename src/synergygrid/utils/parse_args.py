@@ -2,6 +2,7 @@ import argparse
 import re
 from synergygrid import algorithms
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Run agent experiments.")
 
@@ -61,14 +62,13 @@ def parse_args():
 
     return args
 
+
 # ================= #
 #      Helpers      #
 # ================= #
 
+
 def _positive_int_str(value: str):
     if not re.fullmatch(r"\d+", value):
-        raise argparse.ArgumentTypeError(
-            f"{value} is not a positive integer string"
-        )
+        raise argparse.ArgumentTypeError(f"{value} is not a positive integer string")
     return value
-
