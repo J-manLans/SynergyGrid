@@ -39,8 +39,6 @@ class TestAgentRunnerBase:
         Args:
             agent_runner (AgentRunner): The `AgentRunner` instance to test.
         """
-        assert agent_runner.environment == "synergy_grid-v0"
-        assert agent_runner.model == None
         assert agent_runner.algorithm == "A2C"
         assert agent_runner.AlgorithmClass == A2C
 

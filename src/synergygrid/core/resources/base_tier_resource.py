@@ -4,7 +4,7 @@ from typing import Final
 
 
 class BaseTierResource(BaseResource, ABC):
-    _TIER_BASE_REWARD: Final[int] = 2
+    _TIER_BASE_REWARD: Final[int] = 3
 
     def _resolve_tier_progression(self) -> bool:
         """Checks if tier progression is correct and either continue the chain or breaks it."""

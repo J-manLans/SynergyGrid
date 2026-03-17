@@ -15,25 +15,26 @@ def main():
         # If we want to test the game our selves
         # Choose to train or run the agent
         training = False
-        # Continue training from a saved model
-        continue_training = False
-        # Model that we shall continue to train
-        agent_steps = "716800"
-        # Num of timesteps for training or model selection when running
-        timesteps = 10000
-        # Number of training iterations
-        iterations = 2
+        # Human control to test hte game
         human_control = False
+        # Continue training from a saved model
+        continue_training = True
+        # Model that we shall continue to train
+        agent_steps = "1689600"
+        # Num of timesteps for training or model selection when running
+        timesteps = 50000
+        # Number of training iterations
+        iterations = 20
     else:
         args = parse_args()  # python -m experiments -h for info
         algorithm = args.alg
         agent = args.agent
         training = args.train
+        human_control = args.human_controls
         continue_training = args.cont
         agent_steps = args.steps
         timesteps = args.timesteps
         iterations = args.iterations
-        human_control = args.human_controls
 
     runner = AgentRunner(algorithm_index=algorithm)
 

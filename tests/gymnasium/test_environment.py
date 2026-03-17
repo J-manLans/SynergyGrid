@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from synergygrid.core import AgentAction
 from synergygrid.gymnasium.environment import SYNGridEnv
 
 

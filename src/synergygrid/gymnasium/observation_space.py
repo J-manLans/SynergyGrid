@@ -167,7 +167,7 @@ class ObservationHandler:
             max_row = self._grid_rows - 1
             max_col = self._grid_cols - 1
             max_steps = self._max_steps
-            max_score = 150
+            max_score = 50
             # guards against div / 0 when just using direct rewards
             max_tier_chain = max(1, self._world.max_tier)
 
