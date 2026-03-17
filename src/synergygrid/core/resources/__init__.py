@@ -7,8 +7,8 @@ from .synergy import *
 __all__ = [
     "BaseTierResource",
     "BaseResource",
-    "PositiveResource",
     "NegativeResource",
+    "TierBase",
     "TierResource",
     "ResourceMeta",
     "ResourceCategory",

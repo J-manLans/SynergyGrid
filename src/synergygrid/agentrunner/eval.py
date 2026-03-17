@@ -32,7 +32,7 @@ def evaluate_agent(runner: AgentRunner, agent_steps: str, trained_model: bool):
         get_action = get_action_random
 
     # Reset the environment
-    obs, _ = env.reset()
+    obs, _ = env.reset(seed=42)
 
     done = False
     while not done:

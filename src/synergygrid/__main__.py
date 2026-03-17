@@ -18,9 +18,9 @@ def main():
         # Human control to test hte game
         human_control = False
         # Continue training from a saved model
-        continue_training = True
+        continue_training = False
         # Model that we shall continue to train
-        agent_steps = "1689600"
+        agent_steps = "768000"
         # Num of timesteps for training or model selection when running
         timesteps = 50000
         # Number of training iterations

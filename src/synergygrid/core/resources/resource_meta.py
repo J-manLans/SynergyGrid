@@ -7,12 +7,12 @@ class ResourceCategory(Enum):
 
 
 class SynergyType(Enum):
-    TIER = 0
+    TierBase = 0
+    TIER = 1
 
 
 class DirectType(Enum):
     NEGATIVE = 0
-    POSITIVE = 1
 
 
 class ResourceMeta:

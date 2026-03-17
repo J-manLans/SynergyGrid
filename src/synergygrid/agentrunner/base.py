@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from synergygrid.config.configs import algorithms, agent_config
+from synergygrid.config.configs import algorithms
 from synergygrid.gymnasium.env_factory import register_env
 from stable_baselines3.common.base_class import BaseAlgorithm
 
@@ -13,6 +13,8 @@ class AgentRunner:
         self.algorithm = algorithm_names[algorithm_index]
         self.AlgorithmClass: type[BaseAlgorithm] = algorithms[self.algorithm]
 
+        self.identifier = "tight_loop_"
+
     def get_model(self, agent_steps: str, env) -> BaseAlgorithm:
         """Create a path to match the latest model of the specified timesteps and load it"""
 
@@ -20,5 +22,5 @@ class AgentRunner:
             sys.exit("You forgot to specify the models steps")
 
         base_dir = Path("results/models")
-        file_name = f"{self.algorithm}_{agent_steps}*"
+        file_name = f"{self.identifier}_{self.algorithm}_{agent_steps}*"
         return self.AlgorithmClass.load(list(base_dir.glob(file_name))[-1], env=env)

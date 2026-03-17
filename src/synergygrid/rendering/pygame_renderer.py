@@ -25,6 +25,8 @@ class PygameRenderer:
         - Graphic elements
         """
 
+        self.waiting_for_space = True
+
         pygame.init()  # Initialize pygame
         pygame.display.init()  # initialize the display module
         self.clock = pygame.time.Clock()  # Game clock
@@ -234,12 +236,12 @@ class PygameRenderer:
         """Draw resource at pixel position `pos` (top-left)"""
 
         if resource_meta.category == ResourceCategory.DIRECT:
-            if resource_meta.type == DirectType.POSITIVE:
-                self._draw_tier_resource(resource_meta, pos)
-            elif resource_meta.type == DirectType.NEGATIVE:
+            if resource_meta.type == DirectType.NEGATIVE:
                 self.window_surface.blit(self.graphics["negative_resource"], pos)
         else:
-            if resource_meta.type == SynergyType.TIER:
+            if resource_meta.type == SynergyType.TierBase:
+                self._draw_tier_resource(resource_meta, pos)
+            elif resource_meta.type == SynergyType.TIER:
                 self._draw_tier_resource(resource_meta, pos)
 
     def _draw_tier_resource(self, resource_meta: ResourceMeta, pos: tuple[int, int]):
@@ -296,7 +298,7 @@ class PygameRenderer:
         )
         self.window_surface.blit(hud_img, hud_rect)
 
-        # --- Life and moves bar --- #
+        # --- Energy and moves bar --- #
         self._draw_life_bar(hud_data["score"], hud_rect)
         self._draw_moves_bar(hud_data["moves"], hud_rect)
 
@@ -309,12 +311,10 @@ class PygameRenderer:
             hud_rect.x + 33, hud_rect.y + (hud_rect.height - 68), 64, 52
         )
 
-        rect = tier_surf.get_rect()
-        rect.centerx = tier_rect.centerx
-        rect.y = tier_rect.y + (tier_rect.height // 4)
+        rect = tier_surf.get_rect(center=tier_rect.center)
         self.window_surface.blit(tier_surf, rect)
 
-    def _draw_life_bar(self, current_score, hud_rect):
+    def _draw_life_bar(self, current_score: int, hud_rect: pygame.Rect):
         """
         Draw a dynamic life bar inside hud_rect.
         Bar fills relative to highest score reached so far (max_seen_score).
@@ -344,6 +344,16 @@ class PygameRenderer:
         # --- Draw border --- #
         status_rect = pygame.Rect(bar_x, bar_y, bar_width, bar_height)
         pygame.draw.rect(self.window_surface, (75, 75, 75), status_rect, 2)
+
+        # --- Draw score below --- #
+        tier_surf = self.hud_font.render(str(current_score), True, self._hud_text_clr)
+
+        # Place it in the hud
+        tier_rect = pygame.Rect(hud_rect.x + 120, hud_rect.y + 45, 64, 52)
+
+        # Center it inside a rect
+        rect = tier_surf.get_rect(center=tier_rect.center)
+        self.window_surface.blit(tier_surf, rect)
 
     def _draw_moves_bar(self, remaining_moves, hud_rect):
         """
@@ -384,7 +394,15 @@ class PygameRenderer:
     def _process_quit_events(self) -> None | str:
         """Handle quitting / ESC"""
 
+
+        while self.waiting_for_space:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        self.waiting_for_space = False
+
         action = None
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -393,8 +411,6 @@ class PygameRenderer:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                if event.key == pygame.K_SPACE:
-                    pass
                 if event.key == pygame.K_LEFT:
                     action = "left"
                 if event.key == pygame.K_DOWN:
