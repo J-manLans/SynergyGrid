@@ -6,14 +6,14 @@ from stable_baselines3.common.base_class import BaseAlgorithm
 
 
 class AgentRunner:
-    def __init__(self, algorithm_index: int):
+    def __init__(self, algorithm_index: int, identifier: str):
         register_env()
 
         algorithm_names = list(algorithms.keys())
         self.algorithm = algorithm_names[algorithm_index]
         self.AlgorithmClass: type[BaseAlgorithm] = algorithms[self.algorithm]
 
-        self.identifier = "tight_loop_"
+        self.identifier = identifier
 
     def get_model(self, agent_steps: str, env) -> BaseAlgorithm:
         """Create a path to match the latest model of the specified timesteps and load it"""

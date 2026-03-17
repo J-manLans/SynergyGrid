@@ -25,8 +25,6 @@ class PygameRenderer:
         - Graphic elements
         """
 
-        self.waiting_for_space = True
-
         pygame.init()  # Initialize pygame
         pygame.display.init()  # initialize the display module
         self.clock = pygame.time.Clock()  # Game clock
@@ -393,13 +391,6 @@ class PygameRenderer:
 
     def _process_quit_events(self) -> None | str:
         """Handle quitting / ESC"""
-
-
-        while self.waiting_for_space:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        self.waiting_for_space = False
 
         action = None
 

@@ -5,7 +5,7 @@ from typing import Final
 
 
 class BaseTierResource(BaseResource, ABC):
-    _TIER_BASE_REWARD: Final[int] = 3
+    _TIER_BASE_REWARD: Final[int] = 2
     MAX_TIER: int
 
     def _resolve_tier_progression(self) -> bool:

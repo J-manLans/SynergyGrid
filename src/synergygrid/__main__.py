@@ -20,11 +20,11 @@ def main():
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
-        agent_steps = "768000"
+        agent_steps = "921600"
         # Num of timesteps for training or model selection when running
         timesteps = 50000
         # Number of training iterations
-        iterations = 20
+        iterations = 40
     else:
         args = parse_args()  # python -m experiments -h for info
         algorithm = args.alg
@@ -36,7 +36,7 @@ def main():
         timesteps = args.timesteps
         iterations = args.iterations
 
-    runner = AgentRunner(algorithm_index=algorithm)
+    runner = AgentRunner(algorithm, "tight_loop_")
 
     if human_control:
         SYNGridEnv(render_mode="human", human_control=human_control)
