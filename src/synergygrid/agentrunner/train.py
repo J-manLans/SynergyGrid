@@ -28,7 +28,7 @@ def train_agent(
     :type iterations: int
     """
 
-    # Get current date and time for unique file naming
+    # Get current date and time and create a identifier for unique file naming
     date = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
 
     # Create directories for saving models and logs
@@ -42,7 +42,7 @@ def train_agent(
     env = make(None)
     # Wrap the environment with a Monitor for logging.
     # The created csv is needed for plotting our own graphs with matplotlib later.
-    monitor_file = Path(log_dir) / f"{runner.algorithm}_{date}.csv"
+    monitor_file = Path(log_dir) / f"{runner.identifier}_{runner.algorithm}_{date}.csv"
     env = Monitor(env, filename=str(monitor_file))
 
     model = None
@@ -70,13 +70,14 @@ def train_agent(
             # Train the model
             model.learn(
                 total_timesteps=timesteps,
-                tb_log_name=f"{date} {runner.algorithm}",
+                tb_log_name=f"{runner.identifier}_{runner.algorithm}_{date}",
                 reset_num_timesteps=False,
             )
 
             # Save the model
             save_path = (
-                Path(model_dir) / f"{runner.algorithm}_{model.num_timesteps}_{date}"
+                Path(model_dir)
+                / f"{runner.identifier}_{runner.algorithm}_{model.num_timesteps}_{date}"
             )
             model.save(save_path)
             print(f"\nModel saved with {model.num_timesteps} time steps")

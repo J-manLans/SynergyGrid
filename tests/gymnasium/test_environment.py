@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from synergygrid.core import AgentAction
 from synergygrid.gymnasium.environment import SYNGridEnv
 
 
@@ -34,9 +33,7 @@ class TestEnvironment:
         Verify that custom initialization parameters are correctly
         applied to the environment.
         """
-        env = SYNGridEnv(
-            max_active_resources=5, grid_rows=7, grid_cols=6, max_steps=50
-        )
+        env = SYNGridEnv(max_active_resources=5, grid_rows=7, grid_cols=6, max_steps=50)
 
         # Check that configuration parameters were stored correctly
         assert env.max_active_resources == 5
@@ -134,7 +131,7 @@ class TestEnvironment:
 
         assert truncated
 
-    def test_environment_runs_until_termination_or_truncation(self, env):
+    def test_environment_runs_until_termination_or_truncation(self, env: SYNGridEnv):
         """
         Verify that the environment eventually reaches either a terminated
         or truncated state during normal operation.

@@ -14,14 +14,16 @@ class TierResource(BaseTierResource):
     To get reward for a tier 3 resource a tier 0, tier 1 and tier 2 must have first been collected on that order without breaking the chain.
     """
 
-    _linear_reward_growth: bool = False
+    _linear_reward_growth: bool = True
     _step_wise_scoring_type: bool = True
 
     # ================= #
     #       Init        #
     # ================= #
 
-    def __init__(self, tier, world_boundaries: tuple[int, int], cool_down: int = 10):
+    def __init__(
+        self, tier: int, world_boundaries: tuple[int, int], cool_down: int = 10
+    ):
         self._REWARD = self._calculate_reward(tier)
 
         super().__init__(
@@ -48,7 +50,8 @@ class TierResource(BaseTierResource):
 
         # Or reward only when the current chain is broken
         if super()._resolve_tier_progression():
-            return 0
+            if len(self._chained_tiers) > 0:
+                return 0
         return self._REWARD
 
     # ================= #

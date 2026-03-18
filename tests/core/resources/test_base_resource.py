@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from synergygrid.core.resources import (
     BaseResource,
-    DirectType,
+    SynergyType,
     ResourceMeta,
     ResourceCategory,
 )
@@ -35,7 +35,7 @@ class TestBaseResource:
 
     @pytest.fixture
     def meta(self):
-        return ResourceMeta(ResourceCategory.DIRECT, DirectType.POSITIVE, 1)
+        return ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TierBase, 1)
 
     @pytest.fixture
     def resource(self, meta):

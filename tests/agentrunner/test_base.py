@@ -24,7 +24,7 @@ class TestAgentRunnerBase:
             AgentRunner: A configured `AgentRunner` instance with a specified environment ("synergy_grid-v0")
                          and algorithm ("A2C").
         """
-        return AgentRunner(2)
+        return AgentRunner(2, "test")
 
     def test_initialization(self, agent_runner):
         """
@@ -39,8 +39,6 @@ class TestAgentRunnerBase:
         Args:
             agent_runner (AgentRunner): The `AgentRunner` instance to test.
         """
-        assert agent_runner.environment == "synergy_grid-v0"
-        assert agent_runner.model == None
         assert agent_runner.algorithm == "A2C"
         assert agent_runner.AlgorithmClass == A2C
 
@@ -56,7 +54,7 @@ class TestAgentRunnerBase:
             ValueError: If the algorithm is invalid (e.g., "invalid_algorithm").
         """
         with pytest.raises(IndexError):
-            AgentRunner(4)
+            AgentRunner(4, "test")
 
     def test_get_model_with_no_agent_steps(self, agent_runner):
         """

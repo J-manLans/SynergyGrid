@@ -2,8 +2,9 @@ from synergygrid.gymnasium.action_space import AgentAction
 from synergygrid.core.agent import SynergyAgent
 from synergygrid.core.resources.resource_meta import ResourceMeta
 from synergygrid.core.resources.base_resource import BaseResource
-from synergygrid.core.resources.direct.positive import PositiveResource
+from synergygrid.core.resources.base_tier_resource import BaseTierResource
 from synergygrid.core.resources.direct.negative import NegativeResource
+from synergygrid.core.resources.synergy.tier_base import TierBase
 from synergygrid.core.resources.synergy.tier import TierResource
 import numpy as np
 from numpy.random import Generator, default_rng
@@ -24,7 +25,7 @@ class GridWorld:
         max_active_resources: int,
         grid_rows: int,
         grid_cols: int,
-        max_tier: int = 3,
+        max_tier: int = 2,
     ):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
@@ -39,7 +40,7 @@ class GridWorld:
         self.max_tier = max_tier
         self._agent = SynergyAgent(grid_rows, grid_cols)
 
-        self._ALL_RESOURCES = self._create_resources(max_tier)
+        self._ALL_RESOURCES = self._create_resources(self.max_tier)
 
     def reset(self, rng: Generator | None = None) -> None:
         """
@@ -126,25 +127,30 @@ class GridWorld:
 
     def _create_resources(self, max_tier: int) -> list[BaseResource]:
         resources = []
-        n_pos = n_neg = n_tier = 0
+        n_tier_base = n_neg = n_tier = 0
 
         if max_tier > 1:
-            ratio = (0.50, 0.20, 0.30)
-            n_pos = self._compute_spawn_count(ratio[0])
-            n_neg = self._compute_spawn_count(ratio[1])
+            ratio = (0.20, 0.40, 0.40)
+            n_neg = self._compute_spawn_count(ratio[0])
+            n_tier_base = self._compute_spawn_count(ratio[1])
             n_tier = self._compute_spawn_count(ratio[2])
         else:
             ratio = (0.75, 0.25)
-            n_pos = self._compute_spawn_count(ratio[0])
+            n_tier_base = self._compute_spawn_count(ratio[0])
             n_neg = self._compute_spawn_count(ratio[1])
 
-        for _ in range(n_pos):
-            resources.append(PositiveResource((self.grid_rows, self.grid_cols)))
+        BaseTierResource.MAX_TIER = max_tier
         for _ in range(n_neg):
             resources.append(NegativeResource((self.grid_rows, self.grid_cols)))
-        for tier in range(2, max_tier + 1):
-            for _ in range(n_tier):
-                resources.append(TierResource(tier, (self.grid_rows, self.grid_cols)))
+        for tier in range(1, max_tier + 1):
+            if tier == 1:
+                for _ in range(n_tier_base):
+                    resources.append(TierBase(tier, (self.grid_rows, self.grid_cols)))
+            else:
+                for _ in range(n_tier):
+                    resources.append(
+                        TierResource(tier, (self.grid_rows, self.grid_cols))
+                    )
 
         return resources
 
