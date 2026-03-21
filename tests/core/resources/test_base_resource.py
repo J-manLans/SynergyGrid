@@ -39,7 +39,8 @@ class TestBaseResource:
 
     @pytest.fixture
     def resource(self, meta):
-        return DummyResource((5, 5), 3, meta)
+        BaseResource.set_life_span(5, 5)
+        return DummyResource(3, meta)
 
     @pytest.mark.parametrize(
         "rows, cols",
@@ -58,7 +59,9 @@ class TestBaseResource:
         - The internal timer starts at zero.
         - No exception is raised for valid grid dimensions.
         """
-        resource = DummyResource((rows, cols), 3, meta)
+
+        BaseResource.set_life_span(5, 5)
+        resource = DummyResource(3, meta)
 
         assert resource.is_active is False
         assert resource.timer.remaining == 0

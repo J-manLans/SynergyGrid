@@ -29,18 +29,27 @@ class BaseResource(ABC):
 
     def __init__(
         self,
-        world_boundaries: tuple[int, int],
         cool_down: int,
         meta: ResourceMeta,
     ):
-        self._world_boundaries = world_boundaries
-        # Max steps needed to reach resource diagonally anywhere on the grid
-        self._LIFE_SPAN = (world_boundaries[0] - 1) + (world_boundaries[1] - 1)
         self._cool_down = cool_down
         self.meta = meta
         self.timer = self.Timer()
 
-    def reset(self):
+    @classmethod
+    def set_life_span(cls, grid_rows:int, grid_cols:int) -> None:
+        """
+        Set the maximum lifespan based on the grid size.
+
+        The lifespan is defined as the maximum number of steps required to traverse the grid from one corner to the opposite corner using Manhattan distance.
+
+        :param grid_rows: Number of rows
+        :param grid_cols: Number of columns
+        """
+
+        cls._LIFE_SPAN = (grid_rows - 1) + (grid_cols - 1)
+
+    def reset(self) -> None:
         self.is_active = False
         self.timer.set(0)
         self._chained_tiers.clear()

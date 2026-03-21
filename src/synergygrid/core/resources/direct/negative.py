@@ -18,9 +18,8 @@ class NegativeResource(BaseResource):
     #       Init        #
     # ================= #
 
-    def __init__(self, world_boundaries: tuple[int, int], cool_down: int = 7):
+    def __init__(self, cool_down: int = 7):
         super().__init__(
-            world_boundaries,
             cool_down,
             ResourceMeta(category=ResourceCategory.DIRECT, type=DirectType.NEGATIVE),
         )

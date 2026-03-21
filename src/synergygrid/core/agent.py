@@ -1,4 +1,4 @@
-from synergygrid.core.resources import BaseResource
+from synergygrid.core.resources.base_resource import BaseResource
 from synergygrid.gymnasium.action_space import AgentAction
 
 

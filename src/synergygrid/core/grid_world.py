@@ -140,16 +140,17 @@ class GridWorld:
             n_neg = self._compute_spawn_count(ratio[1])
 
         BaseTierResource.MAX_TIER = max_tier
+        BaseResource.set_life_span(self.grid_rows, self.grid_cols)
         for _ in range(n_neg):
-            resources.append(NegativeResource((self.grid_rows, self.grid_cols)))
+            resources.append(NegativeResource())
         for tier in range(1, max_tier + 1):
             if tier == 1:
                 for _ in range(n_tier_base):
-                    resources.append(TierBase(tier, (self.grid_rows, self.grid_cols)))
+                    resources.append(TierBase(tier))
             else:
                 for _ in range(n_tier):
                     resources.append(
-                        TierResource(tier, (self.grid_rows, self.grid_cols))
+                        TierResource(tier)
                     )
 
         return resources
