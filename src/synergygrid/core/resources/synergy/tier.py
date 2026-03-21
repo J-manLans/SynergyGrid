@@ -24,12 +24,11 @@ class TierResource(BaseTierResource):
     # ================= #
 
     def __init__(
-        self, tier: int, world_boundaries: tuple[int, int], cool_down: int = 10
+        self, tier: int, cool_down: int = 10
     ):
         self._REWARD = self._calculate_reward(tier)
 
         super().__init__(
-            world_boundaries,
             cool_down,
             ResourceMeta(
                 category=ResourceCategory.SYNERGY, type=SynergyType.TIER, tier=tier
