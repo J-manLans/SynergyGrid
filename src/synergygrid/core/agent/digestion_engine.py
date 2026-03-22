@@ -5,7 +5,7 @@ from synergygrid.core.resources.synergy.tier_resource import TierResource
 class DigestionEngine:
     _NO_CHAIN = -1
     _BASE_TIER = 0
-    _pending_reward: int
+    _pending_reward: int = 0
     chained_tiers: int = _NO_CHAIN
 
     # ================= #
@@ -56,6 +56,8 @@ class DigestionEngine:
             if current_tier == consumed_resource.MAX_TIER:
                 # If max tier is reached, reset chain
                 self.chained_tiers = self._NO_CHAIN
+                if not consumed_resource.step_wise_scoring_type:
+                    return False
             else:
                 # Otherwise, continue the chain
                 self.chained_tiers = current_tier

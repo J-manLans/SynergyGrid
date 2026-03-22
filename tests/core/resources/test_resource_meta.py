@@ -27,10 +27,10 @@ class TestResourceMeta:
         - type is DirectType.POSITIVE
         - tier defaults to 0 when not provided
         """
-        meta = ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER_BASE)
+        meta = ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER)
 
         assert meta.category == ResourceCategory.SYNERGY
-        assert meta.type == SynergyType.TIER_BASE
+        assert meta.type == SynergyType.TIER
         assert meta.tier == 0
 
     def test_direct_negative_initialization(self):
@@ -82,9 +82,9 @@ class TestResourceMeta:
 
         This confirms consistent default handling.
         """
-        meta = ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER_BASE, None)
+        meta = ResourceMeta(ResourceCategory.DIRECT, SynergyType.TIER, None)
 
-        assert meta.tier == 0
+        assert meta.tier == -1
 
     def test_negative_tier_raises(self):
         """

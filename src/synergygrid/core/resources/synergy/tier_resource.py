@@ -25,8 +25,6 @@ class TierResource(BaseResource):
     # ================= #
 
     def __init__(self, tier: int, cool_down: int = 10):
-
-
         super().__init__(
             self._calculate_reward(tier + 1),
             cool_down,
