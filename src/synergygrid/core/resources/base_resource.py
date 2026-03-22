@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from synergygrid.core.resources import ResourceMeta
-from typing import Final
 
 
 class BaseResource(ABC):

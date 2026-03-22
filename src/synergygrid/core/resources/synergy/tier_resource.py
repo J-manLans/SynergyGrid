@@ -17,14 +17,18 @@ class TierResource(BaseResource):
 
     _linear_reward_growth: bool = True
     _TIER_BASE_REWARD: Final[int] = 3
+    MAX_TIER: int
     step_wise_scoring_type: bool = False
-    GROWTH_FACTOR: Final[float] = 1.5
+    _GROWTH_FACTOR: Final[float] = 1.5
 
     # ================= #
     #       Init        #
     # ================= #
 
     def __init__(self, tier: int, cool_down: int = 10):
+        if tier > self.MAX_TIER:
+            raise ValueError('Tier is higher than the allowed max')
+
         super().__init__(
             self._calculate_reward(tier + 1),
             cool_down,
@@ -32,16 +36,6 @@ class TierResource(BaseResource):
                 category=ResourceCategory.SYNERGY, type=SynergyType.TIER, tier=tier
             ),
         )
-
-    @classmethod
-    def set_max_tier(cls, max_tier) -> None:
-        """
-        Set the maximum tier for the episode.
-
-        :param max_tier: Decides the maximum tier of the tier resources
-        """
-
-        cls.MAX_TIER = max_tier
 
     # ================= #
     #        API        #
@@ -66,7 +60,7 @@ class TierResource(BaseResource):
             reward = self._TIER_BASE_REWARD * multiplier
         else:
             reward = int(
-                (self._TIER_BASE_REWARD * (self.GROWTH_FACTOR**multiplier)) + 0.5
+                (self._TIER_BASE_REWARD * (self._GROWTH_FACTOR**multiplier)) + 0.5
             )
 
         return reward

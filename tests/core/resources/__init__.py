@@ -4,7 +4,7 @@ from .test_base_resource import BaseResource
 from .synergy import TierResource
 
 __all__ = [
-    'base_check_for_inactive_resource',
+    "base_check_for_inactive_resource",
     "ResourceMeta",
     "ResourceCategory",
     "DirectType",
