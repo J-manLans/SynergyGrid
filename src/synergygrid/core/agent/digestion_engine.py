@@ -34,11 +34,21 @@ class DigestionEngine:
                     return consumed_resource.REWARD
                 return 0
 
-            # Non-step-wise scoring: accumulate reward silently on correct progression, and only
-            # pay it out when the chain fails
+            # Non-step-wise scoring: accumulate reward silently on correct progression.
+            # - If base tier is consumed, flush and return the last correct reward
+            # - If max tier is consumed, flush and return the max reward
+            # If the chain breaks, flush the pending reward and return it.
             if self._resolve_tier_progression(consumed_resource):
+                if consumed_resource.meta.tier == self._BASE_TIER:
+                    return self._flush_pending_reward()
+
+                if consumed_resource.meta.tier == consumed_resource.MAX_TIER:
+                    self._pending_reward = consumed_resource.REWARD
+                    return self._flush_pending_reward()
+
                 self._pending_reward = consumed_resource.REWARD
                 return 0
+
             return self._flush_pending_reward()
 
         # Non-tier resources: always return base reward
@@ -48,7 +58,7 @@ class DigestionEngine:
     #      Helpers      #
     # ================= #
 
-    def _resolve_tier_progression(self, consumed_resource: TierResource) -> int:
+    def _resolve_tier_progression(self, consumed_resource: TierResource) -> bool:
         current_tier = consumed_resource.meta.tier
 
         # Correct progression (starting tier or previous tier + 1)
@@ -56,8 +66,6 @@ class DigestionEngine:
             if current_tier == consumed_resource.MAX_TIER:
                 # If max tier is reached, reset chain
                 self.chained_tiers = self._NO_CHAIN
-                if not consumed_resource.step_wise_scoring_type:
-                    return False
             else:
                 # Otherwise, continue the chain
                 self.chained_tiers = current_tier

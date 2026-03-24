@@ -35,7 +35,7 @@ class TestBaseResource:
 
     @pytest.fixture
     def meta(self):
-        return ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER_BASE, 1)
+        return ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER, 1)
 
     @pytest.fixture
     def resource(self, meta):
