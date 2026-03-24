@@ -20,14 +20,14 @@ class TestResourceMeta:
 
     def test_direct_positive_initialization(self):
         """
-        Verify that a DIRECT POSITIVE resource initializes correctly.
+        Verify that a SYNERGY TIER resource initializes correctly.
 
         Expected behavior:
-        - category is ResourceCategory.DIRECT
-        - type is DirectType.POSITIVE
-        - tier defaults to 0 when not provided
+        - category is ResourceCategory.SYNERGY
+        - type is SynergyType.TIER
+        - tier defaults to -1 when not provided
         """
-        meta = ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER)
+        meta = ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER, 0)
 
         assert meta.category == ResourceCategory.SYNERGY
         assert meta.type == SynergyType.TIER
@@ -45,22 +45,7 @@ class TestResourceMeta:
 
         assert meta.category == ResourceCategory.DIRECT
         assert meta.type == DirectType.NEGATIVE
-        assert meta.tier == 0
-
-    def test_synergy_tier_initialization(self):
-        """
-        Verify that a SYNERGY TIER resource initializes correctly.
-
-        Ensures:
-        - category is ResourceCategory.SYNERGY
-        - type is SynergyType.TIER
-        - tier defaults to 0
-        """
-        meta = ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER)
-
-        assert meta.category == ResourceCategory.SYNERGY
-        assert meta.type == SynergyType.TIER
-        assert meta.tier == 0
+        assert meta.tier == -1
 
     @pytest.mark.parametrize("tier", [1, 2, 5])
     def test_explicit_tier(self, tier):
@@ -82,7 +67,7 @@ class TestResourceMeta:
 
         This confirms consistent default handling.
         """
-        meta = ResourceMeta(ResourceCategory.DIRECT, SynergyType.TIER, None)
+        meta = ResourceMeta(ResourceCategory.DIRECT, DirectType.NEGATIVE, None)
 
         assert meta.tier == -1
 

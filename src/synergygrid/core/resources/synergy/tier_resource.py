@@ -33,7 +33,7 @@ class TierResource(BaseResource):
             self._calculate_reward(tier + 1),
             cool_down,
             ResourceMeta(
-                category=ResourceCategory.SYNERGY, type=SynergyType.TIER, tier=tier
+                ResourceCategory.SYNERGY, SynergyType.TIER, tier
             ),
         )
 

@@ -1,8 +1,15 @@
 import pytest
 from synergygrid.core.agent.synergy_agent import AgentAction, SynergyAgent
+from synergygrid.core.resources.base_resource import BaseResource
+from synergygrid.core.resources.resource_meta import (
+    ResourceMeta,
+    ResourceCategory,
+    DirectType,
+    SynergyType,
+)
 
 
-class DummyPositiveResource:
+class DummyPositiveResource(BaseResource):
     """
     Minimal stub resource for testing.
 
@@ -11,10 +18,11 @@ class DummyPositiveResource:
     """
 
     def consume(self):
-        return 5
+        super()._consume()
+        return self
 
 
-class DummyNegativeResource:
+class DummyNegativeResource(BaseResource):
     """
     Minimal stub resource for testing.
 
@@ -23,7 +31,8 @@ class DummyNegativeResource:
     """
 
     def consume(self):
-        return -5
+        super()._consume()
+        return self
 
 
 class TestAgent:
@@ -163,24 +172,28 @@ class TestAgent:
 
         assert agent.score == starting_score
 
-    def test_consume_resource_adds_score(self, agent):
+    def test_consume_resource_adds_score(self, agent: SynergyAgent):
         """
         Verify that consuming a positive resource increases the agent's score
         and returns the correct reward value.
         """
-        resource = DummyPositiveResource()
+
+        resource = DummyPositiveResource(
+            3, 10, ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER, 0)
+        )
         reward = agent.consume_resource(resource)
 
-        assert reward == 5
-        assert agent.score == 15
+        assert reward == 3
+        assert agent.score == 13
 
     def test_consume_negative_resource_reduces_score(self, agent):
         """
         Verify that consuming a negative resource decreases the agent's score
         and returns the correct negative reward value.
         """
-        resource = DummyNegativeResource()
+
+        resource = DummyNegativeResource(-3, 5, ResourceMeta(ResourceCategory.DIRECT, DirectType.NEGATIVE))
         reward = agent.consume_resource(resource)
 
-        assert reward == -5
-        assert agent.score == 5
+        assert reward == -3
+        assert agent.score == 7

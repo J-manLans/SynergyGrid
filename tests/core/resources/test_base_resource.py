@@ -15,8 +15,8 @@ class DummyResource(BaseResource):
     """
 
     def consume(self):
-        self._consume()
-        return 1
+        super()._consume()
+        return self
 
 
 class TestBaseResource:
@@ -40,7 +40,7 @@ class TestBaseResource:
     @pytest.fixture
     def resource(self, meta):
         BaseResource.set_life_span(5, 5)
-        return DummyResource(3, meta)
+        return DummyResource(3, 10, meta)
 
     @pytest.mark.parametrize(
         "rows, cols",
@@ -61,7 +61,7 @@ class TestBaseResource:
         """
 
         BaseResource.set_life_span(5, 5)
-        resource = DummyResource(3, meta)
+        resource = DummyResource(3, 10, meta)
 
         assert resource.is_active is False
         assert resource.timer.remaining == 0
@@ -80,7 +80,7 @@ class TestBaseResource:
         assert resource.position == [np.int64(2), np.int64(3)]
         assert resource.timer.remaining > 0
 
-    def test_deplete_deactivates_and_sets_cooldown(self, resource):
+    def test_deplete_deactivates_and_sets_cooldown(self, resource: DummyResource):
         """
         Ensure that deplete_resource():
 
@@ -93,7 +93,7 @@ class TestBaseResource:
         resource.deplete_resource()
 
         assert resource.is_active is False
-        assert resource.timer.remaining == 3
+        assert resource.timer.remaining == 10
 
     def test_reset_restores_default_state(self, resource):
         """
@@ -110,7 +110,7 @@ class TestBaseResource:
         assert resource.is_active is False
         assert resource.timer.remaining == 0
 
-    def test_consume_returns_reward_and_sets_cooldown(self, resource):
+    def test_consume_returns_reward_and_sets_cool_down(self, resource: DummyResource):
         """
         Ensure that consuming a resource:
 
@@ -120,11 +120,11 @@ class TestBaseResource:
         """
         resource.spawn([np.int64(0), np.int64(0)])
 
-        reward = resource.consume()
+        reward = resource.consume().REWARD
 
-        assert reward == 1
+        assert reward == 3
         assert resource.is_active is False
-        assert resource.timer.remaining == 3
+        assert resource.timer.remaining == 10
 
     def test_timer_set_and_tick(self):
         """
