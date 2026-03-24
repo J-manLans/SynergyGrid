@@ -1,7 +1,7 @@
 import datetime
 from pathlib import Path
 from stable_baselines3.common.monitor import Monitor
-from synergygrid.agentrunner.base import AgentRunner
+from synergygrid.runners.agent_runner.agent_runner import AgentRunner
 from synergygrid.config.configs import agent_config
 from synergygrid.gymnasium.env_factory import make
 from synergygrid.utils.paths import get_project_path

@@ -18,7 +18,7 @@ class TierResource(BaseResource):
     _linear_reward_growth: bool = True
     _TIER_BASE_REWARD: Final[int] = 3
     MAX_TIER: int
-    step_wise_scoring_type: bool = False
+    step_wise_scoring_type: bool = True
     _GROWTH_FACTOR: Final[float] = 1.5
 
     # ================= #

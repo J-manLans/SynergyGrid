@@ -54,7 +54,8 @@ class DigestionEngine:
 
             return self._flush_pending_reward()
 
-        # Non-tier resources: always return base reward
+        # Non-tier resources: always return base reward and resets the tier chain
+        self.chained_tiers = self._NO_CHAIN
         return consumed_resource.REWARD
 
     # ================= #

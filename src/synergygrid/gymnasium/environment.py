@@ -2,7 +2,6 @@ import gymnasium as gym
 from gymnasium import spaces
 
 from synergygrid.core.grid_world import GridWorld
-from synergygrid.core.resources.base_resource import BaseResource
 from synergygrid.gymnasium.action_space import AgentAction
 from synergygrid.gymnasium.observation_space import ObservationHandler
 from synergygrid.rendering.pygame_renderer import PygameRenderer
@@ -36,13 +35,10 @@ class SYNGridEnv(gym.Env):
         human_control: bool = False,
     ):
         # Set up bench environment;
-
         self._init_vars(max_active_resources, grid_rows, grid_cols, render_mode)
         self._init_world(
             human_control, max_steps, max_active_resources, grid_rows, grid_cols
         )
-        if human_control:
-            return
 
         if self.render_mode == "human":
             self._init_renderer(grid_rows, grid_cols, self.metadata["render_fps"])
@@ -116,6 +112,7 @@ class SYNGridEnv(gym.Env):
             self.world.get_resource_meta(True),
             self._get_hud_data(),
         )
+        self.renderer.get_user_action()
 
     # ================== #
     #       Helpers      #
@@ -143,17 +140,7 @@ class SYNGridEnv(gym.Env):
         grid_rows: int,
         grid_cols: int,
     ) -> None:
-        if human_control:
-            self._init_renderer(self.grid_rows, self.grid_rows, 60)
-            self.world = GridWorld(
-                max_active_resources,
-                grid_rows,
-                grid_cols,
-                renderer=self.renderer,
-                steps_left=max_steps,
-            )
-        else:
-            self.world = GridWorld(max_active_resources, grid_rows, grid_cols)
+        self.world = GridWorld(max_active_resources, grid_rows, grid_cols)
 
     def _init_renderer(self, grid_rows: int, grid_cols: int, fps: int) -> None:
         self.renderer = PygameRenderer(grid_rows, grid_cols, fps)

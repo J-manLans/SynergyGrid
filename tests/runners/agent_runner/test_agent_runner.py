@@ -1,10 +1,10 @@
 import pytest
-from synergygrid.agentrunner import AgentRunner
+from synergygrid.runners.agent_runner.agent_runner import AgentRunner
 from stable_baselines3 import A2C
 from unittest.mock import patch
 
 
-class TestAgentRunnerBase:
+class TestAgentRunner:
     """
     This test suite verifies that the `AgentRunner` class functions correctly in various scenarios. Specifically, it tests:
     - The initialization of an `AgentRunner` object.
