@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from synergygrid.gymnasium.environment import SYNGridEnv
+from syn_grid.gymnasium.environment import SYNGridEnv
 
 
 class TestEnvironment:

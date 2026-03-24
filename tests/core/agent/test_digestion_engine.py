@@ -1,8 +1,8 @@
 import pytest
 
-from synergygrid.core.resources.base_resource import BaseResource
-from synergygrid.core.resources.synergy.tier_resource import TierResource
-from synergygrid.core.agent.digestion_engine import DigestionEngine
+from syn_grid.core.resources.base_resource import BaseResource
+from syn_grid.core.resources.synergy.tier_resource import TierResource
+from syn_grid.core.agent.digestion_engine import DigestionEngine
 
 
 class TestDigestionEngine:

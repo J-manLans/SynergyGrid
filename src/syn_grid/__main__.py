@@ -1,8 +1,8 @@
-from synergygrid.runners.agent_runner.agent_runner import AgentRunner
-from synergygrid.runners.agent_runner.train_agent import train_agent
-from synergygrid.runners.agent_runner.evaluate_agent import evaluate_agent
-from synergygrid.utils.parse_args import parse_args
-from synergygrid.runners.human_runner.human_runner import HumanRunner
+from syn_grid.runners.agent_runner.agent_runner import AgentRunner
+from syn_grid.runners.agent_runner.train_agent import train_agent
+from syn_grid.runners.agent_runner.evaluate_agent import evaluate_agent
+from syn_grid.utils.parse_args import parse_args
+from syn_grid.runners.human_runner.human_runner import HumanRunner
 
 import sys
 

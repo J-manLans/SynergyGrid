@@ -1,11 +1,11 @@
-from synergygrid.core.resources.resource_meta import (
+from syn_grid.core.resources.resource_meta import (
     ResourceMeta,
     ResourceCategory,
     DirectType,
     SynergyType,
 )
-from synergygrid.utils.paths import get_package_path, get_package_root
-from synergygrid.gymnasium.action_space import AgentAction
+from syn_grid.utils.paths import get_package_path, get_package_root
+from syn_grid.gymnasium.action_space import AgentAction
 
 import pygame
 import json
@@ -61,6 +61,7 @@ class PygameRenderer:
 
         # Initialize game window
         self.window_surface = pygame.display.set_mode(self.window_size)
+        pygame.display.set_caption("SYNGrid")
 
     # ================= #
     #        API        #

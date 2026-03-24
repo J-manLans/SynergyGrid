@@ -1,5 +1,5 @@
 import pytest
-from synergygrid.core.resources.resource_meta import (
+from syn_grid.core.resources.resource_meta import (
     DirectType,
     ResourceCategory,
     ResourceMeta,

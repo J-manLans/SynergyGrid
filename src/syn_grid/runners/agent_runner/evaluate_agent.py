@@ -1,5 +1,5 @@
-from synergygrid.runners.agent_runner.agent_runner import AgentRunner
-from synergygrid.gymnasium.env_factory import make
+from syn_grid.runners.agent_runner.agent_runner import AgentRunner
+from syn_grid.gymnasium.env_factory import make
 
 
 def evaluate_agent(runner: AgentRunner, agent_steps: str, trained_model: bool):

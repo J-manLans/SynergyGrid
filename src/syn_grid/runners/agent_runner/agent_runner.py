@@ -1,6 +1,6 @@
-from synergygrid.config.configs import algorithms
-from synergygrid.gymnasium.env_factory import register_env
-from synergygrid.utils.paths import get_project_path
+from syn_grid.config.configs import algorithms
+from syn_grid.gymnasium.env_factory import register_env
+from syn_grid.utils.paths import get_project_path
 import sys
 from pathlib import Path
 from stable_baselines3.common.base_class import BaseAlgorithm

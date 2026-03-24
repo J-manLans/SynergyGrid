@@ -1,6 +1,6 @@
-from synergygrid.core.resources.base_resource import BaseResource
-from synergygrid.gymnasium.action_space import AgentAction
-from synergygrid.core.agent.digestion_engine import DigestionEngine
+from syn_grid.core.resources.base_resource import BaseResource
+from syn_grid.gymnasium.action_space import AgentAction
+from syn_grid.core.agent.digestion_engine import DigestionEngine
 
 
 class SynergyAgent:

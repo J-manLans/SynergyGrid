@@ -1,5 +1,5 @@
-from synergygrid.core.resources.synergy.tier_resource import TierResource
-from synergygrid.core.resources.base_resource import BaseResource
+from syn_grid.core.resources.synergy.tier_resource import TierResource
+from syn_grid.core.resources.base_resource import BaseResource
 
 import pytest
 import numpy as np

@@ -1,10 +1,10 @@
 import datetime
 from pathlib import Path
 from stable_baselines3.common.monitor import Monitor
-from synergygrid.runners.agent_runner.agent_runner import AgentRunner
-from synergygrid.config.configs import agent_config
-from synergygrid.gymnasium.env_factory import make
-from synergygrid.utils.paths import get_project_path
+from syn_grid.runners.agent_runner.agent_runner import AgentRunner
+from syn_grid.config.configs import agent_config
+from syn_grid.gymnasium.env_factory import make
+from syn_grid.utils.paths import get_project_path
 
 
 # TODO: this only accompanies the stable baselines3 models as of now. We need to crete a more

@@ -19,7 +19,7 @@
 # pip install -e .[dev] --upgrade
 # Upgrade dependencies if newer versions are allowed by version constraints
 #
-# pip show synergygrid
+# pip show syn-grid
 # Show where the package is installed and which version pip sees
 #
 # pip check
@@ -31,7 +31,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "synergygrid"
+name = "syn-grid"
 version = "0.1.0"
 license = {file = "LICENSE"}
 description = "Benchmark for synergy reasoning in agents"
@@ -57,7 +57,7 @@ dev = [
     "pytest>=9.0.2",
     "stable-baselines3>=2.7.1",
     "tensorboard>=2.20.0",
-    "black>=26.1" # For automatic code formatting. Usage: black path/to/file.py or black src/synergygrid for the whole module
+    "black>=26.1" # For automatic code formatting. Usage: black path/to/file.py or black src/syn_grid for the whole module
 ]
 
 [tool.setuptools.packages.find]
@@ -68,4 +68,4 @@ where = ["src"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-"synergygrid" = ["assets/**/*"]
+"syn_grid" = ["assets/**/*"]

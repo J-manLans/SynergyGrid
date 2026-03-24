@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
-from synergygrid.core.resources.base_resource import BaseResource
-from synergygrid.core.resources.resource_meta import (
+from syn_grid.core.resources.base_resource import BaseResource
+from syn_grid.core.resources.resource_meta import (
     SynergyType,
     ResourceMeta,
     ResourceCategory,

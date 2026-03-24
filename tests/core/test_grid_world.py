@@ -1,6 +1,6 @@
 import pytest
-from synergygrid.core.grid_world import GridWorld
-from synergygrid.core.resources.resource_meta import DirectType, SynergyType
+from syn_grid.core.grid_world import GridWorld
+from syn_grid.core.resources.resource_meta import DirectType, SynergyType
 
 import numpy as np
 

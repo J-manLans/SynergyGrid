@@ -1,4 +1,4 @@
-from synergygrid.config.configs import algorithms
+from syn_grid.config.configs import algorithms
 import argparse
 from argparse import Namespace
 import re

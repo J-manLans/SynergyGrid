@@ -1,5 +1,5 @@
-from synergygrid.rendering.pygame_renderer import PygameRenderer
-from synergygrid.core.grid_world import GridWorld
+from syn_grid.rendering.pygame_renderer import PygameRenderer
+from syn_grid.core.grid_world import GridWorld
 
 
 class HumanRunner:

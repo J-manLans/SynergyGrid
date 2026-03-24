@@ -2,10 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug package: synergygrid",
+      "name": "Debug package: SYNGrid",
       "type": "debugpy",
       "request": "launch",
-      "module": "synergygrid",
+      "module": "syn_grid",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "justMyCode": true

@@ -1,10 +1,10 @@
 import gymnasium as gym
 from gymnasium import spaces
 
-from synergygrid.core.grid_world import GridWorld
-from synergygrid.gymnasium.action_space import AgentAction
-from synergygrid.gymnasium.observation_space import ObservationHandler
-from synergygrid.rendering.pygame_renderer import PygameRenderer
+from syn_grid.core.grid_world import GridWorld
+from syn_grid.gymnasium.action_space import AgentAction
+from syn_grid.gymnasium.observation_space import ObservationHandler
+from syn_grid.rendering.pygame_renderer import PygameRenderer
 
 
 class SYNGridEnv(gym.Env):

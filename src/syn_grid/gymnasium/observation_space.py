@@ -1,7 +1,7 @@
-from synergygrid.core.grid_world import GridWorld
-from synergygrid.core.resources.resource_meta import ResourceCategory
-from synergygrid.core.resources.resource_meta import DirectType
-from synergygrid.core.resources.resource_meta import SynergyType
+from syn_grid.core.grid_world import GridWorld
+from syn_grid.core.resources.resource_meta import ResourceCategory
+from syn_grid.core.resources.resource_meta import DirectType
+from syn_grid.core.resources.resource_meta import SynergyType
 
 from numpy.typing import NDArray
 import numpy as np
