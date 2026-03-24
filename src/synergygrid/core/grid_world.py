@@ -1,5 +1,4 @@
 from synergygrid.gymnasium.action_space import AgentAction
-from synergygrid.rendering.pygame_renderer import PygameRenderer
 from synergygrid.core.agent.synergy_agent import SynergyAgent
 from synergygrid.core.resources.resource_meta import ResourceMeta
 from synergygrid.core.resources.base_resource import BaseResource
