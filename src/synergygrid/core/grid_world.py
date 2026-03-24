@@ -1,9 +1,11 @@
 from synergygrid.gymnasium.action_space import AgentAction
+from synergygrid.rendering.pygame_renderer import PygameRenderer
 from synergygrid.core.agent.synergy_agent import SynergyAgent
 from synergygrid.core.resources.resource_meta import ResourceMeta
 from synergygrid.core.resources.base_resource import BaseResource
 from synergygrid.core.resources.direct.negative_resource import NegativeResource
 from synergygrid.core.resources.synergy.tier_resource import TierResource
+
 import numpy as np
 from numpy.random import Generator, default_rng
 from typing import Final
@@ -23,7 +25,7 @@ class GridWorld:
         max_active_resources: int,
         grid_rows: int,
         grid_cols: int,
-        max_tier: int = 4,
+        max_tier: int = 1,
     ):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
@@ -36,6 +38,7 @@ class GridWorld:
         self.grid_rows = grid_rows
         self.grid_cols = grid_cols
         self.max_tier = max_tier
+
         self.agent = SynergyAgent(grid_rows, grid_cols)
 
         self.ALL_RESOURCES = self._create_resources(self.max_tier)

@@ -1,4 +1,4 @@
-from synergygrid.agentrunner.base import AgentRunner
+from synergygrid.runners.agent_runner.agent_runner import AgentRunner
 from synergygrid.gymnasium.env_factory import make
 
 

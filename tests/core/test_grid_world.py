@@ -1,9 +1,7 @@
 import pytest
 from synergygrid.core.grid_world import GridWorld
-from synergygrid.core.resources.resource_meta import DirectType
-from synergygrid.core.resources.resource_meta import SynergyType
+from synergygrid.core.resources.resource_meta import DirectType, SynergyType
 
-from synergygrid.gymnasium.action_space import AgentAction
 import numpy as np
 
 

@@ -18,7 +18,7 @@ class TierResource(BaseResource):
     _linear_reward_growth: bool = True
     _TIER_BASE_REWARD: Final[int] = 3
     MAX_TIER: int
-    step_wise_scoring_type: bool = False
+    step_wise_scoring_type: bool = True
     _GROWTH_FACTOR: Final[float] = 1.5
 
     # ================= #
@@ -27,14 +27,12 @@ class TierResource(BaseResource):
 
     def __init__(self, tier: int, cool_down: int = 10):
         if tier > self.MAX_TIER:
-            raise ValueError('Tier is higher than the allowed max')
+            raise ValueError("Tier is higher than the allowed max")
 
         super().__init__(
             self._calculate_reward(tier + 1),
             cool_down,
-            ResourceMeta(
-                ResourceCategory.SYNERGY, SynergyType.TIER, tier
-            ),
+            ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER, tier),
         )
 
     # ================= #
