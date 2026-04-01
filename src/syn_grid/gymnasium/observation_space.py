@@ -1,3 +1,4 @@
+from syn_grid.config.configs import ObservationConf
 from syn_grid.core.grid_world import GridWorld
 from syn_grid.core.resources.resource_meta import ResourceCategory
 from syn_grid.core.resources.resource_meta import DirectType
@@ -15,17 +16,11 @@ class ObservationHandler:
     #       Init        #
     # ================= #
 
-    def __init__(
-        self,
-        world: GridWorld,
-        grid_rows: int,
-        grid_cols: int,
-        max_steps: int,
-    ):
+    def __init__(self, world: GridWorld, obs_conf: ObservationConf):
         self._world = world
-        self._grid_rows = grid_rows
-        self._grid_cols = grid_cols
-        self._max_steps = max_steps
+        self._grid_rows = obs_conf.grid_rows
+        self._grid_cols = obs_conf.grid_cols
+        self._max_steps = obs_conf.max_steps
 
     def reset(self):
         self.step_count_down = self._max_steps

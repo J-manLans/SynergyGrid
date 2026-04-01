@@ -1,3 +1,4 @@
+from syn_grid.config.configs import RendererConf
 from syn_grid.core.resources.resource_meta import (
     ResourceMeta,
     ResourceCategory,
@@ -19,7 +20,7 @@ class PygameRenderer:
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows: int = 5, grid_cols: int = 5, fps: int = 2) -> None:
+    def __init__(self, renderer_conf: RendererConf, fps: int) -> None:
         """
         Initializes the Pygame renderer.
 
@@ -35,8 +36,8 @@ class PygameRenderer:
         pygame.display.init()  # initialize the display module
         self.clock = pygame.time.Clock()  # Game clock
 
-        self._grid_rows = grid_rows
-        self._grid_cols = grid_cols
+        self._grid_rows = renderer_conf.grid_rows
+        self._grid_cols = renderer_conf.grid_cols
         self._step_fps = fps
 
         # Default font
@@ -232,7 +233,9 @@ class PygameRenderer:
 
         chained_tiers = hud_data["current tier chain"]
         if chained_tiers > -1:
-            self._draw_hud_stat(chained_tiers, hud_rect.x + 33, hud_rect.y + (hud_rect.height - 68))
+            self._draw_hud_stat(
+                chained_tiers, hud_rect.x + 33, hud_rect.y + (hud_rect.height - 68)
+            )
 
     def _draw_life_bar(self, current_score: int, hud_rect: pygame.Rect):
         """
