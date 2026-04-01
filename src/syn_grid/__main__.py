@@ -17,7 +17,7 @@ def main():
         # Choose to train or run the agent
         training = False
         # Human control to test the game
-        human_control = True
+        human_control = False
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train

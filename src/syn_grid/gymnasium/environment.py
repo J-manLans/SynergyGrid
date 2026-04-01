@@ -1,6 +1,7 @@
 import gymnasium as gym
 from gymnasium import spaces
 
+from syn_grid.config.configs import RunConfig
 from syn_grid.core.grid_world import GridWorld
 from syn_grid.gymnasium.action_space import AgentAction
 from syn_grid.gymnasium.observation_space import ObservationHandler
@@ -27,26 +28,17 @@ class SYNGridEnv(gym.Env):
 
     def __init__(
         self,
-        max_active_resources: int = 3,
-        grid_rows: int = 5,
-        grid_cols: int = 5,
-        max_steps: int = 100,
+        run_conf: RunConfig,
         render_mode: str | None = None,
-        human_control: bool = False,
     ):
         # Set up bench environment;
-        self._init_vars(max_active_resources, grid_rows, grid_cols, render_mode)
-        self._init_world(
-            human_control, max_steps, max_active_resources, grid_rows, grid_cols
-        )
+        self.render_mode = render_mode
+        self.world = GridWorld(run_conf.grid_world, run_conf.agent)
 
         if self.render_mode == "human":
-            self._init_renderer(grid_rows, grid_cols, self.metadata["render_fps"])
-
-        # if human_control:
-        #     self._max_steps = max_steps
-        #     self._human_play_loop()
-        #     return
+            self.renderer = PygameRenderer(
+                run_conf.renderer, self.metadata["render_fps"]
+            )
 
         # Set up Gymnasium environment:
 
@@ -57,7 +49,7 @@ class SYNGridEnv(gym.Env):
         # Same goes with observation_space: this provides the agent with a structured view
         # of the world that it uses to decide its actions.
         self._observation_handler = ObservationHandler(
-            self.world, grid_rows, grid_cols, max_steps
+            self.world, run_conf.observation_handler
         )
         self.observation_space = self._observation_handler.setup_obs_space()
 
@@ -117,33 +109,6 @@ class SYNGridEnv(gym.Env):
     # ================== #
     #       Helpers      #
     # ================== #
-
-    # === Init === #
-
-    def _init_vars(
-        self,
-        max_active_resources: int,
-        grid_rows: int,
-        grid_cols: int,
-        render_mode: str | None,
-    ) -> None:
-        self.max_active_resources = max_active_resources
-        self.grid_rows = grid_rows
-        self.grid_cols = grid_cols
-        self.render_mode = render_mode
-
-    def _init_world(
-        self,
-        human_control: bool,
-        max_steps: int,
-        max_active_resources: int,
-        grid_rows: int,
-        grid_cols: int,
-    ) -> None:
-        self.world = GridWorld(max_active_resources, grid_rows, grid_cols)
-
-    def _init_renderer(self, grid_rows: int, grid_cols: int, fps: int) -> None:
-        self.renderer = PygameRenderer(grid_rows, grid_cols, fps)
 
     # === Gymnasium contract === #
 

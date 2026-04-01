@@ -1,3 +1,4 @@
+from syn_grid.config.configs import AgentConf
 from syn_grid.core.resources.base_resource import BaseResource
 from syn_grid.gymnasium.action_space import AgentAction
 from syn_grid.core.agent.digestion_engine import DigestionEngine
@@ -8,16 +9,16 @@ class SynergyAgent:
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_rows: int, grid_cols: int, starting_score: int = 40):
+    def __init__(self, agent_conf: AgentConf):
         """
         Initializes the agent.
 
         Defines the game world so the agent know its bounds, set its starting score and store it for later resetting.
         """
 
-        self._grid_rows = grid_rows
-        self._grid_cols = grid_cols
-        self._starting_score = starting_score
+        self._grid_rows = agent_conf.grid_rows
+        self._grid_cols = agent_conf.grid_cols
+        self._starting_score = agent_conf.starting_score
         self.digestion_engine = DigestionEngine()
         self.reset()
 

@@ -1,3 +1,4 @@
+from syn_grid.config.configs import GridWorldConf, AgentConf
 from syn_grid.gymnasium.action_space import AgentAction
 from syn_grid.core.agent.synergy_agent import SynergyAgent
 from syn_grid.core.resources.resource_meta import ResourceMeta
@@ -19,26 +20,20 @@ class GridWorld:
     #       Init        #
     # ================= #
 
-    def __init__(
-        self,
-        max_active_resources: int,
-        grid_rows: int,
-        grid_cols: int,
-        max_tier: int = 1,
-    ):
+    def __init__(self, grid_world_conf: GridWorldConf, agent_conf: AgentConf):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
         """
 
-        if grid_cols < 1 or grid_rows < 1:
+        if grid_world_conf.grid_rows < 1 or grid_world_conf.grid_cols < 1:
             raise ValueError("grid_cols and grid_rows should be larger than 0")
 
-        self._max_active_resources = max_active_resources
-        self.grid_rows = grid_rows
-        self.grid_cols = grid_cols
-        self.max_tier = max_tier
+        self._max_active_resources = grid_world_conf.max_active_resources
+        self.grid_rows = grid_world_conf.grid_rows
+        self.grid_cols = grid_world_conf.grid_cols
+        self.max_tier = grid_world_conf.max_tier
 
-        self.agent = SynergyAgent(grid_rows, grid_cols)
+        self.agent = SynergyAgent(agent_conf)
 
         self.ALL_RESOURCES = self._create_resources(self.max_tier)
 
