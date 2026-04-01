@@ -1,3 +1,4 @@
+from syn_grid.config.models import RunConfig, ObsConfig
 from syn_grid.config.configs import algorithms
 from syn_grid.gymnasium.env_factory import register_env
 from syn_grid.utils.paths import get_project_path
@@ -7,7 +8,13 @@ from stable_baselines3.common.base_class import BaseAlgorithm
 
 
 class AgentRunner:
-    def __init__(self, algorithm_index: int, identifier: str):
+    def __init__(
+        self,
+        algorithm_index: int,
+        identifier: str,
+        run_conf: RunConfig,
+        obs_conf: ObsConfig,
+    ):
         register_env()
 
         algorithm_names = list(algorithms.keys())
@@ -15,6 +22,9 @@ class AgentRunner:
         self.AlgorithmClass: type[BaseAlgorithm] = algorithms[self.algorithm]
 
         self.identifier = identifier
+
+        self.run_conf = run_conf
+        self.obs_conf = obs_conf
 
     def get_model(self, agent_steps: str, env) -> BaseAlgorithm:
         """Create a path to match the latest model of the specified timesteps and load it"""

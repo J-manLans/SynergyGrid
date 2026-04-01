@@ -27,7 +27,7 @@ class BaseResource(ABC):
 
     def __init__(
         self,
-        reward: int,
+        reward: float,
         cool_down: int,
         meta: ResourceMeta,
     ):

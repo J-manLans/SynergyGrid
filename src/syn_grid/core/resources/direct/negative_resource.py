@@ -1,3 +1,4 @@
+from syn_grid.config.models import NegativeConf
 from syn_grid.core.resources.base_resource import BaseResource
 from syn_grid.core.resources.resource_meta import (
     ResourceMeta,
@@ -12,16 +13,14 @@ class NegativeResource(BaseResource):
     A resource that gives the agent a negative score.
     """
 
-    REWARD: Final[int] = -3
-
     # ================= #
     #       Init        #
     # ================= #
 
-    def __init__(self, cool_down: int = 7):
+    def __init__(self, conf: NegativeConf):
         super().__init__(
-            self.REWARD,
-            cool_down,
+            conf.reward,
+            conf.cool_down,
             ResourceMeta(category=ResourceCategory.DIRECT, type=DirectType.NEGATIVE),
         )
 

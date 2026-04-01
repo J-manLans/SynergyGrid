@@ -1,4 +1,4 @@
-from syn_grid.config.configs import RendererConf
+from syn_grid.config.models import RendererConf
 from syn_grid.core.resources.resource_meta import (
     ResourceMeta,
     ResourceCategory,
@@ -6,7 +6,7 @@ from syn_grid.core.resources.resource_meta import (
     SynergyType,
 )
 from syn_grid.utils.paths import get_package_path, get_package_root
-from syn_grid.gymnasium.action_space import AgentAction
+from syn_grid.gymnasium.action_space import DroidAction
 
 import pygame
 import json
@@ -74,7 +74,7 @@ class PygameRenderer:
         is_active_statuses: list[bool],
         resource_positions: list[list[np.int64]],
         resource_meta: list[ResourceMeta],
-        hud_data: dict[str, int],
+        hud_data: dict[str, int | float],
     ) -> None | str:
         """
         Draws the game window and all its content, updates and limits the fps.
@@ -212,7 +212,7 @@ class PygameRenderer:
 
         self.window_surface.blit(self.graphics["agent_img"], pos)
 
-    def _draw_hud(self, hud_data: dict[str, int]):
+    def _draw_hud(self, hud_data: dict[str, int | float]):
         """Draw HUD / score with background rectangle for multiple data"""
 
         # --- Hud element --- #
@@ -237,7 +237,7 @@ class PygameRenderer:
                 chained_tiers, hud_rect.x + 33, hud_rect.y + (hud_rect.height - 68)
             )
 
-    def _draw_life_bar(self, current_score: int, hud_rect: pygame.Rect):
+    def _draw_life_bar(self, current_score: int | float, hud_rect: pygame.Rect):
         """
         Draw a dynamic life bar inside hud_rect.
         Bar fills relative to highest score reached so far (max_seen_score).
@@ -270,7 +270,7 @@ class PygameRenderer:
 
         self._draw_hud_stat(current_score, hud_rect.x + 120, hud_rect.y + 45)
 
-    def _draw_hud_stat(self, stat: int, x, y):
+    def _draw_hud_stat(self, stat: int | float, x, y):
         tier_surf = self.hud_font.render(str(stat), True, self._hud_text_clr)
 
         # Place it in the hud
@@ -280,7 +280,7 @@ class PygameRenderer:
         rect = tier_surf.get_rect(center=tier_rect.center)
         self.window_surface.blit(tier_surf, rect)
 
-    def _draw_moves_bar(self, remaining_moves, hud_rect):
+    def _draw_moves_bar(self, remaining_moves: int | float, hud_rect: pygame.Rect):
         """
         Draw a dynamic life bar inside hud_rect.
         Bar fills relative to highest score reached so far (max_seen_score).
@@ -316,7 +316,7 @@ class PygameRenderer:
         pygame.display.update()
         self.clock.tick(self._step_fps)
 
-    def get_user_action(self) -> AgentAction | None:
+    def get_user_action(self) -> DroidAction | None:
         action = None
 
         for event in pygame.event.get():
@@ -328,12 +328,12 @@ class PygameRenderer:
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_LEFT:
-                    action = AgentAction(0)
+                    action = DroidAction(0)
                 if event.key == pygame.K_DOWN:
-                    action = AgentAction(1)
+                    action = DroidAction(1)
                 if event.key == pygame.K_RIGHT:
-                    action = AgentAction(2)
+                    action = DroidAction(2)
                 if event.key == pygame.K_UP:
-                    action = AgentAction(3)
+                    action = DroidAction(3)
 
         return action

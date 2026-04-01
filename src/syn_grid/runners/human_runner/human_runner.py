@@ -1,3 +1,4 @@
+from syn_grid.config.models import RunConfig
 from syn_grid.rendering.pygame_renderer import PygameRenderer
 from syn_grid.core.grid_world import GridWorld
 
@@ -7,11 +8,14 @@ class HumanRunner:
     #       Init        #
     # ================= #
 
-    def __init__(self, steps_left: int = 100):
-        # TODO: these values will be switched to use the same as the ones for SYNGridEnv through
-        # the config file so its more coherent testing the agent setup you attempt to train
-        self._renderer = PygameRenderer(5, 5, 60)
-        self._world = GridWorld(3, 5, 5)
+    def __init__(self, run_conf: RunConfig, steps_left: int):
+        self._renderer = PygameRenderer(run_conf.renderer_conf, 60)
+        self._world = GridWorld(
+            run_conf.grid_world_conf,
+            run_conf.droid_conf,
+            run_conf.negative_resource_conf,
+            run_conf.tier_resource_conf,
+        )
         self._steps_left = steps_left
 
     # ================= #
@@ -49,8 +53,9 @@ class HumanRunner:
             self._get_hud_data(),
         )
 
-    def _get_hud_data(self) -> dict[str, int]:
-        hud_data: dict[str, int] = {}
+    def _get_hud_data(self) -> dict[str, int | float]:
+        hud_data: dict[str, int | float] = {}
+
         hud_data["score"] = self._world.agent.score
         hud_data["moves"] = self._steps_left
         hud_data["current tier chain"] = (

@@ -1,4 +1,4 @@
-from syn_grid.config.configs import ObservationConf
+from syn_grid.config.models import ObservationConf
 from syn_grid.core.grid_world import GridWorld
 from syn_grid.core.resources.resource_meta import ResourceCategory
 from syn_grid.core.resources.resource_meta import DirectType
@@ -49,6 +49,7 @@ class ObservationHandler:
         )
 
         # reusable buffers for get_observation() to avoid per-step allocations
+        # TODO: think I need to switch this to something else, because reward is now float
         self._agent_data = np.zeros_like(agent_raw_low, dtype=np.int16)
         self._resource_data = np.zeros_like(resource_raw_low, dtype=np.int16)
 

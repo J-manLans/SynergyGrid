@@ -1,3 +1,4 @@
+from syn_grid.config.models import TierConf
 from syn_grid.core.resources.base_resource import BaseResource
 from syn_grid.core.resources.resource_meta import (
     ResourceMeta,
@@ -15,23 +16,28 @@ class TierResource(BaseResource):
     To get reward for a tier 3 resource a tier 0, tier 1 and tier 2 must have first been collected on that order without breaking the chain.
     """
 
-    _linear_reward_growth: bool = True
-    _TIER_BASE_REWARD: Final[int] = 3
+    _linear_reward_growth: bool
+    _TIER_BASE_REWARD: Final[float]
+    _GROWTH_FACTOR: Final[float]
     MAX_TIER: int
-    step_wise_scoring_type: bool = True
-    _GROWTH_FACTOR: Final[float] = 1.5
+    step_wise_scoring: bool
 
     # ================= #
     #       Init        #
     # ================= #
 
-    def __init__(self, tier: int, cool_down: int = 10):
+    def __init__(self, tier: int, conf: TierConf):
         if tier > self.MAX_TIER:
             raise ValueError("Tier is higher than the allowed max")
 
+        self._linear_reward_growth = conf.linear_reward_growth
+        self._TIER_BASE_REWARD = conf.base_reward
+        self._GROWTH_FACTOR = conf.growth_factor
+        self.step_wise_scoring = conf.step_wise_scoring
+
         super().__init__(
             self._calculate_reward(tier + 1),
-            cool_down,
+            conf.cool_down,
             ResourceMeta(ResourceCategory.SYNERGY, SynergyType.TIER, tier),
         )
 
@@ -47,7 +53,7 @@ class TierResource(BaseResource):
     #      Helpers      #
     # ================= #
 
-    def _calculate_reward(self, multiplier: int) -> int:
+    def _calculate_reward(self, multiplier: int) -> float:
         """
         Calculate the reward based on the tier base and growth setting.
 

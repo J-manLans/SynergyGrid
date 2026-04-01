@@ -1,54 +1,26 @@
+from syn_grid.utils.paths import get_package_path
+
 from stable_baselines3 import PPO, DQN, A2C
 import yaml
-from importlib import resources
-from pydantic import BaseModel
-
-# ================= #
-#      Models       #
-# ================= #
-
-
-class GridWorldConf(BaseModel, frozen=True):
-    grid_rows: int
-    grid_cols: int
-    max_active_resources: int
-    max_tier: int
-
-
-class ObservationConf(BaseModel, frozen=True):
-    grid_rows: int
-    grid_cols: int
-    max_steps: int
-
-
-class RendererConf(BaseModel, frozen=True):
-    grid_rows: int
-    grid_cols: int
-    fps: int
-
-
-class AgentConf(BaseModel, frozen=True):
-    grid_rows: int
-    grid_cols: int
-    starting_score: int
-
-
-class RunConfig(BaseModel, frozen=True):
-    grid_world: GridWorldConf
-    observation_handler: ObservationConf
-    renderer: RendererConf
-    agent: AgentConf
-
 
 # ================= #
 #      Methods      #
 # ================= #
 
+# TODO: this is awful, wanna puke looking at it. Will make a YamlConfig class I think where I keep
+# all yaml related stuff. But tomorrow, it's late now...
 
-def load_config(yaml_file, model_class):
-    with resources.open_text("syn_grid.config", yaml_file) as f:
+
+def load_config(model_class):
+    path = get_package_path("config", "configs.yaml")
+
+    with open(path, "r") as f:
         raw = yaml.safe_load(f)
+
     return model_class(**raw)
+
+
+def update_from_args(): ...
 
 
 # ================= #

@@ -10,7 +10,7 @@ def evaluate_agent(runner: AgentRunner, agent_steps: str, trained_model: bool):
     """
 
     # Create the environment with human rendering and load the model
-    env = make("human")
+    env = make("human", runner.run_conf, runner.obs_conf)
 
     # Define get_action() depending on type of model
     if trained_model:

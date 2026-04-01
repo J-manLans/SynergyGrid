@@ -40,7 +40,7 @@ def train_agent(
     Path(log_dir).mkdir(parents=True, exist_ok=True)
 
     # Create and wrap the training environment
-    env = make(None)
+    env = make(None, runner.run_conf, runner.obs_conf)
     # Wrap the environment with a Monitor for logging.
     # The created csv is needed for plotting our own graphs with matplotlib later.
     monitor_file = Path(log_dir) / f"{runner.identifier}_{runner.algorithm}_{date}.csv"
