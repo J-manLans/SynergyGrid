@@ -2,7 +2,7 @@ import pytest
 
 from syn_grid.core.resources.base_resource import BaseResource
 from syn_grid.core.resources.synergy.tier_resource import TierResource
-from syn_grid.core.agent.digestion_engine import DigestionEngine
+from syn_grid.core.droid.digestion_engine import DigestionEngine
 
 
 class TestDigestionEngine:
@@ -37,14 +37,14 @@ class TestDigestionEngine:
     def reset_resource(self):
         # restore state
         TierResource.MAX_TIER = self._MAX_TIER
-        TierResource.step_wise_scoring_type = True
+        TierResource.step_wise_scoring = True
         TierResource._linear_reward_growth = True
 
     @pytest.fixture
     def parameterize_reset(self):
         # adjust max tier so we don't tap out
         TierResource.MAX_TIER = self._MAX_TIER + 1
-        TierResource.step_wise_scoring_type = True
+        TierResource.step_wise_scoring = True
         TierResource._linear_reward_growth = True
 
     # ================= #
@@ -109,7 +109,7 @@ class TestDigestionEngine:
         resource: TierResource,
     ):
         # set correct scoring type
-        resource.step_wise_scoring_type = False
+        resource.step_wise_scoring = False
 
         # prep the "chain" by giving it a tier value 1 lower than current resource
         digestion_engine.chained_tiers = resource.meta.tier - 1
@@ -121,7 +121,7 @@ class TestDigestionEngine:
         self, reset_resource, digestion_engine: DigestionEngine
     ):
         # set correct scoring type
-        TierResource.step_wise_scoring_type = False
+        TierResource.step_wise_scoring = False
 
         max_resource = TierResource(self._MAX_TIER)
 
@@ -135,7 +135,7 @@ class TestDigestionEngine:
         self, reset_resource, digestion_engine: DigestionEngine
     ):
         # set correct scoring type
-        TierResource.step_wise_scoring_type = False
+        TierResource.step_wise_scoring = False
 
         out_of_order_resource = TierResource(self._MAX_TIER - 3)
         in_order_resource = TierResource(self._MAX_TIER - 2)
@@ -153,7 +153,7 @@ class TestDigestionEngine:
         self, reset_resource, digestion_engine: DigestionEngine
     ):
         # set correct scoring type
-        TierResource.step_wise_scoring_type = False
+        TierResource.step_wise_scoring = False
 
         base_resource = TierResource(0)
         in_order_resource = TierResource(self._MAX_TIER - 1)

@@ -1,5 +1,5 @@
 import pytest
-from syn_grid.core.agent.synergy_agent import AgentAction, SynergyAgent
+from syn_grid.core.droid.synergy_droid import DroidAction, SynergyDroid
 from syn_grid.core.resources.base_resource import BaseResource
 from syn_grid.core.resources.resource_meta import (
     ResourceMeta,
@@ -54,7 +54,7 @@ class TestAgent:
         Returns a SynergyAgent instance on a 6x6 grid with a starting score of 10,
         reset to its initial state. Used as a reusable fixture for most tests.
         """
-        agent = SynergyAgent(grid_rows=6, grid_cols=6, starting_score=10)
+        agent = SynergyDroid(grid_rows=6, grid_cols=6, starting_score=10)
         agent.reset()
 
         return agent
@@ -72,7 +72,7 @@ class TestAgent:
         Check that the agent starts at the center of the grid when reset,
         for various grid sizes.
         """
-        agent = SynergyAgent(grid_rows=y, grid_cols=x)
+        agent = SynergyDroid(grid_rows=y, grid_cols=x)
         agent.reset()
 
         assert agent.position == expected_position
@@ -83,17 +83,17 @@ class TestAgent:
         Ensure that the agent's score is initialized to the starting value
         after creation.
         """
-        agent = SynergyAgent(1, 1, score)
+        agent = SynergyDroid(1, 1, score)
 
         assert agent.score == score
 
     @pytest.mark.parametrize(
         "action, expected_position",
         [
-            (AgentAction.RIGHT, [3, 4]),
-            (AgentAction.LEFT, [3, 2]),
-            (AgentAction.UP, [2, 3]),
-            (AgentAction.DOWN, [4, 3]),
+            (DroidAction.RIGHT, [3, 4]),
+            (DroidAction.LEFT, [3, 2]),
+            (DroidAction.UP, [2, 3]),
+            (DroidAction.DOWN, [4, 3]),
         ],
     )
     def test_movement(self, agent, action, expected_position):
@@ -119,10 +119,10 @@ class TestAgent:
     @pytest.mark.parametrize(
         "position, action, expected_position",
         [
-            ([0, 0], AgentAction.LEFT, [0, 0]),
-            ([0, 5], AgentAction.RIGHT, [0, 5]),
-            ([0, 0], AgentAction.UP, [0, 0]),
-            ([5, 0], AgentAction.DOWN, [5, 0]),
+            ([0, 0], DroidAction.LEFT, [0, 0]),
+            ([0, 5], DroidAction.RIGHT, [0, 5]),
+            ([0, 0], DroidAction.UP, [0, 0]),
+            ([5, 0], DroidAction.DOWN, [5, 0]),
         ],
     )
     def test_boundaries(self, agent, position, action, expected_position):
@@ -137,14 +137,14 @@ class TestAgent:
 
     @pytest.mark.parametrize(
         "action",
-        [AgentAction.LEFT, AgentAction.RIGHT, AgentAction.UP, AgentAction.DOWN],
+        [DroidAction.LEFT, DroidAction.RIGHT, DroidAction.UP, DroidAction.DOWN],
     )
     def test_edge_case_boundaries(self, action):
         """
         Verify that on a minimal 1x1 grid, the agent cannot move
         in any direction and remains at [0, 0].
         """
-        agent = SynergyAgent(1, 1)
+        agent = SynergyDroid(1, 1)
         agent.reset()
         agent.perform_action(action)
 
@@ -172,7 +172,7 @@ class TestAgent:
 
         assert agent.score == starting_score
 
-    def test_consume_resource_adds_score(self, agent: SynergyAgent):
+    def test_consume_resource_adds_score(self, agent: SynergyDroid):
         """
         Verify that consuming a positive resource increases the agent's score
         and returns the correct reward value.

@@ -1,9 +1,9 @@
 import gymnasium as gym
 from gymnasium import spaces
 
-from syn_grid.config.configs import RunConfig
+from syn_grid.config.models import RunConfig, ObsConfig
 from syn_grid.core.grid_world import GridWorld
-from syn_grid.gymnasium.action_space import AgentAction
+from syn_grid.gymnasium.action_space import DroidAction
 from syn_grid.gymnasium.observation_space import ObservationHandler
 from syn_grid.rendering.pygame_renderer import PygameRenderer
 
@@ -29,27 +29,33 @@ class SYNGridEnv(gym.Env):
     def __init__(
         self,
         run_conf: RunConfig,
+        obs_conf: ObsConfig,
         render_mode: str | None = None,
     ):
         # Set up bench environment;
         self.render_mode = render_mode
-        self.world = GridWorld(run_conf.grid_world, run_conf.agent)
+        self.world = GridWorld(
+            run_conf.grid_world_conf,
+            run_conf.droid_conf,
+            run_conf.negative_resource_conf,
+            run_conf.tier_resource_conf,
+        )
 
         if self.render_mode == "human":
             self.renderer = PygameRenderer(
-                run_conf.renderer, self.metadata["render_fps"]
+                run_conf.renderer_conf, self.metadata["render_fps"]
             )
 
         # Set up Gymnasium environment:
 
         # Gymnasium also requires us to define action_space — which is the agent's possible
         # actions. Training code can call action_space.sample() to randomly select an action.
-        self.action_space = spaces.Discrete(len(AgentAction))
+        self.action_space = spaces.Discrete(len(DroidAction))
 
         # Same goes with observation_space: this provides the agent with a structured view
         # of the world that it uses to decide its actions.
         self._observation_handler = ObservationHandler(
-            self.world, run_conf.observation_handler
+            self.world, obs_conf.observation_handler
         )
         self.observation_space = self._observation_handler.setup_obs_space()
 
@@ -74,9 +80,9 @@ class SYNGridEnv(gym.Env):
         # Return observation and info (not used)
         return norm_obs, {}
 
-    def step(self, action: AgentAction):
+    def step(self, action: DroidAction):
         # Perform action and adjust variables affected by it
-        reward = self.world.perform_agent_action(AgentAction(action))
+        reward = self.world.perform_agent_action(DroidAction(action))
         self._observation_handler.step_count_down -= 1
         truncated = self._observation_handler.step_count_down <= 0
         terminated = self.world.agent.score <= 0
@@ -112,8 +118,9 @@ class SYNGridEnv(gym.Env):
 
     # === Gymnasium contract === #
 
-    def _get_hud_data(self) -> dict[str, int]:
-        hud_data: dict[str, int] = {}
+    def _get_hud_data(self) -> dict[str, int | float]:
+        hud_data: dict[str, int | float] = {}
+
         hud_data["score"] = self._obs["agent data"][3]
         hud_data["moves"] = self._obs["agent data"][2]
         hud_data["current tier chain"] = self._obs["agent data"][4]

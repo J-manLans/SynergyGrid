@@ -15,13 +15,13 @@ class DigestionEngine:
 
     def reset(self):
         self.chained_tiers: int = self._NO_CHAIN
-        self._pending_reward: int = 0
+        self._pending_reward: float = 0.0
 
     # ================= #
     #        API        #
     # ================= #
 
-    def digest(self, consumed_resource: BaseResource) -> int:
+    def digest(self, consumed_resource: BaseResource) -> float:
         """
         Process a consumed resource and return the resulting reward.
 
@@ -38,7 +38,7 @@ class DigestionEngine:
         if isinstance(consumed_resource, TierResource):
 
             # Step-wise scoring: reward only if progression is correct
-            if consumed_resource.step_wise_scoring_type:
+            if consumed_resource.step_wise_scoring:
                 if self._resolve_tier_progression(consumed_resource):
                     return consumed_resource.REWARD
                 return 0
@@ -93,7 +93,7 @@ class DigestionEngine:
         self.chained_tiers = self._NO_CHAIN
         return False
 
-    def _flush_pending_reward(self) -> int:
+    def _flush_pending_reward(self) -> float:
         temp_rew = self._pending_reward
         self._pending_reward = 0
         return temp_rew

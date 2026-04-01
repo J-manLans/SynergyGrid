@@ -1,3 +1,5 @@
+from syn_grid.config.configs import load_config
+from syn_grid.config.models import RunConfig, ObsConfig
 from syn_grid.runners.agent_runner.agent_runner import AgentRunner
 from syn_grid.runners.agent_runner.train_agent import train_agent
 from syn_grid.runners.agent_runner.evaluate_agent import evaluate_agent
@@ -8,6 +10,9 @@ import sys
 
 
 def main():
+    run_conf = load_config(RunConfig)
+    obs_conf = load_config(ObsConfig)
+
     if len(sys.argv) == 1:
         # Pick algorithm to train or evaluate
         algorithm = 0
@@ -17,7 +22,7 @@ def main():
         # Choose to train or run the agent
         training = False
         # Human control to test the game
-        human_control = False
+        human_control = True
         # Continue training from a saved model
         continue_training = False
         # Model that we shall continue to train
@@ -38,10 +43,10 @@ def main():
         iterations = args.iterations
 
     if human_control:
-        runner = HumanRunner()
+        runner = HumanRunner(run_conf, obs_conf.observation_handler.max_steps)
         runner.human_player_loop()
     else:
-        runner = AgentRunner(algorithm, "-1_reward_tier_1")
+        runner = AgentRunner(algorithm, "-1_reward_tier_1", run_conf, obs_conf)
 
         if training:
             # Train agent

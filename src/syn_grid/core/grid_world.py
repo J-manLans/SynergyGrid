@@ -1,6 +1,6 @@
-from syn_grid.config.configs import GridWorldConf, AgentConf
-from syn_grid.gymnasium.action_space import AgentAction
-from syn_grid.core.agent.synergy_agent import SynergyAgent
+from syn_grid.config.models import GridWorldConf, DroidConf, NegativeConf, TierConf
+from syn_grid.gymnasium.action_space import DroidAction
+from syn_grid.core.droid.synergy_droid import SynergyDroid
 from syn_grid.core.resources.resource_meta import ResourceMeta
 from syn_grid.core.resources.base_resource import BaseResource
 from syn_grid.core.resources.direct.negative_resource import NegativeResource
@@ -20,22 +20,30 @@ class GridWorld:
     #       Init        #
     # ================= #
 
-    def __init__(self, grid_world_conf: GridWorldConf, agent_conf: AgentConf):
+    def __init__(
+        self,
+        conf: GridWorldConf,
+        droid_conf: DroidConf,
+        negative_resource_conf: NegativeConf,
+        tier_resource_conf: TierConf,
+    ):
         """
         Initializes the grid world. Defines the game world's size and initializes the agent and resources.
         """
 
-        if grid_world_conf.grid_rows < 1 or grid_world_conf.grid_cols < 1:
+        if conf.grid_rows < 1 or conf.grid_cols < 1:
             raise ValueError("grid_cols and grid_rows should be larger than 0")
 
-        self._max_active_resources = grid_world_conf.max_active_resources
-        self.grid_rows = grid_world_conf.grid_rows
-        self.grid_cols = grid_world_conf.grid_cols
-        self.max_tier = grid_world_conf.max_tier
+        self._max_active_resources = conf.max_active_resources
+        self.grid_rows = conf.grid_rows
+        self.grid_cols = conf.grid_cols
+        self.max_tier = conf.max_tier
 
-        self.agent = SynergyAgent(agent_conf)
+        self.agent = SynergyDroid(droid_conf)
 
-        self.ALL_RESOURCES = self._create_resources(self.max_tier)
+        self.ALL_RESOURCES = self._create_resources(
+            negative_resource_conf, tier_resource_conf
+        )
 
     def reset(self, rng: Generator | None = None) -> None:
         """
@@ -64,7 +72,7 @@ class GridWorld:
 
     # === Logic === #
 
-    def perform_agent_action(self, agent_action: AgentAction) -> int:
+    def perform_agent_action(self, agent_action: DroidAction) -> float:
         reward = self.agent.perform_action(agent_action)
 
         for resource in self.ALL_RESOURCES:
@@ -119,20 +127,22 @@ class GridWorld:
 
     # === Init === #
 
-    def _create_resources(self, max_tier: int) -> list[BaseResource]:
+    def _create_resources(
+        self, negative_resource_conf: NegativeConf, tier_resource_conf: TierConf
+    ) -> list[BaseResource]:
         resources = []
 
         ratio = (0.75, 0.25)
         n_tier = self._compute_spawn_count(ratio[0])
         n_neg = self._compute_spawn_count(ratio[1])
 
-        TierResource.MAX_TIER = max_tier
+        TierResource.MAX_TIER = self.max_tier
         BaseResource.set_life_span(self.grid_rows, self.grid_cols)
         for _ in range(n_neg):
-            resources.append(NegativeResource())
-        for tier in range(0, max_tier + 1):
+            resources.append(NegativeResource(negative_resource_conf))
+        for tier in range(0, self.max_tier + 1):
             for _ in range(n_tier):
-                resources.append(TierResource(tier))
+                resources.append(TierResource(tier, tier_resource_conf))
 
         return resources
 

@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class AgentAction(Enum):
+class DroidAction(Enum):
     """Actions the Agent is capable of performing i.e. go in a certain direction"""
 
     LEFT = 0

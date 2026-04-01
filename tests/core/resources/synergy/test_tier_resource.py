@@ -54,12 +54,12 @@ class TestTier:
         assert resource.consume() is resource
 
     def test_stepwise_reward_is_correct(self, resource: TierResource):
-        resource.step_wise_scoring_type = True
+        resource.step_wise_scoring = True
 
         assert (resource.meta.tier + 1) * resource._TIER_BASE_REWARD == resource.REWARD
 
     def test_factor_reward_is_correct(self, resource: TierResource):
-        resource.step_wise_scoring_type = False
+        resource.step_wise_scoring = False
 
         assert (
             resource._TIER_BASE_REWARD * (resource._GROWTH_FACTOR * (self._TIER - 1))
@@ -84,10 +84,10 @@ class TestTier:
         TierResource.MAX_TIER = 999
         resource = TierResource(666)
 
-        resource.step_wise_scoring_type = True
+        resource.step_wise_scoring = True
         assert (resource.meta.tier + 1) * resource._TIER_BASE_REWARD == resource.REWARD
 
-        resource.step_wise_scoring_type = False
+        resource.step_wise_scoring = False
         assert (
             resource._TIER_BASE_REWARD * (resource._GROWTH_FACTOR * (self._TIER - 1))
         ) + 0.5
