@@ -17,7 +17,10 @@ class TestDigestionEngine:
 
     @staticmethod
     def _tier_params(max_tier=_MAX_TIER) -> list[TierOrb]:
-        tierOrbs = [(TierOrb(t, get_test_config().world.tier_orb_conf)) for t in range(0, max_tier + 1)]
+        tierOrbs = [
+            (TierOrb(t, get_test_config().world.tier_orb_conf))
+            for t in range(0, max_tier + 1)
+        ]
 
         for t in tierOrbs:
             t.reset()
@@ -135,8 +138,12 @@ class TestDigestionEngine:
     def test_out_of_order_consumption_rewards_and_resets_chain(
         self, reset_orb, digestion_engine: DigestionEngine
     ):
-        out_of_order_orb = TierOrb(self._MAX_TIER - 3, get_test_config().world.tier_orb_conf)
-        in_order_orb = TierOrb(self._MAX_TIER - 2, get_test_config().world.tier_orb_conf)
+        out_of_order_orb = TierOrb(
+            self._MAX_TIER - 3, get_test_config().world.tier_orb_conf
+        )
+        in_order_orb = TierOrb(
+            self._MAX_TIER - 2, get_test_config().world.tier_orb_conf
+        )
         # set correct scoring type
         out_of_order_orb.step_wise_scoring = False
         in_order_orb.step_wise_scoring = False
@@ -152,7 +159,9 @@ class TestDigestionEngine:
         self, reset_orb, digestion_engine: DigestionEngine
     ):
         base_orb = TierOrb(0, get_test_config().world.tier_orb_conf)
-        in_order_orb = TierOrb(self._MAX_TIER - 1, get_test_config().world.tier_orb_conf)
+        in_order_orb = TierOrb(
+            self._MAX_TIER - 1, get_test_config().world.tier_orb_conf
+        )
         # set correct scoring type
         base_orb.step_wise_scoring = False
         in_order_orb.step_wise_scoring = False

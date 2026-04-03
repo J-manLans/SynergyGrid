@@ -24,8 +24,8 @@ world:
 
   orb_factory_conf:
     # Orbs manager settings:
-    # - max active orbs on grid
-    # - max tier of the tier type orbs
+    # - max active orbs on grid (set in grid_world_conf)
+    # - max_tier: max tier of the tier type orbs
     # - each orb type can be enabled/disabled
     # - weight defines relative spawn frequency when multiple orbs are active
     max_active_orbs: *max_active_orbs
@@ -40,13 +40,13 @@ world:
 
   renderer_conf:
     # Renderer settings:
-    # - grid_rows / grid_cols: used to calculate display size and layout
+    # - grid_rows / grid_cols (set in grid_world_conf): used to calculate display size and layout
     grid_rows: *grid_rows
     grid_cols: *grid_cols
 
   droid_conf:
     # Droid settings:
-    # - grid_rows / grid_cols: defines the grid the droid can move in
+    # - grid_rows / grid_cols (set in grid_world_conf): defines the grid the droid can move in
     # - starting_score: initial score of the droid
     grid_rows: *grid_rows
     grid_cols: *grid_cols
@@ -79,7 +79,8 @@ world:
 obs:
   observation_handler:
     # Observation handler settings:
-    # - grid_rows / grid_cols: fix the maximum observation space size for those variables
+    # - grid_rows / grid_cols (set in grid_world_conf): fix the maximum observation space size for those variables
+    # - max_tier (set in orb_factory_conf): max tier of the tier type orbs
     # - max_steps: number of steps in an episode until truncated
     grid_rows: *grid_rows
     grid_cols: *grid_cols

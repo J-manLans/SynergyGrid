@@ -79,7 +79,8 @@ world:
 obs:
   observation_handler:
     # Observation handler settings:
-    # - grid_rows / grid_cols: fix the maximum observation space size for those variables
+    # - grid_rows / grid_cols (set in grid_world_conf): fix the maximum observation space size for those variables
+    # - max tier (set in orb_factory_conf): of the tier type orbs
     # - max_steps: number of steps in an episode until truncated
     grid_rows: *grid_rows
     grid_cols: *grid_cols

@@ -48,9 +48,7 @@ class GridWorld:
         self.droid = SynergyDroid(droid_conf)
 
         self.ALL_ORBS = OrbFactory(
-            orb_manager_conf,
-            negative_orb_conf,
-            tier_orb_conf
+            orb_manager_conf, negative_orb_conf, tier_orb_conf
         ).create_orbs()
 
     def reset(self, rng: Generator | None = None) -> None:
