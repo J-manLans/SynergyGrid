@@ -6,6 +6,7 @@ from stable_baselines3 import A2C
 from unittest.mock import patch
 import pytest
 
+
 class TestAgentRunner:
     """
     This test suite verifies that the `AgentRunner` class functions correctly in various scenarios. Specifically, it tests:
@@ -29,10 +30,11 @@ class TestAgentRunner:
 
         full_conf = get_test_config()
 
-        agent_conf = update_conf(full_conf.agent.global_agent_conf, {"algorithm_index": 2})
+        agent_conf = update_conf(
+            full_conf.agent.global_agent_conf, {"algorithm_index": 2}
+        )
         run_conf = full_conf.world
         obs_conf = full_conf.obs
-
 
         return AgentRunner(agent_conf, run_conf, obs_conf)
 
@@ -67,10 +69,11 @@ class TestAgentRunner:
 
         full_conf = get_test_config()
 
-        agent_conf = update_conf(full_conf.agent.global_agent_conf, {"algorithm_index": 4})
+        agent_conf = update_conf(
+            full_conf.agent.global_agent_conf, {"algorithm_index": 4}
+        )
         run_conf = full_conf.world
         obs_conf = full_conf.obs
-
 
         with pytest.raises(IndexError):
             AgentRunner(agent_conf, run_conf, obs_conf)
