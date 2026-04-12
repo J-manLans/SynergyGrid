@@ -7,7 +7,7 @@ class OrbCategory(Enum):
 
 
 class SynergyType(Enum):
-    TIER = 1
+    TIER = 0
 
 
 class DirectType(Enum):
