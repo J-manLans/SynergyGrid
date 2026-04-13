@@ -1,12 +1,14 @@
 from syn_grid.config.models import ObservationConf, OrbFactoryConf
 from syn_grid.gymnasium.observation_space_developing.difficulty.base_difficulty import BaseDifficulty
+from syn_grid.gymnasium.observation_space_developing.modality.base_modality import BaseModality
 
 from gymnasium import spaces
 import numpy as np
+from numpy.typing import NDArray
 from typing import Final
 
 
-class SpatialModality:
+class SpatialModality(BaseModality):
     # ================= #
     #       Init        #
     # ================= #
@@ -22,10 +24,10 @@ class SpatialModality:
     #        API        #
     # ================= #
 
-    def setup_obs_space(self, difficulty: BaseDifficulty) -> spaces.Dict:
+    def setup_obs_space(self, difficulty: BaseDifficulty) -> spaces.Space:
         return difficulty.setup_obs_space(self.hard_observation_space)
 
-    def encode(self, difficulty: BaseDifficulty) -> spaces.Space:
+    def encode(self, difficulty: dict[str, NDArray]) -> NDArray:
         ...
 
     # ================= #

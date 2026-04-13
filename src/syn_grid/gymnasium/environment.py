@@ -56,6 +56,7 @@ class SYNGridEnv(gym.Env):
         # actions. Training code can call action_space.sample() to randomly select an action.
         self.action_space = spaces.Discrete(len(DroidAction))
 
+        # TODO: remember to change this when new obs space is implemented
         obsHandler = ObservationHandlerDeveloping(
             self.world, run_conf.orb_factory_conf, obs_conf.observation_handler
         )
