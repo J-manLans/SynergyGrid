@@ -36,3 +36,5 @@ class ObservationHandlerDeveloping:
     def get_observation(self, state) -> NDArray:
         filtered = self.difficulty.apply(state)
         return self.modality.encode(filtered)
+        # Maybe like this instead
+        # return self.difficulty.apply(state)
