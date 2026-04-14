@@ -12,7 +12,7 @@ from syn_grid.gymnasium.observation_space.modality.base_modality import (
 )
 
 from gymnasium import spaces
-from numpy.typing import NDArray
+import numpy as np
 from typing import Final
 
 
@@ -41,15 +41,10 @@ class ObservationHandler:
         return self.modality.setup_obs_space(self.difficulty)
 
     def reset(self):
-        self.step_count_down = self._obs_conf.medium_difficulty.max_steps
-        # TODO: think I need to look over step_count down here that I give to medium obs
-        # look at how I do it in old obs handler. Need it for get observation
-        ...
+        self.difficulty.reset()
 
-    def get_observation(self, state) -> NDArray:
-        filtered = self.difficulty.apply(state)
-        return self.modality.encode(filtered)
-        # Maybe like this instead
-        # return self.difficulty.apply(state)
+    def get_observation(self, state: GridWorld) -> dict[str, np.ndarray]:
+        return self.difficulty.get_observation(state)
+
 
 

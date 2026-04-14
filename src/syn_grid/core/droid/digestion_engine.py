@@ -3,7 +3,7 @@ from syn_grid.core.orbs.synergy.tier_orb import TierOrb
 
 
 class DigestionEngine:
-    _NO_CHAIN = -1
+    _NO_CHAIN = 0
     _BASE_TIER = 0
 
     # ================= #

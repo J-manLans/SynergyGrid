@@ -14,16 +14,16 @@ class OrbFactory:
 
     def __init__(
         self,
-        orb_manager_conf: OrbFactoryConf,
+        orb_factory_conf: OrbFactoryConf,
         negative_orb_conf: NegativeConf,
         tier_orb_conf: TierConf,
     ):
-        self._MIN_POOL_SIZE = orb_manager_conf.max_active_orbs * 3
-        self._orb_manager_conf = orb_manager_conf
+        self._MIN_POOL_SIZE = orb_factory_conf.max_active_orbs * 3
+        self._orb_factory_conf = orb_factory_conf
         self._negative_orb_conf = negative_orb_conf
         self._tier_orb_conf = tier_orb_conf
-        self._max_active_orbs = orb_manager_conf.max_active_orbs
-        self._max_tier = orb_manager_conf.max_tier
+        self._max_active_orbs = orb_factory_conf.max_active_orbs
+        self._max_tier = orb_factory_conf.max_tier
 
     # ================= #
     #        API        #
@@ -37,7 +37,7 @@ class OrbFactory:
         total_weight = sum(enabled_orbs.values())
 
         # Shared setup
-        BaseOrb.set_life_span(self._max_active_orbs, self._max_active_orbs)
+        BaseOrb.set_life_span(self._orb_factory_conf.grid_rows, self._orb_factory_conf.grid_cols)
         TierOrb.MAX_TIER = self._max_tier
 
         # Calculate counts through ratios via orb weights
@@ -66,7 +66,7 @@ class OrbFactory:
         """Return enabled orb types and their weights from orb_manager_conf"""
 
         enabled_orbs = {}
-        for orb_type, orb_conf in self._orb_manager_conf.types:
+        for orb_type, orb_conf in self._orb_factory_conf.types:
             if orb_conf.enabled:
                 enabled_orbs[orb_type] = orb_conf.weight
         if not enabled_orbs:

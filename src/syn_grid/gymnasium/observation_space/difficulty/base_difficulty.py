@@ -1,5 +1,8 @@
+from syn_grid.core.grid_world import GridWorld
+
 from abc import ABC, abstractmethod
 from gymnasium import spaces
+import numpy as np
 from numpy.typing import NDArray
 
 
@@ -8,4 +11,7 @@ class BaseDifficulty(ABC):
     def setup_obs_space(self, hard_obs_high: NDArray) -> spaces.Space: ...
 
     @abstractmethod
-    def apply(self, state) -> dict[str, NDArray]: ...
+    def reset(self) -> None: ...
+
+    @abstractmethod
+    def get_observation(self, state: GridWorld) -> dict[str, np.ndarray]: ...
