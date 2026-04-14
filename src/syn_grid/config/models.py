@@ -49,6 +49,8 @@ class TypesConf(BaseModel, frozen=True):
 
 
 class OrbFactoryConf(BaseModel, frozen=True):
+    grid_rows: int
+    grid_cols: int
     max_active_orbs: int
     max_tier: int
     types: TypesConf
