@@ -46,11 +46,11 @@ world:
     grid_rows: *grid_rows
     grid_cols: *grid_cols
     max_active_orbs: *max_active_orbs
-    max_tier: &max_tier 1
+    max_tier: &max_tier 3
     types:
       negative:
-        enabled: false
-        weight: 1
+        enabled: true
+        weight:
       tier:
         enabled: true
         weight: 2
@@ -84,6 +84,7 @@ obs:
     # - modality: decides what type of observation the agent get. vector, composite and spatial are the options
     # - difficulty: decides how much information to pack into the agents observation. Hard, medium and easy are the options
     # - grid_rows / grid_cols (set in grid_world_conf): fix the maximum observation space size for those variables
+    # - max_steps: number of steps in an episode until truncated
     modality: "vector"
     difficulty: "medium"
     max_steps: &max_steps 100
@@ -128,10 +129,10 @@ agent:
     # - human_control: allow human to control the game manually
     # - training: choose whether to train the agent or just run it
     algorithm_index: 0
-    agent_steps: "3010560"
-    identifier: "vector_trial"
+    agent_steps: "286720"
+    identifier: "vector_curriculum"
     human_control: true
-    training: true
+    training: false
 
   # Pick algorithm to train or evaluate
   train_agent_conf:
@@ -139,8 +140,8 @@ agent:
     # - continue_training: continue from a previously saved model
     # - timesteps: number of timesteps per iteration (a checkpoint is saved after this many steps)
     # - iterations: total number of training iterations
-    continue_training: true
-    timesteps: 100000
+    continue_training: false
+    timesteps: 10000
     iterations: 30
 
   eval_agent_conf:

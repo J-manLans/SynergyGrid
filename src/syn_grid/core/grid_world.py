@@ -85,15 +85,16 @@ class GridWorld:
         reward = self.droid.perform_action(agent_action)
 
         for orb in self.ALL_ORBS:
+            orb.timer.tick()
             if orb.is_active:
-                if self._update_timer_and_return_is_completed(orb):
+                if orb.timer.is_completed():
                     orb.deplete_orb()
                     self._remove_orb(orb)
                 elif self.droid.position == orb.position:
-                    reward = self.droid.consume_orb(orb)
+                    reward += self.droid.consume_orb(orb)
                     self._remove_orb(orb)
             else:
-                if self._update_timer_and_return_is_completed(orb):
+                if orb.timer.is_completed():
                     self._spawn_random_orb()
 
         return reward
@@ -135,10 +136,6 @@ class GridWorld:
     # ================= #
 
     # === API === #
-
-    def _update_timer_and_return_is_completed(self, orb: BaseOrb) -> bool:
-        orb.timer.tick()
-        return orb.timer.is_completed()
 
     def _remove_orb(self, orb: BaseOrb):
         idx = self._active_orbs.index(orb)
