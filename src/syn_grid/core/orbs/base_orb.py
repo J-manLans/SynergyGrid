@@ -1,29 +1,18 @@
-from abc import ABC, abstractmethod
-import numpy as np
 from syn_grid.core.orbs.orb_meta import OrbMeta
+from syn_grid.core.utils.timer import Timer
 
+from abc import ABC
+import numpy as np
+from typing import Final
 
 class BaseOrb(ABC):
-    position = [np.int64(-1), np.int64(-1)]
-    is_active = False
-
-    class Timer:
-        def __init__(self):
-            self.remaining = 0
-
-        def is_completed(self) -> bool:
-            return self.remaining <= 0
-
-        def set(self, duration: int) -> None:
-            self.remaining = duration
-
-        def tick(self) -> None:
-            if self.remaining > 0:
-                self.remaining -= 1
-
     # ================= #
     #       Init        #
     # ================= #
+
+    position = [np.int64(-1), np.int64(-1)]
+    is_active = False
+    TIMER: Final[Timer] = Timer()
 
     def __init__(
         self,
@@ -32,9 +21,8 @@ class BaseOrb(ABC):
         meta: OrbMeta,
     ):
         self.REWARD = reward
-        self._cool_down = cool_down
-        self.meta = meta
-        self.timer = self.Timer()
+        self._COOL_DOWN = cool_down
+        self.META = meta
 
     @classmethod
     def set_life_span(cls, grid_rows: int, grid_cols: int) -> None:
@@ -51,39 +39,28 @@ class BaseOrb(ABC):
 
     def reset(self) -> None:
         self.is_active = False
-        self.timer.set(0)
+        self.TIMER.reset()
 
     # ================= #
     #        API        #
     # ================= #
 
-    def deplete_orb(self) -> None:
-        """Removes the orb without giving any reward."""
-
-        self.is_active = False
-        self.timer.set(self._cool_down)
-
-    def spawn(self, position: list[np.int64]):
+    def spawn(self, position: list[np.int64]) -> None:
         """Spawns the orb."""
 
         self.position = position
         self.is_active = True
-        self.timer.set(self._LIFE_SPAN)
+        self.TIMER.set(self._LIFE_SPAN)
 
-    # ================= #
-    #      Abstract     #
-    # ================= #
+    def deplete_orb(self) -> None:
+        """Removes the orb without giving any reward."""
 
-    @abstractmethod
+        self.is_active = False
+        self.TIMER.set(self._COOL_DOWN)
+
     def consume(self) -> "BaseOrb":
         """Let's the droid consume the orb."""
 
-    # ================= #
-    #      Helpers      #
-    # ================= #
-
-    def _consume(self) -> None:
-        """Sets up the consume() method."""
-
         self.is_active = False
-        self.timer.set(self._cool_down)
+        self.TIMER.set(self._COOL_DOWN)
+        return self

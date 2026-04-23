@@ -74,15 +74,15 @@ class ObservationHandlerOld:
         return spaces.Dict(self.observation_space)
 
     def get_observation(self) -> dict[str, NDArray]:
-        agent_row, agent_col = self._world.droid.position
+        agent_row, agent_col = self._world.DROID.position
 
         # NOTE: change here
         # ---- Agent ---- #
         self._agent_data[0] = agent_row
         self._agent_data[1] = agent_col
         self._agent_data[2] = self.step_count_down
-        self._agent_data[3] = self._world.droid.score
-        self._agent_data[4] = self._world.droid.digestion_engine.chained_tiers
+        self._agent_data[3] = self._world.DROID.score
+        self._agent_data[4] = self._world.DROID.DIGESTION_ENGINE.chained_tiers
 
         # NOTE: change here
         # ---- Orbs ---- #
