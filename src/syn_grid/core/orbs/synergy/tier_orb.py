@@ -20,34 +20,26 @@ class TierOrb(BaseOrb):
     #       Init        #
     # ================= #
 
-    _linear_reward_growth: bool
+    _LINEAR_REWARD_GROWTH: bool
     _TIER_BASE_REWARD: Final[float]
     _GROWTH_FACTOR: Final[float]
     MAX_TIER: int
-    step_wise_scoring: bool
+    STEP_WISE_SCORING: bool
 
     def __init__(self, tier: int, conf: TierConf):
         if tier > self.MAX_TIER:
             raise ValueError("Tier is higher than the allowed max")
 
-        self._linear_reward_growth = conf.linear_reward_growth
+        self._LINEAR_REWARD_GROWTH = conf.linear_reward_growth
         self._TIER_BASE_REWARD = conf.base_reward
         self._GROWTH_FACTOR = conf.growth_factor
-        self.step_wise_scoring = conf.step_wise_scoring
+        self.STEP_WISE_SCORING = conf.step_wise_scoring
 
         super().__init__(
             self._calculate_reward(tier),
             conf.cool_down,
             OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, tier),
         )
-
-    # ================= #
-    #        API        #
-    # ================= #
-
-    def consume(self) -> "TierOrb":
-        super()._consume()
-        return self
 
     # ================= #
     #      Helpers      #
@@ -60,7 +52,7 @@ class TierOrb(BaseOrb):
         :param multiplier: The factor by which the base reward is scaled.
         """
 
-        if self._linear_reward_growth or tier_multiplier == 1:
+        if self._LINEAR_REWARD_GROWTH or tier_multiplier == 1:
             reward = self._TIER_BASE_REWARD * tier_multiplier
         else:
             reward = int(

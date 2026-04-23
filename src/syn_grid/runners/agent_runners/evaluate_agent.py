@@ -20,14 +20,21 @@ def evaluate_agent(runner: AgentRunner, conf: EvalAgentConf):
         model = runner.get_model(env)
 
         if runner.algorithm == "RPPO":
-            def predict_action_from_lstm_model(obs, lstm_states=None, episode_starts=None):
+
+            def predict_action_from_lstm_model(
+                obs, lstm_states=None, episode_starts=None
+            ):
                 action, lstm_states = model.predict(
-                    obs, state=lstm_states, episode_start=episode_starts, deterministic=True
+                    obs,
+                    state=lstm_states,
+                    episode_start=episode_starts,
+                    deterministic=True,
                 )
                 return action, lstm_states
 
             get_action = predict_action_from_lstm_model
         else:
+
             def predict_action_from_model(obs, lstm_states=None, episode_starts=None):
                 # Predict action from the model
                 action, _ = model.predict(obs)
@@ -70,7 +77,7 @@ def evaluate_agent(runner: AgentRunner, conf: EvalAgentConf):
 
             # Exit environment if terminated or truncated.
             done = terminated or truncated
-            episode_starts =  done
+            episode_starts = done
             episode_starts = np.logical_or(terminated, truncated)
     except Exception as e:
         print(f"System crashed: {e}")

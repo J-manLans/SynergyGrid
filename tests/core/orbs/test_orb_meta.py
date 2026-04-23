@@ -29,9 +29,9 @@ class TestOrbMeta:
         """
         meta = OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, 0)
 
-        assert meta.category == OrbCategory.SYNERGY
-        assert meta.type == SynergyType.TIER
-        assert meta.tier == 0
+        assert meta.CATEGORY == OrbCategory.SYNERGY
+        assert meta.TYPE == SynergyType.TIER
+        assert meta.TIER == 0
 
     def test_direct_negative_initialization(self):
         """
@@ -43,9 +43,9 @@ class TestOrbMeta:
         """
         meta = OrbMeta(OrbCategory.DIRECT, DirectType.NEGATIVE)
 
-        assert meta.category == OrbCategory.DIRECT
-        assert meta.type == DirectType.NEGATIVE
-        assert meta.tier == -1
+        assert meta.CATEGORY == OrbCategory.DIRECT
+        assert meta.TYPE == DirectType.NEGATIVE
+        assert meta.TIER == -1
 
     @pytest.mark.parametrize("tier", [1, 2, 5])
     def test_explicit_tier(self, tier):
@@ -58,7 +58,7 @@ class TestOrbMeta:
         """
         meta = OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, tier)
 
-        assert meta.tier == tier
+        assert meta.TIER == tier
 
     def test_explicit_none_tier_defaults_to_zero(self):
         """
@@ -69,7 +69,7 @@ class TestOrbMeta:
         """
         meta = OrbMeta(OrbCategory.DIRECT, DirectType.NEGATIVE, None)
 
-        assert meta.tier == -1
+        assert meta.TIER == -1
 
     def test_negative_tier_raises(self):
         """

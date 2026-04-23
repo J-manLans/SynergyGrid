@@ -11,7 +11,7 @@ class SynergyDroid:
     #       Init        #
     # ================= #
 
-    _STEP_PENALTY: Final[float]
+    DIGESTION_ENGINE: Final[DigestionEngine] = DigestionEngine()
 
     def __init__(self, conf: DroidConf):
         """
@@ -20,21 +20,19 @@ class SynergyDroid:
         Defines the game world so the droid know its bounds, set its starting score and store it for later resetting.
         """
 
-        self._grid_rows = conf.grid_rows
-        self._grid_cols = conf.grid_cols
-        self._starting_score = conf.starting_score
-        self._STEP_PENALTY = conf.step_penalty
-        self.digestion_engine = DigestionEngine()
-        self.reset()
+        self._GRID_ROWS: Final[int] = conf.grid_rows
+        self._GRID_COLS: Final[int] = conf.grid_cols
+        self._STARTING_SCORE: Final[float] = conf.starting_score
+        self._STEP_PENALTY: Final[float] = conf.step_penalty
 
     def reset(self) -> None:
         """
         Initialize Droids starting position at the center of the grid and reset its score and the digestion engine.
         """
 
-        self.position = [self._grid_rows // 2, self._grid_cols // 2]
-        self.score = self._starting_score
-        self.digestion_engine.reset()
+        self.position = [self._GRID_ROWS // 2, self._GRID_COLS // 2]
+        self.score = self._STARTING_SCORE
+        self.DIGESTION_ENGINE.reset()
 
     # ================= #
     #        API        #
@@ -48,11 +46,11 @@ class SynergyDroid:
             case DroidAction.LEFT:
                 self._moveTowardsMinBound(1)
             case DroidAction.RIGHT:
-                self._moveTowardsMaxBound(1, self._grid_cols - 1)
+                self._moveTowardsMaxBound(1, self._GRID_COLS - 1)
             case DroidAction.UP:
                 self._moveTowardsMinBound(0)
             case DroidAction.DOWN:
-                self._moveTowardsMaxBound(0, self._grid_rows - 1)
+                self._moveTowardsMaxBound(0, self._GRID_ROWS - 1)
             case _:
                 raise TypeError("This action isn't implemented")
 
@@ -61,7 +59,7 @@ class SynergyDroid:
     def consume_orb(self, orb: BaseOrb) -> float:
         """Consumes the orb, add its reward to its score and returns the reward"""
 
-        reward = self.digestion_engine.digest(orb.consume())
+        reward = self.DIGESTION_ENGINE.digest(orb.consume())
         return self._apply_reward(reward)
 
     # ================= #

@@ -47,8 +47,8 @@ class TestTierOrb:
     # ================= #
 
     def test_created_orb(self, orb: TierOrb):
-        assert orb._cool_down == self._COOL_DOWN
-        assert orb.meta.tier == self._TIER
+        assert orb._COOL_DOWN == self._COOL_DOWN
+        assert orb.META.TIER == self._TIER
         assert orb.MAX_TIER == self._MAX_TIER
         assert orb._LIFE_SPAN == (self._GRID_ROWS - 1) + (self._GRID_COLS - 1)
 
@@ -56,12 +56,12 @@ class TestTierOrb:
         assert orb.consume() is orb
 
     def test_stepwise_reward_is_correct(self, orb: TierOrb):
-        orb.step_wise_scoring = True
+        orb.STEP_WISE_SCORING = True
 
-        assert (orb.meta.tier + 1) * orb._TIER_BASE_REWARD == orb.REWARD
+        assert (orb.META.TIER + 1) * orb._TIER_BASE_REWARD == orb.REWARD
 
     def test_factor_reward_is_correct(self, orb: TierOrb):
-        orb.step_wise_scoring = False
+        orb.STEP_WISE_SCORING = False
 
         assert (orb._TIER_BASE_REWARD * (orb._GROWTH_FACTOR * (self._TIER - 1))) + 0.5
 
@@ -72,7 +72,7 @@ class TestTierOrb:
         ]
         orb.spawn(position)
 
-        assert orb.timer.remaining == orb._LIFE_SPAN
+        assert orb.TIMER.remaining == orb._LIFE_SPAN
         assert orb.is_active
         assert orb.position == position
 
@@ -84,10 +84,10 @@ class TestTierOrb:
         TierOrb.MAX_TIER = 999
         orb = TierOrb(666, get_test_config().world.tier_orb_conf)
 
-        orb.step_wise_scoring = True
-        assert (orb.meta.tier + 1) * orb._TIER_BASE_REWARD == orb.REWARD
+        orb.STEP_WISE_SCORING = True
+        assert (orb.META.TIER + 1) * orb._TIER_BASE_REWARD == orb.REWARD
 
-        orb.step_wise_scoring = False
+        orb.STEP_WISE_SCORING = False
         assert (orb._TIER_BASE_REWARD * (orb._GROWTH_FACTOR * (self._TIER - 1))) + 0.5
 
     def test_creating_orb_with_to_high_tier(self):

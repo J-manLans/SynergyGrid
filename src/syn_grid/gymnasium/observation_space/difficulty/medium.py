@@ -1,4 +1,5 @@
 from syn_grid.core.orbs.orb_meta import OrbCategory, DirectType, SynergyType
+from syn_grid.core.orbs.base_orb import BaseOrb
 from syn_grid.gymnasium.observation_space.difficulty.base_difficulty import (
     BaseDifficulty,
 )
@@ -24,9 +25,7 @@ class MediumDifficulty(BaseDifficulty):
         max_category = len(OrbCategory) - 1
         max_type = max(len(DirectType) - 1, len(SynergyType) - 1)
         max_tier = self._medium_conf.max_tier
-        max_orb_lifespan = (self._medium_conf.grid_rows - 1) + (
-            self._medium_conf.grid_cols - 1
-        )
+        max_orb_lifespan = BaseOrb._LIFE_SPAN
 
         return [
             # agent values

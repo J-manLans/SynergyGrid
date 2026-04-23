@@ -20,6 +20,14 @@ class GridWorldConf(BaseModel, frozen=True):
     grid_cols: int
     max_active_orbs: int
 
+    @model_validator(mode="after")
+    def validate_config(self):
+        if self.grid_rows <= 0 or self.grid_cols <= 0:
+            raise ValueError("grid_cols and grid_rows should be larger than 0")
+        if self.max_active_orbs <= 0:
+            raise ValueError("max_active_orbs should be larger than 0")
+        return self
+
 
 class RendererConf(BaseModel, frozen=True):
     grid_rows: int
@@ -29,7 +37,7 @@ class RendererConf(BaseModel, frozen=True):
 class DroidConf(BaseModel, frozen=True):
     grid_rows: int
     grid_cols: int
-    starting_score: int
+    starting_score: float
     step_penalty: float
 
 
@@ -55,6 +63,12 @@ class OrbFactoryConf(BaseModel, frozen=True):
     max_active_orbs: int
     max_tier: int
     types: TypesConf
+
+    @model_validator(mode="after")
+    def validate_config(self):
+        if self.max_tier <= 0:
+            raise ValueError("max_tier should be larger than 0")
+        return self
 
 
 # === OrbFactory END === #
@@ -82,6 +96,14 @@ class ObservationHandlerConf(BaseModel, frozen=True):
     modality: str
     difficulty: str
     max_steps: int
+
+    @model_validator(mode="after")
+    def validate_config(self):
+        if self.modality not in ["vector", "composite", "spatial"]:
+            raise ValueError("The value of modality is not allowed")
+        if self.difficulty not in ['easy', 'medium', 'hard']:
+            raise ValueError("The value of difficulty is not allowed")
+        return self
 
 
 class ModalityConf(BaseModel, frozen=True):

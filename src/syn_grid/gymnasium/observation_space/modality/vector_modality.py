@@ -66,12 +66,12 @@ class VectorModality(BaseModality):
         grid[0] = steps_left / self._max_vals[0]
 
         # Droid data
-        droid_y, droid_x = state.droid.position
+        droid_y, droid_x = state.DROID.position
 
         grid[1] = droid_y / self._max_vals[1]
         grid[2] = droid_x / self._max_vals[2]
-        grid[3] = state.droid.score / self._max_vals[3]
-        grid[4] = state.droid.digestion_engine.chained_tiers / self._max_vals[4]
+        grid[3] = state.DROID.score / self._max_vals[3]
+        grid[4] = state.DROID.DIGESTION_ENGINE.chained_tiers / self._max_vals[4]
 
         self._prune_orb_slot_map(state)
 
@@ -114,11 +114,11 @@ class VectorModality(BaseModality):
         index += 1
         grid[index] = orb_x / self._max_vals[index]
         index += 1
-        grid[index] = orb.meta.category.value / self._max_vals[index]
+        grid[index] = orb.META.CATEGORY.value / self._max_vals[index]
         index += 1
-        grid[index] = orb.meta.type.value / self._max_vals[index]
+        grid[index] = orb.META.TYPE.value / self._max_vals[index]
         index += 1
-        grid[index] = orb.meta.tier / self._max_vals[index]
+        grid[index] = orb.META.TIER / self._max_vals[index]
         index += 1
-        grid[index] = orb.timer.remaining / self._max_vals[index]
+        grid[index] = orb.TIMER.remaining / self._max_vals[index]
         index += 1

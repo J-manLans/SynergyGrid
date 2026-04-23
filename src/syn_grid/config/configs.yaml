@@ -7,7 +7,7 @@ snapshot:
   # - enabled: whether to save a snapshot of the full config
   # - id: optional identifier used as part of the snapshot filename
   enabled: false
-  id: "tier_3_with_0_rew_for_moving"
+  id: "tier_1_vector_RPPO_64_hidden"
 
 ###########################
 #   World Configuration   #
@@ -35,7 +35,7 @@ world:
     # - step_penalty: the cost of moving around for the agent
     grid_rows: *grid_rows
     grid_cols: *grid_cols
-    starting_score: 30
+    starting_score: 30.0
     step_penalty: -1
 
   orb_factory_conf:
@@ -48,7 +48,7 @@ world:
     grid_rows: *grid_rows
     grid_cols: *grid_cols
     max_active_orbs: *max_active_orbs
-    max_tier: &max_tier 1
+    max_tier: &max_tier 2
     types:
       negative:
         enabled: false
@@ -74,7 +74,7 @@ world:
     linear_reward_growth: false
     step_wise_scoring: true
     growth_factor: 1.7
-    base_reward: 3
+    base_reward: 1.5
     cool_down: 7
 
 ###########################
@@ -96,7 +96,6 @@ obs:
     grid_rows: *grid_rows
     grid_cols: *grid_cols
     max_active_orbs: *max_active_orbs
-
 
   medium_difficulty:
     # - max_score: set per scenario based on expected achievable score in this setup
@@ -131,10 +130,10 @@ agent:
     # - human_control: allow human to control the game manually
     # - training: choose whether to train the agent or just run it
     algorithm: "RPPO"
-    agent_steps: "800768"
-    identifier: "vector_tier_1_fixed_reset"
+    agent_steps: "300288"
+    identifier: "vector_tier_2_hidden_256"
     human_control: false
-    training: true
+    training: false
 
   # Pick algorithm to train or evaluate
   train_agent_conf:
@@ -148,7 +147,7 @@ agent:
     enable_output: true
     render_mode: null
     timesteps: 100000
-    iterations: 4
+    iterations: 8
 
   eval_agent_conf:
     # Eval settings:

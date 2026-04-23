@@ -55,13 +55,13 @@ class SpatialModality(BaseModality):
         grid = np.zeros((self._ROWS, self._COLS, self._CHANNELS), dtype=np.float32)
 
         # Droid data
-        droid_y, droid_x = state.droid.position
+        droid_y, droid_x = state.DROID.position
 
         grid[droid_y, droid_x, 0] = 1
         grid[droid_y, droid_x, 1] = steps_left / self._max_vals[1]
-        grid[droid_y, droid_x, 2] = state.droid.score / self._max_vals[2]
+        grid[droid_y, droid_x, 2] = state.DROID.score / self._max_vals[2]
         grid[droid_y, droid_x, 3] = (
-            state.droid.digestion_engine.chained_tiers / self._max_vals[3]
+            state.DROID.DIGESTION_ENGINE.chained_tiers / self._max_vals[3]
         )
 
         # Orb data
@@ -69,9 +69,9 @@ class SpatialModality(BaseModality):
             if orb.is_active:
                 y, x = orb.position
 
-                grid[y, x, 4] = orb.meta.category.value / self._max_vals[4]
-                grid[y, x, 5] = orb.meta.type.value / self._max_vals[5]
-                grid[y, x, 6] = orb.meta.tier / self._max_vals[6]
-                grid[y, x, 7] = orb.timer.remaining / self._max_vals[7]
+                grid[y, x, 4] = orb.META.CATEGORY.value / self._max_vals[4]
+                grid[y, x, 5] = orb.META.TYPE.value / self._max_vals[5]
+                grid[y, x, 6] = orb.META.TIER / self._max_vals[6]
+                grid[y, x, 7] = orb.TIMER.remaining / self._max_vals[7]
 
         return grid

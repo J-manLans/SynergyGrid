@@ -33,10 +33,10 @@ class TestOrbFactory:
         factory = self._make_adjusted_factory(max_tier=max_tier, max_active_orbs=3)
         orbs = factory.create_orbs()
 
-        tier_counts = Counter(orb.meta.tier for orb in orbs)
+        tier_counts = Counter(orb.META.TIER for orb in orbs)
         num_neg_orbs = tier_counts.pop(-1)
         expected_counts = self._expected_tier_counts(
-            (factory._max_tier + 1), (len(orbs) - num_neg_orbs)
+            (factory._MAX_TIER + 1), (len(orbs) - num_neg_orbs)
         )
         assert tier_counts == expected_counts
 
@@ -49,7 +49,7 @@ class TestOrbFactory:
         factory = self._make_adjusted_factory(max_tier=max_tier, max_active_orbs=3)
         orbs = factory.create_orbs()
 
-        assert len(orbs) == factory._max_tier + 4
+        assert len(orbs) == factory._MAX_TIER + 4
 
     @pytest.mark.parametrize("max_active_orbs", [i for i in range(1, 10)])
     def test_create_orbs_respects_different_max_active_orbs(self, max_active_orbs: int):
@@ -58,7 +58,7 @@ class TestOrbFactory:
         )
         orbs = factory.create_orbs()
 
-        assert len(orbs) == factory._max_active_orbs * 3
+        assert len(orbs) == factory._MAX_ACTIVE_ORBS * 3
 
     @pytest.mark.parametrize(
         "neg_weight, tier_weight",
@@ -70,10 +70,10 @@ class TestOrbFactory:
         )
         orbs = factory.create_orbs()
 
-        tier_counts = Counter(orb.meta.tier for orb in orbs)
+        tier_counts = Counter(orb.META.TIER for orb in orbs)
         num_neg_orbs = tier_counts.pop(-1)
         expected_counts = self._expected_tier_counts(
-            (factory._max_tier + 1), (len(orbs) - num_neg_orbs)
+            (factory._MAX_TIER + 1), (len(orbs) - num_neg_orbs)
         )
         assert tier_counts == expected_counts
 
@@ -88,8 +88,8 @@ class TestOrbFactory:
         orbs = factory.create_orbs()
 
         counts_actual = [
-            sum(1 for orb in orbs if orb.meta.tier == -1),
-            sum(1 for orb in orbs if orb.meta.tier != -1),
+            sum(1 for orb in orbs if orb.META.TIER == -1),
+            sum(1 for orb in orbs if orb.META.TIER != -1),
         ]
 
         total_weight = neg_weight + tier_weight
@@ -106,7 +106,7 @@ class TestOrbFactory:
         )
         orbs = factory.create_orbs()
 
-        expected_counts = self._expected_tier_counts(factory._max_tier + 1, len(orbs))
+        expected_counts = self._expected_tier_counts(factory._MAX_TIER + 1, len(orbs))
         if max_tier == 7:
             for tier, count in expected_counts.items():
                 assert count == 2 if tier == 0 else 1

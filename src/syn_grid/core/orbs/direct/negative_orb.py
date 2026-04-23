@@ -22,11 +22,3 @@ class NegativeOrb(BaseOrb):
             conf.cool_down,
             OrbMeta(category=OrbCategory.DIRECT, type=DirectType.NEGATIVE),
         )
-
-    # ================= #
-    #        API        #
-    # ================= #
-
-    def consume(self) -> "NegativeOrb":
-        super()._consume()
-        return self

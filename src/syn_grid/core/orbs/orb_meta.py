@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Final
 
 
 class OrbCategory(Enum):
@@ -28,24 +29,19 @@ class OrbMeta:
         type: DirectType | SynergyType,
         tier: int | None = None,
     ):
-        self._assert_type_matches_category(category, type, tier)
-        # For finding correct image to render together with type and helping the agent identifying the orb
-        self.category = category
-        self.type = type  # Same as above
+        self._assert_type_and_tier_matches_category(category, type, tier)
 
-        if (not tier == None) and tier < 1:
-            raise ValueError("Tier orbs can't have tiers less than 1")
-        # Orbs tier.
-        # 0 if not applicable
-        # ...n for rest of the tier orbs
-        # this is so the observation stays consistent
-        self.tier = tier if tier is not None else 0
+        # These values are for finding correct image to render in PygameRenderer and to help the
+        # agent identify the orb in the observation
+        self.CATEGORY: Final[OrbCategory] = category
+        self.TYPE: Final[DirectType | SynergyType] = type
+        self.TIER: Final[int] = tier if (tier is not None) else 0
 
     # ================= #
     #      Helpers      #
     # ================= #
 
-    def _assert_type_matches_category(
+    def _assert_type_and_tier_matches_category(
         self,
         category: OrbCategory,
         type: DirectType | SynergyType,
@@ -66,5 +62,9 @@ class OrbMeta:
                 raise TypeError(
                     "If the category is SYNERGY, the orb need to be of synergy type"
                 )
+
             if tier is None:
                 raise ValueError("If the category is SYNERGY, tier should be applied")
+
+            if tier < 1:
+                raise ValueError("Tier orbs can't have tiers less than 1")

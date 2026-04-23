@@ -64,7 +64,7 @@ class TestBaseOrb:
         orb = DummyOrb(3, 10, meta)
 
         assert orb.is_active is False
-        assert orb.timer.remaining == 0
+        assert orb.TIMER.remaining == 0
 
     def test_spawn_activates_orb(self, orb):
         """
@@ -93,7 +93,7 @@ class TestBaseOrb:
         orb.deplete_orb()
 
         assert orb.is_active is False
-        assert orb.timer.remaining == 10
+        assert orb.TIMER.remaining == 10
 
     def test_reset_restores_default_state(self, orb):
         """
@@ -124,7 +124,7 @@ class TestBaseOrb:
 
         assert reward == 3
         assert orb.is_active is False
-        assert orb.timer.remaining == 10
+        assert orb.TIMER.remaining == 10
 
     def test_timer_set_and_tick(self):
         """
