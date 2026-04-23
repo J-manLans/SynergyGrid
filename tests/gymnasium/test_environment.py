@@ -62,11 +62,7 @@ class TestEnvironment:
         obs2, _ = env2.reset(seed=42)
 
         # Both observations should have the same structure
-        assert obs1.keys() == obs2.keys()
-
-        # Each observation component should be identical
-        for key in obs1:
-            assert np.array_equal(obs1[key], obs2[key])
+        assert np.array_equal(obs1, obs2)
 
     def test_step_returns_gym_contract(self, env: SYNGridEnv):
         """

@@ -31,7 +31,7 @@ class TestAgentRunner:
         full_conf = get_test_config()
 
         agent_conf = update_conf(
-            full_conf.agent.global_agent_conf, {"algorithm_index": 2}
+            full_conf.agent.global_agent_conf, {"algorithm": 'A2C'}
         )
         run_conf = full_conf.world
         obs_conf = full_conf.obs
@@ -70,12 +70,12 @@ class TestAgentRunner:
         full_conf = get_test_config()
 
         agent_conf = update_conf(
-            full_conf.agent.global_agent_conf, {"algorithm_index": 4}
+            full_conf.agent.global_agent_conf, {"algorithm": "4"}
         )
         run_conf = full_conf.world
         obs_conf = full_conf.obs
 
-        with pytest.raises(IndexError):
+        with pytest.raises(KeyError):
             AgentRunner(agent_conf, run_conf, obs_conf)
 
     def test_get_model_with_no_agent_steps(self, agent_runner: AgentRunner):

@@ -75,10 +75,10 @@ class SYNGridEnv(gym.Env):
         if self.render_mode == "human":
             self.render()
 
-        self._obs = self._observation_handler.get_observation(self.world)
+        self.obs = self._observation_handler.get_observation(self.world)
 
         # Return observation and info (not used)
-        return self._obs, {}
+        return self.obs, {}
 
     def step(self, action: int):
         # Perform action and adjust variables affected by it
@@ -90,13 +90,13 @@ class SYNGridEnv(gym.Env):
         if self.render_mode == "human":
             self.render()
 
-        self._obs = self._observation_handler.get_observation(self.world)
+        self.obs = self._observation_handler.get_observation(self.world)
 
         # Return observation, reward, terminated, truncated and info (TODO: info is not used now,
         # but add it at termination or truncation so result can be persisted in the evaluate_agent
         # () method)
         return (
-            self._obs,
+            self.obs,
             reward,
             terminated,
             truncated,

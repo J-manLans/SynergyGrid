@@ -40,7 +40,7 @@ world:
     # - step_penalty: the cost of moving around for the agent
     grid_rows: *grid_rows
     grid_cols: *grid_cols
-    starting_score: 30
+    starting_score: 30.0
     step_penalty: -1
 
   orb_factory_conf:
@@ -56,7 +56,7 @@ world:
     max_tier: &max_tier 2
     types:
       negative:
-        enabled: true
+        enabled: false
         weight: 1
       tier:
         enabled: true
@@ -67,7 +67,7 @@ world:
     # - reward: penalty applied when interacting with the orb
     # - cool_down: number of steps before the orb can be reused
     reward: -3.0
-    cool_down: 7
+    cool_down: 10
 
   tier_orb_conf:
     # Tiered orb behavior:
@@ -78,9 +78,9 @@ world:
     # - cool_down: number of steps before the orb can be reused
     linear_reward_growth: true
     step_wise_scoring: true
-    growth_factor: 1.5
-    base_reward: 3.0
-    cool_down: 10
+    growth_factor: 1.7
+    base_reward: 1.5
+    cool_down: 7
 
 ###########################
 #    Obs Configuration    #
@@ -91,6 +91,7 @@ obs:
     # - modality: decides what type of observation the agent get. vector, composite and spatial are the options
     # - difficulty: decides how much information to pack into the agents observation. Hard, medium and easy are the options
     # - grid_rows / grid_cols (set in grid_world_conf): fix the maximum observation space size for those variables
+    # - max_steps: number of steps in an episode until truncated
     modality: "vector"
     difficulty: "medium"
     max_steps: &max_steps 100
@@ -100,7 +101,6 @@ obs:
     grid_rows: *grid_rows
     grid_cols: *grid_cols
     max_active_orbs: *max_active_orbs
-
 
   medium_difficulty:
     # - max_score: set per scenario based on expected achievable score in this setup
@@ -157,4 +157,6 @@ agent:
   eval_agent_conf:
     # Eval settings:
     # - trained_model: enable agent or use random sampling for debugging
+    # - render_mode (null or "human"): "human" is default, change to null if you don't want visual feedback during timing
     trained_model: false
+    time_env: false

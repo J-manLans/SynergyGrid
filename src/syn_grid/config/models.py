@@ -156,6 +156,12 @@ class TrainAgentConf(BaseModel, frozen=False):
     timesteps: int
     iterations: int
 
+    @model_validator(mode="after")
+    def validate_config(self):
+        if self.render_mode not in ['human', None]:
+            raise ValueError('The value of render mode is not allowed')
+        return self
+
 
 class EvalAgentConf(BaseModel, frozen=False):
     trained_model: bool

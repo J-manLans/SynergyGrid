@@ -133,7 +133,7 @@ agent:
     agent_steps: "300288"
     identifier: "vector_tier_2_hidden_256"
     human_control: false
-    training: false
+    training: true
 
   # Pick algorithm to train or evaluate
   train_agent_conf:
@@ -144,8 +144,8 @@ agent:
     # - timesteps: number of timesteps per iteration (a checkpoint is saved after this many steps)
     # - iterations: total number of training iterations
     continue_training: false
-    enable_output: true
-    render_mode: null
+    enable_output: false
+    render_mode: 'human'
     timesteps: 100000
     iterations: 8
 
