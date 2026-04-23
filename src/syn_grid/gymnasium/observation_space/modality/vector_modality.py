@@ -19,7 +19,7 @@ class VectorModality(BaseModality):
     _AVAILABLE_SLOTS: Final[list[int]] = [5, 11, 17]
 
     def __init__(self, modality_conf: ModalityConf):
-        self._modality_conf = modality_conf
+        self._MODALITY_CONF = modality_conf
 
     # ================= #
     #        API        #
@@ -32,15 +32,15 @@ class VectorModality(BaseModality):
         self._max_vals = difficulty.get_max_values()
 
         # Initialize vector specific values
-        max_droid_y = self._modality_conf.grid_rows - 1
-        max_droid_x = self._modality_conf.grid_cols - 1
-        max_orb_y = self._modality_conf.grid_rows - 1
-        max_orb_x = self._modality_conf.grid_cols - 1
+        max_droid_y = self._MODALITY_CONF.grid_rows - 1
+        max_droid_x = self._MODALITY_CONF.grid_cols - 1
+        max_orb_y = self._MODALITY_CONF.grid_rows - 1
+        max_orb_x = self._MODALITY_CONF.grid_cols - 1
 
         # Add the orb values
         self._max_vals[3:3] = [max_orb_y, max_orb_x]
         self._max_vals[3:3] = self._max_vals[3:] * (
-            self._modality_conf.max_active_orbs - 1
+            self._MODALITY_CONF.max_active_orbs - 1
         )
 
         # Add the droid values
@@ -60,38 +60,38 @@ class VectorModality(BaseModality):
         )
 
     def get_observation(self, state: GridWorld, steps_left: int) -> np.ndarray:
-        grid = np.full(self._SHAPE, -1.0, dtype=np.float32)
+        obs = np.full(self._SHAPE, -1.0, dtype=np.float32)
 
         # Episode data
-        grid[0] = steps_left / self._max_vals[0]
+        obs[0] = steps_left / self._max_vals[0]
 
         # Droid data
         droid_y, droid_x = state.DROID.position
 
-        grid[1] = droid_y / self._max_vals[1]
-        grid[2] = droid_x / self._max_vals[2]
-        grid[3] = state.DROID.score / self._max_vals[3]
-        grid[4] = state.DROID.DIGESTION_ENGINE.chained_tiers / self._max_vals[4]
+        obs[1] = droid_y / self._max_vals[1]
+        obs[2] = droid_x / self._max_vals[2]
+        obs[3] = state.DROID.score / self._max_vals[3]
+        obs[4] = state.DROID.DIGESTION_ENGINE.chained_tiers / self._max_vals[4]
 
         self._prune_orb_slot_map(state)
 
         # Available orb data
-        for orb_index, orb in enumerate(state.ALL_ORBS):
+        for orb_index_in_all_orbs_list, orb in enumerate(state.ALL_ORBS):
             if orb.is_active:
 
                 # Assign a permanent grid slot if this orb is new
-                if orb_index not in self._orb_slot_map:
-                    for grid_idx in self._AVAILABLE_SLOTS:
-                        if grid_idx not in self._orb_slot_map.values():
-                            self._orb_slot_map[orb_index] = grid_idx
+                if orb_index_in_all_orbs_list not in self._orb_slot_map:
+                    for obs_start_index in self._AVAILABLE_SLOTS:
+                        if obs_start_index not in self._orb_slot_map.values():
+                            self._orb_slot_map[orb_index_in_all_orbs_list] = obs_start_index
                             break
 
                 # Write orb data to its assigned slot
-                grid_idx = self._orb_slot_map.get(orb_index)
-                if grid_idx is not None:
-                    self._add_orb_data(orb, grid, grid_idx)
+                obs_start_index = self._orb_slot_map.get(orb_index_in_all_orbs_list)
+                if obs_start_index is not None:
+                    self._add_orb_data(orb, obs, obs_start_index)
 
-        return grid
+        return obs
 
     # ================= #
     #      Helpers      #
@@ -107,18 +107,18 @@ class VectorModality(BaseModality):
             if orb_index not in active_indices:
                 del self._orb_slot_map[orb_index]
 
-    def _add_orb_data(self, orb: BaseOrb, grid: np.ndarray, index: int) -> None:
+    def _add_orb_data(self, orb: BaseOrb, grid: np.ndarray, grid_index: int) -> None:
         orb_y, orb_x = orb.position
 
-        grid[index] = orb_y / self._max_vals[index]
-        index += 1
-        grid[index] = orb_x / self._max_vals[index]
-        index += 1
-        grid[index] = orb.META.CATEGORY.value / self._max_vals[index]
-        index += 1
-        grid[index] = orb.META.TYPE.value / self._max_vals[index]
-        index += 1
-        grid[index] = orb.META.TIER / self._max_vals[index]
-        index += 1
-        grid[index] = orb.TIMER.remaining / self._max_vals[index]
-        index += 1
+        grid[grid_index] = orb_y / self._max_vals[grid_index]
+        grid_index += 1
+        grid[grid_index] = orb_x / self._max_vals[grid_index]
+        grid_index += 1
+        grid[grid_index] = orb.META.CATEGORY.value / self._max_vals[grid_index]
+        grid_index += 1
+        grid[grid_index] = orb.META.TYPE.value / self._max_vals[grid_index]
+        grid_index += 1
+        grid[grid_index] = orb.META.TIER / self._max_vals[grid_index]
+        grid_index += 1
+        grid[grid_index] = orb.TIMER.remaining / self._max_vals[grid_index]
+        grid_index += 1

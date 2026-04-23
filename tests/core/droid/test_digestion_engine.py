@@ -19,7 +19,7 @@ class TestDigestionEngine:
     def _tier_params(max_tier=_MAX_TIER) -> list[TierOrb]:
         tierOrbs = [
             (TierOrb(t, get_test_config().world.tier_orb_conf))
-            for t in range(0, max_tier + 1)
+            for t in range(1, max_tier + 1)
         ]
 
         for t in tierOrbs:
@@ -96,7 +96,7 @@ class TestDigestionEngine:
     def test_base_tier_consumption_rewards_and_starts_chain(
         self, reset_orb, digestion_engine: DigestionEngine
     ):
-        base_orb = TierOrb(0, get_test_config().world.tier_orb_conf)
+        base_orb = TierOrb(1, get_test_config().world.tier_orb_conf)
 
         # force out-of-order consumption for base tier
         digestion_engine.chained_tiers = self._MAX_TIER - 1
@@ -158,7 +158,7 @@ class TestDigestionEngine:
     def test_base_tier_consumption_returns_pending_reward_and_starts_chain(
         self, reset_orb, digestion_engine: DigestionEngine
     ):
-        base_orb = TierOrb(0, get_test_config().world.tier_orb_conf)
+        base_orb = TierOrb(1, get_test_config().world.tier_orb_conf)
         in_order_orb = TierOrb(
             self._MAX_TIER - 1, get_test_config().world.tier_orb_conf
         )

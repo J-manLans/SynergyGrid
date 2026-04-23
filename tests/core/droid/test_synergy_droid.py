@@ -21,7 +21,7 @@ class DummyPositiveOrb(BaseOrb):
     """
 
     def consume(self):
-        super()._consume()
+        super().consume()
         return self
 
 
@@ -34,7 +34,7 @@ class DummyNegativeOrb(BaseOrb):
     """
 
     def consume(self):
-        super()._consume()
+        super().consume()
         return self
 
 
@@ -97,6 +97,7 @@ class TestSynergyDroid:
         )
 
         droid = SynergyDroid(conf)
+        droid.reset()
 
         assert droid.score == score
 
@@ -209,11 +210,11 @@ class TestSynergyDroid:
         and returns the correct reward value.
         """
 
-        orb = DummyPositiveOrb(3, 10, OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, 0))
+        orb = DummyPositiveOrb(3, 10, OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, 1))
         reward = droid.consume_orb(orb)
 
         assert reward == 3
-        assert droid.score == 43
+        assert droid.score == 33
 
     def test_consume_negative_orb_reduces_score(self, droid: SynergyDroid):
         """
@@ -225,4 +226,4 @@ class TestSynergyDroid:
         reward = droid.consume_orb(orb)
 
         assert reward == -3
-        assert droid.score == 37
+        assert droid.score == 27.0

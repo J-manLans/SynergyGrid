@@ -1,11 +1,13 @@
-import pytest
-import numpy as np
+from syn_grid.core.utils.timer import Timer
 from syn_grid.core.orbs.base_orb import BaseOrb
 from syn_grid.core.orbs.orb_meta import (
     SynergyType,
     OrbMeta,
     OrbCategory,
 )
+
+import pytest
+import numpy as np
 
 
 class DummyOrb(BaseOrb):
@@ -15,7 +17,7 @@ class DummyOrb(BaseOrb):
     """
 
     def consume(self):
-        super()._consume()
+        super().consume()
         return self
 
 
@@ -60,13 +62,14 @@ class TestBaseOrb:
         - No exception is raised for valid grid dimensions.
         """
 
-        BaseOrb.set_life_span(5, 5)
-        orb = DummyOrb(3, 10, meta)
+        BaseOrb.set_life_span(rows, cols)
+        orb = DummyOrb(3.0, 10, meta)
+        orb.TIMER.reset()
 
         assert orb.is_active is False
         assert orb.TIMER.remaining == 0
 
-    def test_spawn_activates_orb(self, orb):
+    def test_spawn_activates_orb(self, orb: DummyOrb):
         """
         Verify that calling spawn():
 
@@ -74,11 +77,12 @@ class TestBaseOrb:
         - Sets the orb position correctly.
         - Initializes the timer with a positive lifespan value.
         """
+
         orb.spawn([np.int64(2), np.int64(3)])
 
         assert orb.is_active is True
         assert orb.position == [np.int64(2), np.int64(3)]
-        assert orb.timer.remaining > 0
+        assert orb.TIMER.remaining > 0
 
     def test_deplete_deactivates_and_sets_cool_down(self, orb: DummyOrb):
         """
@@ -88,6 +92,7 @@ class TestBaseOrb:
         - Sets the timer to the configured cooldown value.
         - Does not leave the orb active.
         """
+
         orb.spawn([np.int64(1), np.int64(1)])
 
         orb.deplete_orb()
@@ -95,7 +100,7 @@ class TestBaseOrb:
         assert orb.is_active is False
         assert orb.TIMER.remaining == 10
 
-    def test_reset_restores_default_state(self, orb):
+    def test_reset_restores_default_state(self, orb: DummyOrb):
         """
         Verify that reset():
 
@@ -103,12 +108,13 @@ class TestBaseOrb:
         - Clears the timer (remaining == 0).
         - Restores the orb to its initial inactive state.
         """
+
         orb.spawn([np.int64(1), np.int64(1)])
 
         orb.reset()
 
         assert orb.is_active is False
-        assert orb.timer.remaining == 0
+        assert orb.TIMER.remaining == 0
 
     def test_consume_returns_reward_and_sets_cool_down(self, orb: DummyOrb):
         """
@@ -118,6 +124,7 @@ class TestBaseOrb:
         - Deactivates the orb.
         - Sets the timer to the configured cool-down.
         """
+
         orb.spawn([np.int64(0), np.int64(0)])
 
         reward = orb.consume().REWARD
@@ -134,7 +141,8 @@ class TestBaseOrb:
         - tick() decrements the timer correctly.
         - is_completed() returns True when remaining reaches zero.
         """
-        timer = BaseOrb.Timer()
+
+        timer = Timer()
 
         timer.set(3)
         assert timer.remaining == 3
@@ -153,7 +161,8 @@ class TestBaseOrb:
         Ensure that repeated calls to tick() do not cause
         the timer to drop below zero.
         """
-        timer = BaseOrb.Timer()
+
+        timer = Timer()
 
         timer.set(1)
 

@@ -26,20 +26,20 @@ class TestOrbFactory:
     #       Tests       #
     # ================= #
 
-    @pytest.mark.parametrize("max_tier", [0, 1, 2, 3, 4, 5])
+    @pytest.mark.parametrize("max_tier", [1, 2, 3, 4, 5, 6])
     def test_create_orbs_fills_to_min_pool_size_with_limited_active_orbs(
         self, max_tier: int
     ):
         factory = self._make_adjusted_factory(max_tier=max_tier, max_active_orbs=3)
         orbs = factory.create_orbs()
 
-        tier_counts = Counter(orb.META.TIER for orb in orbs)
-        num_neg_orbs = tier_counts.pop(-1)
-        expected_counts = self._expected_tier_counts(
-            (factory._MAX_TIER + 1), (len(orbs) - num_neg_orbs)
+        actual_tier_counts = Counter(orb.META.TIER for orb in orbs)
+        num_neg_orbs = actual_tier_counts.pop(0)
+        expected_tier_counts = self._expected_tier_counts(
+            (factory._MAX_TIER), (len(orbs) - num_neg_orbs)
         )
-        assert tier_counts == expected_counts
 
+        assert actual_tier_counts == expected_tier_counts
         assert len(orbs) == factory._MIN_POOL_SIZE
 
     @pytest.mark.parametrize("max_tier", [i for i in range(100, 120)])
@@ -49,7 +49,7 @@ class TestOrbFactory:
         factory = self._make_adjusted_factory(max_tier=max_tier, max_active_orbs=3)
         orbs = factory.create_orbs()
 
-        assert len(orbs) == factory._MAX_TIER + 4
+        assert len(orbs) == factory._MAX_TIER + 3
 
     @pytest.mark.parametrize("max_active_orbs", [i for i in range(1, 10)])
     def test_create_orbs_respects_different_max_active_orbs(self, max_active_orbs: int):
@@ -70,12 +70,13 @@ class TestOrbFactory:
         )
         orbs = factory.create_orbs()
 
-        tier_counts = Counter(orb.META.TIER for orb in orbs)
-        num_neg_orbs = tier_counts.pop(-1)
+        actual_tier_counts = Counter(orb.META.TIER for orb in orbs)
+        num_neg_orbs = actual_tier_counts.pop(0)
         expected_counts = self._expected_tier_counts(
-            (factory._MAX_TIER + 1), (len(orbs) - num_neg_orbs)
+            (factory._MAX_TIER), (len(orbs) - num_neg_orbs)
         )
-        assert tier_counts == expected_counts
+
+        assert actual_tier_counts == expected_counts
 
     @pytest.mark.parametrize(
         "neg_weight, tier_weight",
@@ -88,8 +89,8 @@ class TestOrbFactory:
         orbs = factory.create_orbs()
 
         counts_actual = [
-            sum(1 for orb in orbs if orb.META.TIER == -1),
-            sum(1 for orb in orbs if orb.META.TIER != -1),
+            sum(1 for orb in orbs if orb.META.TIER == 0),
+            sum(1 for orb in orbs if orb.META.TIER != 0),
         ]
 
         total_weight = neg_weight + tier_weight
@@ -160,8 +161,8 @@ class TestOrbFactory:
         base_per_tier, tiers_with_extra = divmod(total_tier_orbs, num_tiers)
 
         counts = {
-            tier: base_per_tier + (1 if tier < tiers_with_extra else 0)
-            for tier in range(num_tiers)
+            tier: base_per_tier + (1 if tier <= tiers_with_extra else 0)
+            for tier in range(1, num_tiers + 1)
         }
 
         return counts

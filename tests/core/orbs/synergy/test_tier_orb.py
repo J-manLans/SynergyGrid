@@ -11,7 +11,7 @@ class TestTierOrb:
     _GRID_ROWS = 5
     _GRID_COLS = 5
     _MAX_TIER = 5
-    _COOL_DOWN = 10
+    _COOL_DOWN = 7
     _TIER = 2
 
     """
@@ -56,9 +56,7 @@ class TestTierOrb:
         assert orb.consume() is orb
 
     def test_stepwise_reward_is_correct(self, orb: TierOrb):
-        orb.STEP_WISE_SCORING = True
-
-        assert (orb.META.TIER + 1) * orb._TIER_BASE_REWARD == orb.REWARD
+        assert orb.META.TIER * orb._TIER_BASE_REWARD == orb.REWARD
 
     def test_factor_reward_is_correct(self, orb: TierOrb):
         orb.STEP_WISE_SCORING = False
@@ -80,15 +78,11 @@ class TestTierOrb:
         with pytest.raises(ValueError):
             TierOrb(-1, get_test_config().world.tier_orb_conf)
 
-    def test_creating_orb_with_high_tier(self):
+    def test_creating_orb_with_high_tier_gets_correct_reward(self):
         TierOrb.MAX_TIER = 999
         orb = TierOrb(666, get_test_config().world.tier_orb_conf)
 
-        orb.STEP_WISE_SCORING = True
-        assert (orb.META.TIER + 1) * orb._TIER_BASE_REWARD == orb.REWARD
-
-        orb.STEP_WISE_SCORING = False
-        assert (orb._TIER_BASE_REWARD * (orb._GROWTH_FACTOR * (self._TIER - 1))) + 0.5
+        assert orb.META.TIER * orb._TIER_BASE_REWARD == orb.REWARD
 
     def test_creating_orb_with_to_high_tier(self):
         TierOrb.MAX_TIER = self._MAX_TIER

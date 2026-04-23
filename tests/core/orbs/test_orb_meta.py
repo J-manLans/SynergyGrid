@@ -18,20 +18,21 @@ class TestOrbMeta:
     - Validation of invalid inputs
     """
 
-    def test_direct_positive_initialization(self):
+    def test_tier_1_initialization(self):
         """
         Verify that a SYNERGY TIER orb initializes correctly.
 
         Expected behavior:
         - category is OrbCategory.SYNERGY
         - type is SynergyType.TIER
-        - tier defaults to -1 when not provided
+        - Tier is 1
         """
-        meta = OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, 0)
+
+        meta = OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, 1)
 
         assert meta.CATEGORY == OrbCategory.SYNERGY
         assert meta.TYPE == SynergyType.TIER
-        assert meta.TIER == 0
+        assert meta.TIER == 1
 
     def test_direct_negative_initialization(self):
         """
@@ -41,11 +42,12 @@ class TestOrbMeta:
         - category and type are stored correctly
         - tier defaults to 0
         """
+
         meta = OrbMeta(OrbCategory.DIRECT, DirectType.NEGATIVE)
 
         assert meta.CATEGORY == OrbCategory.DIRECT
         assert meta.TYPE == DirectType.NEGATIVE
-        assert meta.TIER == -1
+        assert meta.TIER == 0
 
     @pytest.mark.parametrize("tier", [1, 2, 5])
     def test_explicit_tier(self, tier):
@@ -56,6 +58,7 @@ class TestOrbMeta:
         Expected behavior:
         - tier equals the explicitly provided value
         """
+
         meta = OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, tier)
 
         assert meta.TIER == tier
@@ -67,9 +70,10 @@ class TestOrbMeta:
 
         This confirms consistent default handling.
         """
-        meta = OrbMeta(OrbCategory.DIRECT, DirectType.NEGATIVE, None)
 
-        assert meta.TIER == -1
+        meta = OrbMeta(OrbCategory.DIRECT, DirectType.NEGATIVE)
+
+        assert meta.TIER == 0
 
     def test_negative_tier_raises(self):
         """
@@ -78,6 +82,7 @@ class TestOrbMeta:
 
         Negative tiers are considered invalid domain input.
         """
+
         with pytest.raises(ValueError):
             OrbMeta(OrbCategory.SYNERGY, SynergyType.TIER, -1)
 
@@ -90,5 +95,6 @@ class TestOrbMeta:
         - DIRECT category must use DirectType
         - SYNERGY category must use SynergyType
         """
+
         with pytest.raises(TypeError):
             OrbMeta(OrbCategory.DIRECT, SynergyType.TIER)
