@@ -16,10 +16,8 @@ class TestOrbFactory:
     def factory(self) -> OrbFactory:
         conf = get_test_config().world
 
-        return (
-            OrbFactory(
-                conf.orb_factory_conf, conf.negative_orb_conf, conf.tier_orb_conf
-            )
+        return OrbFactory(
+            conf.orb_factory_conf, conf.negative_orb_conf, conf.tier_orb_conf
         )
 
     # ================= #
@@ -117,9 +115,7 @@ class TestOrbFactory:
 
     @pytest.mark.parametrize("neg_weight", [1, 2, 3, 5, 20, 30, 23123])
     def test_negative_orbs_fill_min_pool_and_ignores_weight(self, neg_weight):
-        factory = self._make_adjusted_factory(
-           neg_weight=neg_weight, tier_enabled=False
-        )
+        factory = self._make_adjusted_factory(neg_weight=neg_weight, tier_enabled=False)
         orbs = factory.create_orbs()
 
         assert len(orbs) == factory._MIN_POOL_SIZE

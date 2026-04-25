@@ -4,6 +4,7 @@ from syn_grid.core.utils.timer import Timer
 from abc import ABC
 from typing import Final
 
+
 class BaseOrb(ABC):
     # ================= #
     #       Init        #
@@ -22,7 +23,6 @@ class BaseOrb(ABC):
         self._COOL_DOWN: Final[int] = cool_down
         self.META: Final[OrbMeta] = meta
         self.TIMER: Final[Timer] = Timer()
-
 
     @classmethod
     def set_life_span(cls, grid_rows: int, grid_cols: int) -> None:

@@ -1,28 +1,29 @@
-from syn_grid.core.grid_world import GridWorld
-from syn_grid.config.models import ModalityConf
-from syn_grid.gymnasium.observation_space.difficulty.base_difficulty import (
-    BaseDifficulty,
+from syn_grid.gymnasium.observation_space.perceptions.base_perception import (
+    BasePerception,
 )
-from syn_grid.gymnasium.observation_space.modality.base_modality import BaseModality
+from syn_grid.core.grid_world import GridWorld
+from syn_grid.config.models import PerceptionConf
 
-from gymnasium import spaces
 import numpy as np
+from gymnasium import spaces
 
 
-class SpatialModality(BaseModality):
+class MediumSpatialPerception(BasePerception):
     # ================= #
     #       Init        #
     # ================= #
 
-    def __init__(self, modality_conf: ModalityConf):
-        self._modality_conf = modality_conf
+    def __init__(self, conf: PerceptionConf, orbs: int):
+        super().__init__(conf, orbs)
 
     # ================= #
     #        API        #
     # ================= #
 
-    def setup_obs_space(self, difficulty: BaseDifficulty) -> spaces.Space:
-        self._max_vals = difficulty.get_max_values()
+    def reset(self) -> None: ...
+
+    def setup_obs_space(self) -> spaces.Space:
+        self._max_vals = []
 
         # Initialize spatial specific values
         max_agent_present = 1
@@ -31,8 +32,7 @@ class SpatialModality(BaseModality):
         self._max_vals.insert(0, max_agent_present)
 
         # Create H,W,C and let C be the length of the list
-        self._ROWS = self._modality_conf.grid_rows
-        self._COLS = self._modality_conf.grid_cols
+        self._ROWS, self._COLS = self._get_max_droid_positions()
         self._CHANNELS = len(self._max_vals)
 
         return spaces.Box(

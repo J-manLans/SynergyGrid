@@ -1,19 +1,23 @@
-from syn_grid.config.models import OrbFactoryConf, ObsConfig
+from syn_grid.gymnasium.observation_space.perceptions.base_perception import (
+    BasePerception,
+)
+from syn_grid.gymnasium.observation_space.perceptions.vector import (
+    EasyVectorPerception,
+    MediumVectorPerception,
+    HardVectorPerception,
+)
+from syn_grid.config.models import ObsConfig
 from syn_grid.core.grid_world import GridWorld
-from syn_grid.gymnasium.observation_space.observation_registry import (
-    MODALITIES,
-    DIFFICULTIES,
-)
-from syn_grid.gymnasium.observation_space.difficulty.base_difficulty import (
-    BaseDifficulty,
-)
-from syn_grid.gymnasium.observation_space.modality.base_modality import (
-    BaseModality,
-)
 
-from gymnasium import spaces
 import numpy as np
-from typing import Final
+from gymnasium import spaces
+from typing import Final, Type
+
+PERCEPTIONS = {
+    "vector_easy": EasyVectorPerception,
+    "vector_medium": MediumVectorPerception,
+    "vector_hard": HardVectorPerception,
+}
 
 
 class ObservationHandler:
@@ -21,28 +25,23 @@ class ObservationHandler:
     #       Init        #
     # ================= #
 
-    modality: Final[BaseModality]
-    difficulty: Final[BaseDifficulty]
-
-    def __init__(self, obs_conf: ObsConfig):
-        self._max_steps = obs_conf.observation_handler.max_steps
-        self.modality = MODALITIES[obs_conf.observation_handler.modality](
-            obs_conf.modality_conf
-        )
-        self.difficulty = DIFFICULTIES[obs_conf.observation_handler.difficulty](
-            obs_conf
-        )
+    def __init__(self, conf: ObsConfig, orbs: int) -> None:
+        self._max_steps: Final[int] = conf.observation_handler.max_steps
+        perception_type: Type[BasePerception] = PERCEPTIONS[
+            conf.observation_handler.perception
+        ]
+        self.perception: Final[BasePerception] = perception_type(conf.perception, orbs)
 
     # ================= #
     #        API        #
     # ================= #
 
     def setup_obs_space(self) -> spaces.Space:
-        return self.modality.setup_obs_space(self.difficulty)
+        return self.perception.setup_obs_space()
 
-    def reset(self):
-        self.steps_left = self._max_steps
-        self.modality.reset()
+    def reset(self) -> None:
+        self.steps_left: int = self._max_steps
+        self.perception.reset()
 
     def get_observation(self, state: GridWorld) -> np.ndarray:
-        return self.modality.get_observation(state, self.steps_left)
+        return self.perception.get_observation(state, self.steps_left)
