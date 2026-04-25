@@ -1,11 +1,9 @@
 from syn_grid.core.grid_world import GridWorld
 from syn_grid.core.orbs.orb_meta import DirectType, SynergyType
-from syn_grid.config.config_manager import ConfigManager
 
 from tests.utils.config_helpers import get_test_config
 
 import pytest
-import numpy as np
 
 
 class TestGridWorld:
@@ -15,8 +13,6 @@ class TestGridWorld:
         Fixture to create and initialize a GridWorld instance with 1 active orb.
         Resets the world before each test to ensure a clean state.
         """
-
-        config_manager = ConfigManager("test_configs.yaml")
 
         run_conf = get_test_config().world
         grid_world_conf = run_conf.grid_world_conf

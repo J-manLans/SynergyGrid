@@ -17,11 +17,7 @@ class AgentRunner:
     #       Init        #
     # ================= #
     hyper_parameters = {
-        "PPO": {
-            "policy": "MlpPolicy",
-            "device": "cpu",
-            "ent_coef": 0.02
-        },
+        "PPO": {"policy": "MlpPolicy", "device": "cpu", "ent_coef": 0.02},
         "RPPO": {
             "policy": "MlpLstmPolicy",
             "device": "cpu",
@@ -30,11 +26,11 @@ class AgentRunner:
             "batch_size": 64,
             "n_epochs": 5,
             "policy_kwargs": {
-                "lstm_hidden_size": 128,
+                "lstm_hidden_size": 64,
                 "n_lstm_layers": 1,
                 "shared_lstm": False,
             },
-        }
+        },
     }
     algorithms = {"PPO": PPO, "RPPO": RecurrentPPO, "DQN": DQN, "A2C": A2C}
 

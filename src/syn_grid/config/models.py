@@ -94,47 +94,23 @@ class TierConf(BaseModel, frozen=True):
 
 
 class ObservationHandlerConf(BaseModel, frozen=True):
-    modality: str
-    difficulty: str
+    perception: str
     max_steps: int
 
     @model_validator(mode="after")
     def validate_config(self):
-        if self.modality not in ["vector", "composite", "spatial"]:
-            raise ValueError("The value of modality is not allowed")
-        if self.difficulty not in ['easy', 'medium', 'hard']:
+        if self.perception not in ["vector_easy", "vector_medium", "vector_hard"]:
             raise ValueError("The value of difficulty is not allowed")
         return self
 
 
-class ModalityConf(BaseModel, frozen=True):
-    grid_rows: int
-    grid_cols: int
-    max_active_orbs: int
-
-
-class MediumDifficultyConf(BaseModel, frozen=True):
+class PerceptionConf(BaseModel, frozen=True):
     max_score: int
     max_steps: int
     max_tier: int
     grid_rows: int
     grid_cols: int
-
-
-class HardDifficultyConf(BaseModel, frozen=True):
-    max_curriculum_tier: int
-    max_tier: int
-    grid_rows: int
-    grid_cols: int
-
-    @model_validator(mode="after")
-    def validate_curriculum_tier(self):
-        if self.max_curriculum_tier < self.max_tier:
-            raise ValueError(
-                f"max_curriculum_tier ({self.max_curriculum_tier}) "
-                f"must be equal to or exceed max_tier ({self.max_tier})"
-            )
-        return self
+    max_active_orbs: int
 
 
 # ----------------------- #
@@ -159,8 +135,8 @@ class TrainAgentConf(BaseModel, frozen=False):
 
     @model_validator(mode="after")
     def validate_config(self):
-        if self.render_mode not in ['human', None]:
-            raise ValueError('The value of render mode is not allowed')
+        if self.render_mode not in ["human", None]:
+            raise ValueError("The value of render mode is not allowed")
         return self
 
 
@@ -185,9 +161,7 @@ class WorldConfig(BaseModel, frozen=True):
 
 class ObsConfig(BaseModel, frozen=True):
     observation_handler: ObservationHandlerConf
-    modality_conf: ModalityConf
-    medium_difficulty: MediumDifficultyConf
-    hard_difficulty: HardDifficultyConf
+    perception: PerceptionConf
 
 
 class AgentConfig(BaseModel, frozen=False):

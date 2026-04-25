@@ -24,7 +24,6 @@ class SynergyDroid:
         self._STEP_PENALTY: Final[float] = conf.step_penalty
         self.DIGESTION_ENGINE: Final[DigestionEngine] = DigestionEngine()
 
-
     def reset(self) -> None:
         """
         Initialize Droids starting position at the center of the grid and reset its score and the digestion engine.

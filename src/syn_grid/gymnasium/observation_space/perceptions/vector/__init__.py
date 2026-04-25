@@ -1,0 +1,3 @@
+from .easy_vector_perception import EasyVectorPerception
+from .medium_vector_perception import MediumVectorPerception
+from .hard_vector_perception import HardVectorPerception

@@ -31,7 +31,7 @@ class TestAgentRunner:
         full_conf = get_test_config()
 
         agent_conf = update_conf(
-            full_conf.agent.global_agent_conf, {"algorithm": 'A2C'}
+            full_conf.agent.global_agent_conf, {"algorithm": "A2C"}
         )
         run_conf = full_conf.world
         obs_conf = full_conf.obs
@@ -69,9 +69,7 @@ class TestAgentRunner:
 
         full_conf = get_test_config()
 
-        agent_conf = update_conf(
-            full_conf.agent.global_agent_conf, {"algorithm": "4"}
-        )
+        agent_conf = update_conf(full_conf.agent.global_agent_conf, {"algorithm": "4"})
         run_conf = full_conf.world
         obs_conf = full_conf.obs
 

@@ -114,7 +114,7 @@ class TestEnvironment:
         truncated = False
 
         # Run for more steps than the allowed maximum
-        for _ in range(obs_conf.medium_difficulty.max_steps + 1):
+        for _ in range(obs_conf.perception.max_steps + 1):
             _, _, _, truncated, _ = env.step(env.action_space.sample())
 
             if truncated:
@@ -128,7 +128,7 @@ class TestEnvironment:
         """
 
         conf = get_test_config()
-        world_conf = update_conf(conf.world, {"droid_conf": {'starting_score': 1}})
+        world_conf = update_conf(conf.world, {"droid_conf": {"starting_score": 1}})
 
         env = SYNGridEnv(world_conf, conf.obs)
         env.reset()
@@ -149,11 +149,11 @@ class TestEnvironment:
         env = SYNGridEnv(conf.world, conf.obs, render_mode="human")
         env.reset()
 
-        assert hasattr(env, 'renderer')
+        assert hasattr(env, "renderer")
 
     def test_reset_creates_identical_state(self):
         conf = get_test_config()
-        world_conf = update_conf(conf.world, {"droid_conf": {'starting_score': 99999}})
+        world_conf = update_conf(conf.world, {"droid_conf": {"starting_score": 99999}})
 
         baseline_env = SYNGridEnv(world_conf, conf.obs)
         baseline_env.reset()
@@ -176,7 +176,7 @@ class TestEnvironment:
 
     def test_same_step_in_identical_environments_produces_consistent_state(self):
         conf = get_test_config()
-        world_conf = update_conf(conf.world, {"droid_conf": {'starting_score': 99999}})
+        world_conf = update_conf(conf.world, {"droid_conf": {"starting_score": 99999}})
 
         env1 = SYNGridEnv(world_conf, conf.obs)
         env1.reset(seed=42)
@@ -197,12 +197,12 @@ class TestEnvironment:
 
     def _capture_state(self, env: SYNGridEnv) -> dict[str, Any]:
         return {
-            'steps_left': env._observation_handler.steps_left,
-            'num_orbs_pool': len(env.world.ALL_ORBS),
-            'num_active_orbs': len(env.world._ACTIVE_ORBS),
-            'num_inactive_orbs': len(env.world._inactive_orbs),
-            'droid_position': env.world.DROID.position.copy(),
-            'droid_score': env.world.DROID.score,
-            'chained_tiers': env.world.DROID.DIGESTION_ENGINE.chained_tiers,
-            'pending_reward': env.world.DROID.DIGESTION_ENGINE._pending_reward,
+            "steps_left": env._observation_handler.steps_left,
+            "num_orbs_pool": len(env.world.ALL_ORBS),
+            "num_active_orbs": len(env.world._ACTIVE_ORBS),
+            "num_inactive_orbs": len(env.world._inactive_orbs),
+            "droid_position": env.world.DROID.position.copy(),
+            "droid_score": env.world.DROID.score,
+            "chained_tiers": env.world.DROID.DIGESTION_ENGINE.chained_tiers,
+            "pending_reward": env.world.DROID.DIGESTION_ENGINE._pending_reward,
         }
