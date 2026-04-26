@@ -79,18 +79,14 @@ class GridWorld:
 
     def perform_agent_action(self, agent_action: DroidAction) -> float:
         reward = 0
-        move_penalty = self.DROID.perform_action(agent_action)
+        step_penalty = self.DROID.perform_action(agent_action)
 
         for orb in self.ALL_ORBS:
             if orb.is_active:
+                # only decrease timer for tier orbs if de-spawning is activated in the configs
                 if orb.META.TIER == 0 or self._DE_SPAWN_TIERS:
-                    # only decrease timer for tier orbs if de-spawning them is activated in the
-                    # config file
                     orb.TIMER.tick()
-                if orb.TIMER.is_completed() and (
-                    orb.META.TIER == 0 or self._DE_SPAWN_TIERS
-                ):
-                    # only de-spawn non-tier orbs if it's activated in the config file
+                if orb.TIMER.is_completed():
                     orb.de_spawn()
                     self._toggle_orb_to_inactive(orb)
                 elif self.DROID.position == orb.position:
@@ -104,7 +100,7 @@ class GridWorld:
         if len(self._ACTIVE_ORBS) < self._CONF.max_active_orbs:
             self._spawn_random_orb_if_ready()
 
-        return move_penalty + reward
+        return step_penalty + reward
 
     # === Getters === #
 

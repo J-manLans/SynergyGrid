@@ -1,8 +1,5 @@
 from syn_grid.config.config_manager import ConfigManager
 from syn_grid.config.models import ExperimentConfig, FullConf
-from syn_grid.runners.agent_runners.agent_runner import AgentRunner
-from syn_grid.runners.agent_runners.train_agent import train_agent
-from syn_grid.runners.agent_runners.evaluate_agent import evaluate_agent
 from syn_grid.utils.args_utils import parse_args, update_agent_conf_from_args
 from syn_grid.runners.human_runner.human_runner import HumanRunner
 from syn_grid.runners.agent_runners.agent_registry import ALGORITHMS
@@ -42,7 +39,9 @@ def main():
         runner = HumanRunner(run_conf, obs_conf.observation_handler.max_steps)
         runner.human_player_loop()
     else:
-        runner = ALGORITHMS[agent_conf.global_agent_conf.alg](agent_conf, obs_conf, run_conf)
+        runner = ALGORITHMS[agent_conf.global_agent_conf.alg](
+            agent_conf, obs_conf, run_conf
+        )
         if agent_conf.global_agent_conf.training:
             runner.train()
         else:

@@ -1,4 +1,4 @@
-from syn_grid.runners.agent_runners.agent_runner import AgentRunner
+from syn_grid.runners.agent_runners.base_agent_runner import BaseAgentRunner
 
 from tests.utils.config_helpers import get_test_config, update_conf
 
@@ -36,9 +36,9 @@ class TestAgentRunner:
         run_conf = full_conf.world
         obs_conf = full_conf.obs
 
-        return AgentRunner(agent_conf, run_conf, obs_conf)
+        return BaseAgentRunner(agent_conf, run_conf, obs_conf)
 
-    def test_initialization(self, agent_runner: AgentRunner):
+    def test_initialization(self, agent_runner: BaseAgentRunner):
         """
         Tests the correct initialization of the `AgentRunner` object.
 

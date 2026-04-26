@@ -49,7 +49,10 @@ class BaseAgentRunner(ABC):
     #      Helpers      #
     # ================= #
 
-    def _get_raw_env(self, render_mode: str | None,) -> Env:
+    def _make_raw_env(
+        self,
+        render_mode: str | None,
+    ) -> Env:
         env = make(render_mode, self.run_conf, self.obs_conf)
 
         if self.conf.check_env:
