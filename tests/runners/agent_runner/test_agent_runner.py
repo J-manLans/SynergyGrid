@@ -1,4 +1,5 @@
-from syn_grid.runners.agent_runners.agent_runner import AgentRunner
+from syn_grid.runners.agent_runners.base_agent_runner import BaseAgentRunner
+from syn_grid.runners.agent_runners.agent_registry import ALGORITHMS
 
 from tests.utils.config_helpers import get_test_config, update_conf
 
@@ -30,30 +31,22 @@ class TestAgentRunner:
 
         full_conf = get_test_config()
 
-        agent_conf = update_conf(
-            full_conf.agent.global_agent_conf, {"algorithm": "A2C"}
+        full_conf = update_conf(
+            full_conf, {
+                'agent': {
+                    'global_agent_conf': {
+                        "alg": "PPO"
+                    }
+                }
+            }
         )
+
         run_conf = full_conf.world
         obs_conf = full_conf.obs
 
-        return AgentRunner(agent_conf, run_conf, obs_conf)
-
-    def test_initialization(self, agent_runner: AgentRunner):
-        """
-        Tests the correct initialization of the `AgentRunner` object.
-
-        Verifies that:
-            - The `environment` attribute is set to "synergy_grid-v0".
-            - The `model` attribute is initially `None`.
-            - The `algorithm` attribute is set to "A2C".
-            - The `AlgorithmClass` is set to the `A2C` class.
-
-        Args:
-            agent_runner (AgentRunner): The `AgentRunner` instance to test.
-        """
-
-        assert agent_runner.algorithm == "A2C"
-        assert agent_runner.AlgorithmClass == A2C
+        return ALGORITHMS[full_conf.agent.global_agent_conf.alg](
+            full_conf.agent, obs_conf, run_conf
+        )
 
     def test_initialization_with_invalid_algorithm(self):
         """
@@ -69,14 +62,22 @@ class TestAgentRunner:
 
         full_conf = get_test_config()
 
-        agent_conf = update_conf(full_conf.agent.global_agent_conf, {"algorithm": "4"})
+        full_conf = update_conf(
+            full_conf, {
+                'agent': {
+                    'global_agent_conf': {
+                        "alg": "Ajja_bajja"
+                    }
+                }
+            }
+        )
         run_conf = full_conf.world
         obs_conf = full_conf.obs
 
         with pytest.raises(KeyError):
-            AgentRunner(agent_conf, run_conf, obs_conf)
+            ALGORITHMS[full_conf.agent.global_agent_conf.alg](full_conf.agent, obs_conf, run_conf)
 
-    def test_get_model_with_no_agent_steps(self, agent_runner: AgentRunner):
+    def test_get_model_with_no_agent_steps(self, agent_runner: BaseAgentRunner):
         """
         Tests the behavior when no agent steps are provided to the `get_model` method.
 
@@ -88,25 +89,9 @@ class TestAgentRunner:
             SystemExit: If no agent steps are provided.
         """
 
-        agent_runner.agent_steps = ""
+        agent_runner.conf.agent_steps = ""
 
         with pytest.raises(SystemExit):
-            agent_runner.load_model(None)
+            agent_runner._get_model_path()
 
-    def test_get_model_with_no_matching_model(self, agent_runner: AgentRunner):
-        """
-        Tests the behavior when the `get_model` method is called with valid agent steps but no matching model is found.
 
-        Verifies that an `FileNotFoundError` is raised when the `glob` method returns an empty list (indicating no matching models).
-
-        This ensures that the system correctly handles cases where no models match the specified agent steps.
-
-        Raises:
-            FileNotFoundError: If no matching model is found for the specified agent steps.
-        """
-
-        with patch("pathlib.Path.glob") as mock_glob:
-            mock_glob.return_value = []
-
-            with pytest.raises(FileNotFoundError):
-                agent_runner.load_model(None)

@@ -49,7 +49,7 @@ world:
     grid_rows: *grid_rows
     grid_cols: *grid_cols
     max_active_orbs: *max_active_orbs
-    max_tier: &max_tier 1
+    max_tier: &max_tier 3
     de_spawn_tiers: false
     types:
       negative:
@@ -76,7 +76,7 @@ world:
     linear_reward_growth: false
     step_wise_scoring: true
     growth_factor: 2.2
-    base_reward: 3
+    base_reward: 1.5
     cool_down: 7
 
 ###########################
@@ -114,13 +114,13 @@ agent:
     # - agent_steps: identifier for the model to continue training or evaluate
     # - identifier: name of the model checkpoints that will be saved
     # - human_control: allow human to control the game manually
-    # - training: choose whether to train the agent or just run it
+    # - training: set to false to evaluate the agent
     # - check_env: set to true if you wanna control your changes in the environment didn't break anything obvious
-    alg: "PPO"
-    agent_steps: "200704"
-    id: "REFACTORED_vectorHardTier1_3rew_50score_0.5penalty"
+    alg: "RPPO"
+    agent_steps: "401408"
+    id: "vectorHardTier3_1.5rew_2.2growth_50score_0.5penalty_512"
     human_control: false
-    training: false
+    training: true
     check_env: false
 
   # Pick algorithm to train or evaluate
@@ -132,7 +132,7 @@ agent:
     # - timesteps: number of timesteps per iteration (a checkpoint is saved after this many steps)
     # - iterations: total number of training iterations
     continue_training: false
-    enable_output: false
+    enable_output: true
     render_mode: null
     timesteps: 100000
     iterations: 8
@@ -140,6 +140,5 @@ agent:
   eval_agent_conf:
     # Eval settings:
     # - trained_model: enable agent or use random sampling for debugging
-    # - render_mode (null or "human"): "human" is default, change to null if you don't want visual feedback during timing
     trained_model: true
     time_env: false

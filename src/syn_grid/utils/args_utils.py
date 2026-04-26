@@ -1,5 +1,5 @@
 from syn_grid.config.models import AgentConfig
-from syn_grid.runners.agent_runners.agent_runner import AgentRunner
+from syn_grid.runners.agent_runners.agent_registry import ALGORITHMS
 
 import argparse
 from argparse import Namespace
@@ -24,7 +24,7 @@ def parse_args() -> Namespace:
         "--alg-index",
         type=int,
         default=None,
-        choices=range(len(AgentRunner.algorithms)),
+        choices=range(len(ALGORITHMS)),
         help="Algorithm index",
     )
 
