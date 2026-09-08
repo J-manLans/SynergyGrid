@@ -100,25 +100,52 @@ class BaseAgentRunner(ABC):
 
     # === Wrappers === #
 
-    def _logger_wrapper(self, env: Env, sub_dir: str) -> Env:
+    # --- Logger ---#
+
+    def _maybe_wrap_logger(self, env: Env, sub_dir: str) -> Env:
         """
-        Wrap the environment with EpisodeStatsWrapper for logging.
+        If csv_output is enabled — wrap the environment with EpisodeStatsWrapper for logging.
         Tracks episode metrics and saves them to a CSV for training and eval analysis.
         """
+        # NOTE: when looking over the EpisodeStatsWrapper, decide how to deal with this
 
-        # NOTE: this one I need to look over once I refactor the logger itself
+        # Resolve csv_output depending on if we're training or evaluating
+        csv_output = (
+            self._train_conf.csv_output
+            if self._agent_conf.training
+            else self._eval_conf.csv_output
+        )
 
         return EpisodeStatsWrapper(
-            env, self._log_dir / sub_dir, self.get_unique_model_id()
+            env,
+            self._log_dir / sub_dir,
+            self.get_unique_model_id()
+        ) if csv_output else env
+
+    # --- Video recording ---#
+
+    def _wrap_training_video(self, env: Env) -> Env:
+        local_interval = max(1, self._train_conf.rec_interval // self._train_conf.n_envs)
+
+        return self._rec_video_wrapper(
+            env,
+            step_trigger=lambda t: t % local_interval == 0,
+            video_length=self._train_conf.rec_length,
+        )
+
+    def _wrap_eval_video(self, env: Env) -> Env:
+        return self._rec_video_wrapper(
+            env,
+            episode_trigger=lambda t: t == self._eval_conf.rec_episode,
         )
 
     def _rec_video_wrapper(self, env: Env, **trigger) -> RecordVideo:
-        video_output = get_project_path("output", "results", "videos")
+        video_output = get_project_path("output", "results", "videos") / self.get_unique_model_id()
+
         return RecordVideo(
             env,
             str(video_output),
             **trigger,
-            name_prefix=self.get_unique_model_id(),
         )
 
     # === Persistence === #

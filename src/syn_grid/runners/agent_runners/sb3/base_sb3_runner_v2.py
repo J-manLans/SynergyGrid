@@ -132,82 +132,15 @@ class BaseSB3Runner(BaseAgentRunner, Generic[T]):
         )
 
     def _make_env(self, render_mode: str | None, sub_dir: str, env_idx: int) -> Env:
-        env = super()._make_raw_env(render_mode)
+        env = self._make_raw_env(render_mode)
 
         if env_idx == 0:
             env = self._maybe_wrap_logger(env, sub_dir)
-            env = self._maybe_wrap_training_video(env)
 
-        return self._maybe_wrap_eval_video(env)
-
-    def _maybe_wrap_logger(self, env: Env, sub_dir: str) -> Env:
-        # NOTE: when looking over the EpisodeStatsWrapper, decide how to deal with this
-
-        # Resolve csv_output depending on if we're training or evaluating
-        csv_output = (
-            self._train_conf.csv_output
-            if self._agent_conf.training
-            else self._eval_conf.csv_output
-        )
-
-        return super()._logger_wrapper(env, sub_dir) if csv_output else env
-
-    def _maybe_wrap_training_video(self, env: Env) -> Env:
-        if self._agent_conf.training and self._train_conf.render_mode == "rgb_array":
-            return super()._rec_video_wrapper(
-                env,
-                step_trigger=lambda t: t % self._train_conf.rec_interval == 0,
-                video_length=self._train_conf.rec_length,
-            )
-
-        return env
-
-    def _maybe_wrap_eval_video(self, env: Env) -> Env:
-        if not self._agent_conf.training and self._eval_conf.render_mode == "rgb_array":
-            return super()._rec_video_wrapper(
-                env,
-                episode_trigger=lambda t: t == self._eval_conf.rec_episode,
-            )
-
-        return env
-
-    def _make_env_old(self, render_mode: str | None, sub_dir: str, env_idx: int) -> Env:
-        # During training, only env 0 gets a render mode so that it can be
-        # used for rendering/video recording; the remaining environments do not
-        # need to render. During evaluation, the render mode is passed to the
-        # single environment.
-        #
-        # NOTE: DummyVecEnv requires all environments to have the same render_mode.
-        # Therefore, using a render mode for env 0 and None for the others causes
-        # a render_mode mismatch when training with multiple environments. So need to
-        # rethink this one.
-        env = super()._make_raw_env(
-            render_mode if (not self._agent_conf.training or env_idx == 0) else None
-        )
-
-        # if logging is enabled
-        # fmt: off
-        if env_idx == 0:
-            if (
-                (self._agent_conf.training and self._train_conf.csv_output)
-                or (not self._agent_conf.training and self._eval_conf.csv_output)
-            ):
-                env = super()._logger_wrapper(env, sub_dir)
-
-            # if video recording for training is on record at a specific timestep interval
             if self._agent_conf.training and self._train_conf.render_mode == "rgb_array":
-                env = super()._rec_video_wrapper(
-                    env,
-                    step_trigger=lambda t: t % self._train_conf.rec_interval == 0,
-                    video_length=self._train_conf.rec_length,
-                )
-        # fmt: on
-
-        # if video recording for evaluation is on record selected episode
-        if not self._agent_conf.training and self._eval_conf.render_mode == "rgb_array":
-            env = super()._rec_video_wrapper(
-                env, episode_trigger=lambda t: t == self._eval_conf.rec_episode
-            )
+                env = self._wrap_training_video(env)
+            elif not self._agent_conf.training and self._eval_conf.render_mode == "rgb_array":
+                env = self._wrap_eval_video(env)
 
         return env
 

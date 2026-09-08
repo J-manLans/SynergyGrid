@@ -32,7 +32,7 @@ world:
     termination_on_max_tier: &termination_on_max_tier true
     curriculum_training: &curriculum_training false
     de_spawn_tiers: &de_spawn_tiers false
-    max_tier: &max_tier 4
+    max_tier: &max_tier 3
     max_active_orbs: &max_active_orbs 3
 
   renderer_conf:
@@ -186,10 +186,10 @@ agent:
     tensorboard_output: true
     model_output: true
     n_envs: 16
-    timesteps: 50000
+    timesteps: 500000
     iterations: 1
     render_mode: 'rgb_array'
-    rec_interval: 10000
+    rec_interval: 100000
     rec_length: 100
 
   eval_agent_conf:
