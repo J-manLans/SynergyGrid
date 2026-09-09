@@ -137,9 +137,9 @@ class BaseSB3Runner(BaseAgentRunner, Generic[T]):
         if env_idx == 0:
             env = self._maybe_wrap_logger(env, sub_dir)
 
-            if self._agent_conf.training and self._train_conf.render_mode == "rgb_array":
+            if self._agent_conf.training and self._train_conf.record_video:
                 env = self._wrap_training_video(env)
-            elif not self._agent_conf.training and self._eval_conf.render_mode == "rgb_array":
+            elif not self._agent_conf.training and self._eval_conf.record_video:
                 env = self._wrap_eval_video(env)
 
         return env

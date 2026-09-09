@@ -222,6 +222,7 @@ class TrainAgentConf(BaseModel, frozen=False):
     timesteps: int
     iterations: int
     render_mode: str | None
+    record_video: bool
     rec_interval: int
     rec_length: int
 
@@ -234,12 +235,15 @@ class TrainAgentConf(BaseModel, frozen=False):
                 "render_mode 'human' requires n_envs=1 (live rendering doesn't "
                 "support parallel environments)"
             )
+        if self.record_video and self.render_mode != "rgb_array":
+            raise ValueError("record_video requires render_mode='rgb_array'")
         return self
 
 
 class EvalAgentConf(BaseModel, frozen=False):
     num_eval_episodes: int
     render_mode: str | None
+    record_video: bool
     rec_episode: int
     csv_output: bool
 
@@ -247,6 +251,8 @@ class EvalAgentConf(BaseModel, frozen=False):
     def validate_config(self):
         if self.render_mode not in ["human", "rgb_array", None]:
             raise ValueError("The value of render mode is not allowed")
+        if self.record_video and self.render_mode != "rgb_array":
+            raise ValueError("record_video requires render_mode='rgb_array'")
         return self
 
 

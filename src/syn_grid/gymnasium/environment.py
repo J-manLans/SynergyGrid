@@ -57,7 +57,7 @@ class SYNGridEnv(gym.Env):
 
         if self.render_mode in self.metadata["render_modes"]:
             self.renderer = PygameRenderer(
-                world_conf.renderer_conf, self.metadata["render_fps"]
+                world_conf.renderer_conf, render_mode, self.metadata["render_fps"]
             )
 
         # Set up Gymnasium environment:
@@ -128,9 +128,10 @@ class SYNGridEnv(gym.Env):
             self.world.get_orb_positions(True),
             self.world.get_orb_meta(True),
             self._get_hud_data(),
-            self.render_mode,
         )
-        self.renderer.get_user_action()
+
+        if self.render_mode == 'human':
+            self.renderer.get_user_action()
 
         if self.render_mode == "rgb_array":
             return frame
